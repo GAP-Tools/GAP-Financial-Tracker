@@ -1,14 +1,16 @@
 const currencySelector = document.getElementById('currency');
+const exchangeRate = document.getElementById('exchangeRate');
 const entryName = document.getElementById('entryName');
 const entryAmount = document.getElementById('entryAmount');
 const entryType = document.getElementById('entryType');
 const addEntryButton = document.getElementById('addEntry');
-const statementBody = document.getElementById('statementBody');
-const totalIncome = document.getElementById('totalIncome');
-const totalExpenses = document.getElementById('totalExpenses');
-const netProfit = document.getElementById('netProfit');
-const totalAssets = document.getElementById('totalAssets');
-const totalLiabilities = document.getElementById('totalLiabilities');
+const incomeTable = document.getElementById('incomeTable');
+const expenseTable = document.getElementById('expenseTable');
+const assetTable = document.getElementById('assetTable');
+const liabilityTable = document.getElementById('liabilityTable');
+const healthScore = document.getElementById('healthScore');
+const healthGrade = document.getElementById('healthGrade');
+const circleProgress = document.getElementById('circleProgress');
 const tip = document.getElementById('tip');
 
 let financialData = {
@@ -18,28 +20,26 @@ let financialData = {
   liabilities: []
 };
 
-function updateSummary() {
-  const totalIncomeValue = financialData.income.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalExpensesValue = financialData.expenses.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalAssetsValue = financialData.assets.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalLiabilitiesValue = financialData.liabilities.reduce((sum, entry) => sum + entry.amount, 0);
+// Currency Converter API
+async function updateExchangeRate() {
+  const currency = currencySelector.value;
+  const apiKey = 'YOUR_EXCHANGERATE_API_KEY'; // Replace with your API key
+  const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
 
-  totalIncome.textContent = totalIncomeValue;
-  totalExpenses.textContent = totalExpensesValue;
-  netProfit.textContent = totalIncomeValue - totalExpensesValue;
-  totalAssets.textContent = totalAssetsValue;
-  totalLiabilities.textContent = totalLiabilitiesValue;
-
-  // Provide tips
-  if (totalLiabilitiesValue > totalAssetsValue) {
-    tip.textContent = "Tip: Focus on reducing liabilities and increasing assets to improve your financial health.";
-  } else if (totalIncomeValue < totalExpensesValue) {
-    tip.textContent = "Tip: Try to reduce expenses or find additional income sources to avoid losses.";
-  } else {
-    tip.textContent = "Tip: You're doing well! Keep building assets and managing expenses.";
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    const rate = data.conversion_rates[currency];
+    exchangeRate.textContent = `${rate} ${currency}`;
+  } catch (error) {
+    console.error('Error fetching exchange rate:', error);
   }
 }
 
+currencySelector.addEventListener('change', updateExchangeRate);
+updateExchangeRate();
+
+// Add Entry
 function addEntry() {
   const name = entryName.value.trim();
   const amount = parseFloat(entryAmount.value);
@@ -53,17 +53,9 @@ function addEntry() {
   const entry = { name, amount };
   financialData[type].push(entry);
 
-  // Update table
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td>${type}</td>
-    <td>${name}</td>
-    <td>${amount}</td>
-  `;
-  statementBody.appendChild(row);
-
-  // Update summary
-  updateSummary();
+  updateTables();
+  updateFinancialHealth();
+  updateTips();
 
   // Clear inputs
   entryName.value = '';
@@ -72,8 +64,58 @@ function addEntry() {
 
 addEntryButton.addEventListener('click', addEntry);
 
-// Currency conversion (simplified example)
-currencySelector.addEventListener('change', () => {
-  const currency = currencySelector.value;
-  alert(`Currency changed to ${currency}. Note: Actual conversion requires an API.`);
-});
+// Update Tables
+function updateTables() {
+  const updateTable = (table, data) => {
+    table.innerHTML = data.map(entry => `
+      <tr>
+        <td>${entry.name}</td>
+        <td>${entry.amount}</td>
+      </tr>
+    `).join('');
+  };
+
+  updateTable(incomeTable, financialData.income);
+  updateTable(expenseTable, financialData.expenses);
+  updateTable(assetTable, financialData.assets);
+  updateTable(liabilityTable, financialData.liabilities);
+}
+
+// Update Financial Health
+function updateFinancialHealth() {
+  const totalIncome = financialData.income.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalExpenses = financialData.expenses.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalAssets = financialData.assets.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalLiabilities = financialData.liabilities.reduce((sum, entry) => sum + entry.amount, 0);
+
+  const netWorth = totalAssets - totalLiabilities;
+  const score = Math.max(0, Math.min(100, (netWorth / (totalIncome || 1)) * 100));
+
+  healthScore.textContent = `${score.toFixed(0)}%`;
+  circleProgress.style.background = `conic-gradient(#3498db ${score}%, #e0e0e0 ${score}% 100%)`;
+
+  if (score >= 80) {
+    healthGrade.textContent = 'A';
+  } else if (score >= 60) {
+    healthGrade.textContent = 'B';
+  } else if (score >= 40) {
+    healthGrade.textContent = 'C';
+  } else {
+    healthGrade.textContent = 'D';
+  }
+}
+
+// Update Tips
+function updateTips() {
+  const totalIncome = financialData.income.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalExpenses = financialData.expenses.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalLiabilities = financialData.liabilities.reduce((sum, entry) => sum + entry.amount, 0);
+
+  if (totalLiabilities > totalIncome) {
+    tip.textContent = "Warning: Your liabilities are too high. Focus on reducing debt.";
+  } else if (totalExpenses > totalIncome) {
+    tip.textContent = "Warning: Your expenses exceed your income. Cut unnecessary spending.";
+  } else {
+    tip.textContent = "Tip: Your financial health is good! Keep building assets.";
+  }
+      }
