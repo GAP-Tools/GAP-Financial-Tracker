@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 1200px;
   margin: 20px auto;
   padding: 20px;
   background-color: #fff;
@@ -19,7 +19,7 @@ h1, h2 {
   color: #2c3e50;
 }
 
-.currency-selector, .input-section {
+.currency-converter, .input-section {
   margin-bottom: 20px;
 }
 
@@ -42,6 +42,12 @@ button:hover {
   background-color: #2980b9;
 }
 
+.tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -54,12 +60,37 @@ th, td {
   border-bottom: 1px solid #ddd;
 }
 
-.summary p {
-  font-size: 1.1em;
-  margin: 5px 0;
+.health-score {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.circle-progress {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#3498db 0%, #e0e0e0 0%);
+  transition: background 0.5s;
+}
+
+.circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
 .tips {
   font-style: italic;
   color: #555;
+  text-align: center;
 }
