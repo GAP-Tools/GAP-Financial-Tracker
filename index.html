@@ -14,10 +14,10 @@
     <div class="currency-converter">
       <label for="currency">Select Currency:</label>
       <select id="currency">
-        <option value="USD">USD</option>
-        <option value="NGN">NGN</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
+        <option value="USD">USD ($)</option>
+        <option value="NGN">NGN (₦)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="GBP">GBP (£)</option>
       </select>
       <p>1 USD = <span id="exchangeRate">...</span></p>
     </div>
@@ -25,7 +25,7 @@
     <!-- Input Section -->
     <div class="input-section">
       <h2>Add Entry</h2>
-      <input type="text" id="entryName" placeholder="Entry Name (e.g., Salary, Rent)">
+      <input type="text" id="entryName" placeholder="Entry Name (e.g., Salary, Rent)" oninput="generateHint()">
       <input type="number" id="entryAmount" placeholder="Amount">
       <select id="entryType">
         <option value="income">Income</option>
@@ -34,49 +34,50 @@
         <option value="liability">Liability</option>
       </select>
       <button id="addEntry">Add Entry</button>
+      <p id="hint"></p>
     </div>
 
     <!-- Financial Statement Tables -->
     <div class="financial-statement">
-      <h2>Financial Statement</h2>
-      <div class="tables">
-        <table>
-          <thead>
-            <tr>
-              <th>Income</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody id="incomeTable"></tbody>
-        </table>
-        <table>
-          <thead>
-            <tr>
-              <th>Expenses</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody id="expenseTable"></tbody>
-        </table>
-        <table>
-          <thead>
-            <tr>
-              <th>Assets</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody id="assetTable"></tbody>
-        </table>
-        <table>
-          <thead>
-            <tr>
-              <th>Liabilities</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody id="liabilityTable"></tbody>
-        </table>
-      </div>
+      <h2>Income & Expenses</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Income</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="incomeTable"></tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Expenses</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTable"></tbody>
+      </table>
+
+      <h2>Assets & Liabilities</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Assets</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="assetTable"></tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Liabilities</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="liabilityTable"></tbody>
+      </table>
     </div>
 
     <!-- Financial Health Score -->
@@ -100,4 +101,4 @@
 
   <script src="script.js"></script>
 </body>
-  </html>
+</html>
