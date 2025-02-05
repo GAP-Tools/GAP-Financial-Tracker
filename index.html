@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAP Financial Statement Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>GAP Financial Statement Tracker</h1>
+    <div class="currency-selector">
+      <label for="currency">Select Currency:</label>
+      <select id="currency">
+        <option value="USD">USD</option>
+        <option value="NGN">NGN</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
+    </div>
+
+    <div class="input-section">
+      <h2>Add Entry</h2>
+      <input type="text" id="entryName" placeholder="Entry Name (e.g., Salary, Rent)">
+      <input type="number" id="entryAmount" placeholder="Amount">
+      <select id="entryType">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+        <option value="asset">Asset</option>
+        <option value="liability">Liability</option>
+      </select>
+      <button id="addEntry">Add Entry</button>
+    </div>
+
+    <div class="financial-statement">
+      <h2>Financial Statement</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="statementBody"></tbody>
+      </table>
+    </div>
+
+    <div class="summary">
+      <h2>Summary</h2>
+      <p>Total Income: <span id="totalIncome">0</span></p>
+      <p>Total Expenses: <span id="totalExpenses">0</span></p>
+      <p>Net Profit/Loss: <span id="netProfit">0</span></p>
+      <p>Total Assets: <span id="totalAssets">0</span></p>
+      <p>Total Liabilities: <span id="totalLiabilities">0</span></p>
+    </div>
+
+    <div class="tips">
+      <h2>Tips</h2>
+      <p id="tip"></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
