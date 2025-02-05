@@ -9,7 +9,9 @@
 <body>
   <div class="container">
     <h1>GAP Financial Statement Tracker</h1>
-    <div class="currency-selector">
+
+    <!-- Currency Converter -->
+    <div class="currency-converter">
       <label for="currency">Select Currency:</label>
       <select id="currency">
         <option value="USD">USD</option>
@@ -17,8 +19,10 @@
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
       </select>
+      <p>1 USD = <span id="exchangeRate">...</span></p>
     </div>
 
+    <!-- Input Section -->
     <div class="input-section">
       <h2>Add Entry</h2>
       <input type="text" id="entryName" placeholder="Entry Name (e.g., Salary, Rent)">
@@ -32,35 +36,68 @@
       <button id="addEntry">Add Entry</button>
     </div>
 
+    <!-- Financial Statement Tables -->
     <div class="financial-statement">
       <h2>Financial Statement</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Name</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="statementBody"></tbody>
-      </table>
+      <div class="tables">
+        <table>
+          <thead>
+            <tr>
+              <th>Income</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="incomeTable"></tbody>
+        </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Expenses</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTable"></tbody>
+        </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Assets</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="assetTable"></tbody>
+        </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Liabilities</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="liabilityTable"></tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="summary">
-      <h2>Summary</h2>
-      <p>Total Income: <span id="totalIncome">0</span></p>
-      <p>Total Expenses: <span id="totalExpenses">0</span></p>
-      <p>Net Profit/Loss: <span id="netProfit">0</span></p>
-      <p>Total Assets: <span id="totalAssets">0</span></p>
-      <p>Total Liabilities: <span id="totalLiabilities">0</span></p>
+    <!-- Financial Health Score -->
+    <div class="health-score">
+      <h2>Financial Health Score</h2>
+      <div class="circle">
+        <div class="circle-progress" id="circleProgress"></div>
+        <div class="circle-text">
+          <span id="healthScore">0%</span>
+          <span id="healthGrade">Grade</span>
+        </div>
+      </div>
     </div>
 
+    <!-- Tips and Warnings -->
     <div class="tips">
-      <h2>Tips</h2>
-      <p id="tip"></p>
+      <h2>Tips & Warnings</h2>
+      <p id="tip">Your financial health is good!</p>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
-</html>
+  </html>
