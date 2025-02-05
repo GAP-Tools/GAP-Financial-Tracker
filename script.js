@@ -12,6 +12,7 @@ const healthScore = document.getElementById('healthScore');
 const healthGrade = document.getElementById('healthGrade');
 const circleProgress = document.getElementById('circleProgress');
 const tip = document.getElementById('tip');
+const hint = document.getElementById('hint');
 
 let financialData = {
   income: [],
@@ -23,8 +24,8 @@ let financialData = {
 // Currency Converter API
 async function updateExchangeRate() {
   const currency = currencySelector.value;
-  const apiKey = 'YOUR_EXCHANGERATE_API_KEY'; // Replace with your API key
-  const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
+  const apiKey = bbf3e2a38cee4116e7f051b8;
+  const url = https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD;
 
   try {
     const response = await fetch(url);
@@ -60,6 +61,7 @@ function addEntry() {
   // Clear inputs
   entryName.value = '';
   entryAmount.value = '';
+  hint.textContent = '';
 }
 
 addEntryButton.addEventListener('click', addEntry);
@@ -92,7 +94,7 @@ function updateFinancialHealth() {
   const score = Math.max(0, Math.min(100, (netWorth / (totalIncome || 1)) * 100));
 
   healthScore.textContent = `${score.toFixed(0)}%`;
-  circleProgress.style.background = `conic-gradient(#3498db ${score}%, #e0e0e0 ${score}% 100%)`;
+  circleProgress.style.background = `conic-gradient(${getHealthColor(score)} ${score}%, #e0e0e0 ${score}% 100%)`;
 
   if (score >= 80) {
     healthGrade.textContent = 'A';
@@ -103,6 +105,13 @@ function updateFinancialHealth() {
   } else {
     healthGrade.textContent = 'D';
   }
+}
+
+// Get Health Color
+function getHealthColor(score) {
+  if (score >= 80) return '#2ecc71'; // Green
+  if (score >= 60) return '#f1c40f'; // Yellow
+  return '#e74c3c'; // Red
 }
 
 // Update Tips
@@ -118,4 +127,16 @@ function updateTips() {
   } else {
     tip.textContent = "Tip: Your financial health is good! Keep building assets.";
   }
-      }
+}
+
+// Generate Hint
+function generateHint() {
+  const name = entryName.value.trim().toLowerCase();
+  if (name.includes('land') || name.includes('property')) {
+    hint.textContent = "Hint: This is likely an Asset.";
+  } else if (name.includes('shoe') || name.includes('clothing')) {
+    hint.textContent = "Hint: This is likely an Expense.";
+  } else {
+    hint.textContent = "";
+  }
+                                            }
