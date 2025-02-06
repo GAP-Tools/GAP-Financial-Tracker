@@ -20,6 +20,14 @@ h1 {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.profile input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -64,9 +72,9 @@ button:hover {
   margin: 20px auto;
   border-radius: 50%;
   background: conic-gradient(
-    green 0% 33%,
+    red 0% 33%,
     yellow 33% 66%,
-    red 66% 100%
+    green 66% 100%
   );
   position: relative;
 }
@@ -87,4 +95,9 @@ button:hover {
   padding: 10px;
   border-left: 4px solid #4CAF50;
   margin-bottom: 20px;
+}
+
+.save-button {
+  width: 100%;
+  margin-top: 20px;
 }
