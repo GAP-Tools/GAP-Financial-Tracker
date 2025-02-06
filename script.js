@@ -157,4 +157,4 @@ function generateHint() {
   } else {
     hint.textContent = "";
   }
-}
+    }
