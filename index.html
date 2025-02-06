@@ -10,6 +10,16 @@
   <div class="container">
     <h1>GAP Financial Statement Tracker</h1>
 
+    <!-- Personal Profile -->
+    <div class="profile">
+      <h2>Personal Profile</h2>
+      <input type="text" id="name" placeholder="Name" />
+      <input type="number" id="age" placeholder="Age" />
+      <input type="text" id="occupation" placeholder="Occupation" />
+      <input type="text" id="dream" placeholder="Dream" />
+      <button onclick="saveProfile()">Save Profile</button>
+    </div>
+
     <!-- Currency Converter -->
     <div>
       <h2>Currency Converter</h2>
@@ -58,6 +68,16 @@
         </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Total Income</strong></td>
+          <td id="totalIncome">0</td>
+        </tr>
+        <tr>
+          <td><strong>Total Expenses</strong></td>
+          <td id="totalExpenses">0</td>
+        </tr>
+      </tfoot>
     </table>
 
     <!-- Balance Sheet -->
@@ -70,13 +90,26 @@
         </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Total Assets</strong></td>
+          <td id="totalAssets">0</td>
+        </tr>
+        <tr>
+          <td><strong>Total Liabilities</strong></td>
+          <td id="totalLiabilities">0</td>
+        </tr>
+      </tfoot>
     </table>
 
     <!-- Tips -->
     <div class="tips">
-      <h3>Tips</h3>
+      <h3>Tips & Warnings</h3>
       <p id="tipText">Add an entry to get tips!</p>
     </div>
+
+    <!-- Save Progress -->
+    <button onclick="saveProgress()" class="save-button">Save Progress</button>
   </div>
 
   <script src="script.js"></script>
