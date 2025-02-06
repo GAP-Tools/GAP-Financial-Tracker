@@ -309,4 +309,24 @@ function clearData() {
 
 // Share on WhatsApp
 function shareOnWhatsApp() {
-  const
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20awesome%20Financial%20Tracker%20App%20${url}`);
+}
+
+// Share on Facebook
+function shareOnFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+}
+
+// Share on Twitter
+function shareOnTwitter() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
+}
+
+// Generate Financial Story
+function generateStory() {
+  const story = `Once upon a time, ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, dreamed of ${profile.dream}. Through careful financial management, they achieved a net worth of ${parseFloat(totalAssets.textContent) - parseFloat(totalLiabilities.textContent)}. Their journey was filled with ups and downs, but they persevered. Keep going!`;
+  financialStory.textContent = story;
+    }
