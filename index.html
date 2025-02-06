@@ -5,128 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GAP Financial Statement Tracker</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>GAP Financial Statement Tracker</h1>
-
-    <!-- Personal Profile -->
-    <div class="profile">
-      <h2>Personal Profile</h2>
-      <input type="text" id="name" placeholder="Name" />
-      <input type="number" id="age" placeholder="Age" />
-      <input type="text" id="occupation" placeholder="Occupation" />
-      <input type="text" id="dream" placeholder="Dream" />
+    <!-- Personal Profile Section -->
+    <section class="profile-section">
+      <h1>Personal Profile</h1>
+      <input type="text" id="name" placeholder="Name">
+      <input type="number" id="age" placeholder="Age">
+      <input type="text" id="occupation" placeholder="Occupation">
+      <input type="text" id="dream" placeholder="Dream">
       <button onclick="saveProfile()">Save Profile</button>
-    </div>
+    </section>
+
+    <!-- Income Statement Section -->
+    <section class="income-statement">
+      <h2>Income Statement</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Income</th>
+              <th>Expenses</th>
+            </tr>
+          </thead>
+          <tbody id="income-statement-body"></tbody>
+        </table>
+        <div class="totals">
+          <p>Total Income: <span id="total-income">0</span></p>
+          <p>Total Expenses: <span id="total-expenses">0</span></p>
+        </div>
+      </div>
+      <button onclick="addIncome()">Add Income</button>
+      <button onclick="addExpense()">Add Expense</button>
+    </section>
+
+    <!-- Balance Sheet Section -->
+    <section class="balance-sheet">
+      <h2>Balance Sheet</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Assets</th>
+              <th>Liabilities</th>
+            </tr>
+          </thead>
+          <tbody id="balance-sheet-body"></tbody>
+        </table>
+        <div class="totals">
+          <p>Total Assets: <span id="total-assets">0</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span></p>
+        </div>
+      </div>
+      <button onclick="addAsset()">Add Asset</button>
+      <button onclick="addLiability()">Add Liability</button>
+    </section>
+
+    <!-- Financial Health Score -->
+    <section class="health-score">
+      <h2>Financial Health Score</h2>
+      <div class="circle-container">
+        <canvas id="healthChart"></canvas>
+        <p id="healthPercentage">0%</p>
+      </div>
+      <p id="healthTips"></p>
+    </section>
 
     <!-- Currency Converter -->
-    <div>
+    <section class="currency-converter">
       <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Enter amount" />
-      <select id="fromCurrency">
-        <option value="USD">USD</option>
-        <option value="NGN">NGN</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-      <span>to</span>
-      <select id="toCurrency">
-        <option value="USD">USD</option>
-        <option value="NGN">NGN</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
+      <input type="number" id="amount" placeholder="Amount">
+      <select id="fromCurrency"></select>
+      <select id="toCurrency"></select>
       <button onclick="convertCurrency()">Convert</button>
       <p id="conversionResult"></p>
-    </div>
+    </section>
 
-    <!-- Add Entry -->
-    <div>
-      <h2>Add Entry</h2>
-      <input type="text" id="entryName" placeholder="Entry Name" />
-      <input type="number" id="entryAmount" placeholder="Amount" />
-      <input type="date" id="entryDate" />
-      <select id="entryType">
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-        <option value="asset">Asset</option>
-        <option value="liability">Liability</option>
-      </select>
-      <button onclick="addEntry()">Add Entry</button>
-    </div>
+    <!-- Save, Load, and Clear Data -->
+    <section class="data-management">
+      <h2>Data Management</h2>
+      <button onclick="saveData()">Save Data</button>
+      <button onclick="loadData()">Load Data</button>
+      <button onclick="clearData()">Clear Data</button>
+    </section>
 
-    <!-- Financial Health Bar -->
-    <div class="health-bar" data-score="0%"></div>
+    <!-- Share App -->
+    <section class="share-app">
+      <h2>Share App</h2>
+      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+      <button onclick="shareOnFacebook()">Share on Facebook</button>
+      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
+    </section>
 
-    <!-- Income Statement -->
-    <h2>Income Statement</h2>
-    <table id="incomeStatement">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Income (Green)</th>
-          <th>Expenses (Red)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total Income</strong></td>
-          <td id="totalIncome">0</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><strong>Total Expenses</strong></td>
-          <td></td>
-          <td id="totalExpenses">0</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <!-- Balance Sheet -->
-    <h2>Balance Sheet</h2>
-    <table id="balanceSheet">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Assets (Green)</th>
-          <th>Liabilities (Red)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot>
-        <tr>
-          <td><strong>Total Assets</strong></td>
-          <td id="totalAssets">0</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><strong>Total Liabilities</strong></td>
-          <td></td>
-          <td id="totalLiabilities">0</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <!-- Tips -->
-    <div class="tips">
-      <h3>Tips & Warnings</h3>
-      <p id="tipText">Add an entry to get tips!</p>
-    </div>
-
-    <!-- Download Summary -->
-    <button onclick="downloadSummary()" class="save-button">Download Financial Summary</button>
-
-    <!-- Share Buttons -->
-    <div class="share-buttons">
-      <h3>Share Your Progress</h3>
-      <button onclick="shareOnWhatsApp()">WhatsApp</button>
-      <button onclick="shareOnFacebook()">Facebook</button>
-      <button onclick="shareOnTwitter()">X (Twitter)</button>
-    </div>
+    <!-- Story Generation -->
+    <section class="story-generation">
+      <h2>Financial Story</h2>
+      <button onclick="generateStory()">Generate Story</button>
+      <p id="financialStory"></p>
+    </section>
   </div>
 
   <script src="script.js"></script>
