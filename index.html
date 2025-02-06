@@ -11,91 +11,74 @@
     <h1>GAP Financial Statement Tracker</h1>
 
     <!-- Currency Converter -->
-    <div class="currency-converter">
-      <label for="currency">Select Currency:</label>
-      <select id="currency">
-        <!-- Currencies will be populated dynamically -->
+    <div>
+      <h2>Currency Converter</h2>
+      <input type="number" id="amount" placeholder="Enter amount" />
+      <select id="fromCurrency">
+        <option value="USD">USD</option>
+        <option value="NGN">NGN</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
       </select>
-      <p>1 USD = <span id="exchangeRate">...</span></p>
+      <span>to</span>
+      <select id="toCurrency">
+        <option value="USD">USD</option>
+        <option value="NGN">NGN</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
+      <button onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult"></p>
     </div>
 
-    <!-- Input Section -->
-    <div class="input-section">
+    <!-- Add Entry -->
+    <div>
       <h2>Add Entry</h2>
-      <input type="text" id="entryName" placeholder="Entry Name (e.g., Salary, Rent)" oninput="generateHint()">
-      <input type="number" id="entryAmount" placeholder="Amount">
+      <input type="text" id="entryName" placeholder="Entry Name" />
+      <input type="number" id="entryAmount" placeholder="Amount" />
       <select id="entryType">
         <option value="income">Income</option>
         <option value="expense">Expense</option>
         <option value="asset">Asset</option>
         <option value="liability">Liability</option>
       </select>
-      <button id="addEntry">Add Entry</button>
-      <p id="hint"></p>
+      <button onclick="addEntry()">Add Entry</button>
     </div>
 
-    <!-- Financial Statement Tables -->
-    <div class="financial-statement">
-      <h2>Income Statement</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Income</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="incomeTable"></tbody>
-      </table>
-      <table>
-        <thead>
-          <tr>
-            <th>Expenses</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="expenseTable"></tbody>
-      </table>
+    <!-- Financial Health Bar -->
+    <div class="health-bar" data-score="0%"></div>
 
-      <h2>Balance Sheet</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Assets</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="assetTable"></tbody>
-      </table>
-      <table>
-        <thead>
-          <tr>
-            <th>Liabilities</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="liabilityTable"></tbody>
-      </table>
-    </div>
+    <!-- Income Statement -->
+    <h2>Income Statement</h2>
+    <table id="incomeStatement">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-    <!-- Financial Health Score -->
-    <div class="health-score">
-      <h2>Financial Health Score</h2>
-      <div class="circle">
-        <div class="circle-progress" id="circleProgress"></div>
-        <div class="circle-text">
-          <span id="healthScore">0%</span>
-          <span id="healthGrade">Grade</span>
-        </div>
-      </div>
-    </div>
+    <!-- Balance Sheet -->
+    <h2>Balance Sheet</h2>
+    <table id="balanceSheet">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-    <!-- Tips and Warnings -->
+    <!-- Tips -->
     <div class="tips">
-      <h2>Tips & Warnings</h2>
-      <p id="tip">Your financial health is good!</p>
+      <h3>Tips</h3>
+      <p id="tipText">Add an entry to get tips!</p>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
-          </html>
+  </html>
