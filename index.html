@@ -14,10 +14,7 @@
     <div class="currency-converter">
       <label for="currency">Select Currency:</label>
       <select id="currency">
-        <option value="USD">USD ($)</option>
-        <option value="NGN">NGN (₦)</option>
-        <option value="EUR">EUR (€)</option>
-        <option value="GBP">GBP (£)</option>
+        <!-- Currencies will be populated dynamically -->
       </select>
       <p>1 USD = <span id="exchangeRate">...</span></p>
     </div>
@@ -39,7 +36,7 @@
 
     <!-- Financial Statement Tables -->
     <div class="financial-statement">
-      <h2>Income & Expenses</h2>
+      <h2>Income Statement</h2>
       <table>
         <thead>
           <tr>
@@ -59,7 +56,7 @@
         <tbody id="expenseTable"></tbody>
       </table>
 
-      <h2>Assets & Liabilities</h2>
+      <h2>Balance Sheet</h2>
       <table>
         <thead>
           <tr>
@@ -101,4 +98,4 @@
 
   <script src="script.js"></script>
 </body>
-</html>
+  </html>
