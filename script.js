@@ -22,11 +22,29 @@ let financialData = {
 };
 
 // Currency Converter API
+const apiKey = bbf3e2a38cee4116e7f051b8; //
+
+async function fetchCurrencies() {
+  const url = https://v6.exchangerate-api.com/v6/$bbf3e2a38cee4116e7f051b8/latest/USD;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    const currencies = Object.keys(data.conversion_rates);
+    currencies.forEach(currency => {
+      const option = document.createElement('option');
+      option.value = currency;
+      option.textContent = currency;
+      currencySelector.appendChild(option);
+    });
+    updateExchangeRate();
+  } catch (error) {
+    console.error('Error fetching currencies:', error);
+  }
+}
+
 async function updateExchangeRate() {
   const currency = currencySelector.value;
-  const apiKey = bbf3e2a38cee4116e7f051b8;
-  const url = https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD;
-
+  const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
   try {
     const response = await fetch(url);
     const data = await response.json();
@@ -38,7 +56,7 @@ async function updateExchangeRate() {
 }
 
 currencySelector.addEventListener('change', updateExchangeRate);
-updateExchangeRate();
+fetchCurrencies();
 
 // Add Entry
 function addEntry() {
@@ -139,4 +157,4 @@ function generateHint() {
   } else {
     hint.textContent = "";
   }
-                                            }
+}
