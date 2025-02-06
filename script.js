@@ -1,195 +1,256 @@
-const apiKey = 'bbf3e2a38cee4116e7f051b8';
-const baseURL = 'https://v6.exchangerate-api.com/v6';
+// Initialize variables
+let profile = { name: "", age: "", occupation: "", dream: "" };
+let incomeStatement = [];
+let balanceSheet = [];
+let currencyRates = {};
 
-let income = 0;
-let expenses = 0;
-let assets = 0;
-let liabilities = 0;
+// DOM Elements
+const incomeStatementBody = document.getElementById("income-statement-body");
+const balanceSheetBody = document.getElementById("balance-sheet-body");
+const totalIncome = document.getElementById("total-income");
+const totalExpenses = document.getElementById("total-expenses");
+const totalAssets = document.getElementById("total-assets");
+const totalLiabilities = document.getElementById("total-liabilities");
+const healthChartCtx = document.getElementById("healthChart").getContext("2d");
+const healthPercentage = document.getElementById("healthPercentage");
+const healthTips = document.getElementById("healthTips");
+const fromCurrency = document.getElementById("fromCurrency");
+const toCurrency = document.getElementById("toCurrency");
+const conversionResult = document.getElementById("conversionResult");
+const financialStory = document.getElementById("financialStory");
 
-// Load saved data
-window.onload = () => {
-  loadProfile();
-  loadProgress();
-};
+// Chart Initialization
+const healthChart = new Chart(healthChartCtx, {
+  type: "doughnut",
+  data: {
+    labels: ["Health"],
+    datasets: [{
+      data: [0],
+      backgroundColor: ["#ff6384"],
+    }],
+  },
+  options: {
+    cutout: "70%",
+    responsive: true,
+    maintainAspectRatio: false,
+  },
+});
 
-// Save Profile
-function saveProfile() {
-  const profile = {
-    name: document.getElementById('name').value,
-    age: document.getElementById('age').value,
-    occupation: document.getElementById('occupation').value,
-    dream: document.getElementById('dream').value,
-  };
-  localStorage.setItem('profile', JSON.stringify(profile));
-  alert('Profile saved!');
-}
+// Fetch Currency Rates
+fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
+  .then((response) => response.json())
+  .then((data) => {
+    currencyRates = data.conversion_rates;
+    populateCurrencyDropdowns();
+  });
 
-// Load Profile
-function loadProfile() {
-  const profile = JSON.parse(localStorage.getItem('profile'));
-  if (profile) {
-    document.getElementById('name').value = profile.name;
-    document.getElementById('age').value = profile.age;
-    document.getElementById('occupation').value = profile.occupation;
-    document.getElementById('dream').value = profile.dream;
+// Populate Currency Dropdowns
+function populateCurrencyDropdowns() {
+  for (const currency in currencyRates) {
+    const option1 = document.createElement("option");
+    option1.value = currency;
+    option1.text = currency;
+    fromCurrency.appendChild(option1);
+
+    const option2 = document.createElement("option");
+    option2.value = currency;
+    option2.text = currency;
+    toCurrency.appendChild(option2);
   }
 }
 
-// Save Progress
-function saveProgress() {
-  const progress = {
-    income,
-    expenses,
-    assets,
-    liabilities,
-    incomeStatement: document.querySelector('#incomeStatement tbody').innerHTML,
-    balanceSheet: document.querySelector('#balanceSheet tbody').innerHTML,
-  };
-  localStorage.setItem('progress', JSON.stringify(progress));
-  alert('Progress saved!');
+// Save Profile
+function saveProfile() {
+  profile.name = document.getElementById("name").value;
+  profile.age = document.getElementById("age").value;
+  profile.occupation = document.getElementById("occupation").value;
+  profile.dream = document.getElementById("dream").value;
+  alert("Profile Saved!");
 }
 
-// Load Progress
-function loadProgress() {
-  const progress = JSON.parse(localStorage.getItem('progress'));
-  if (progress) {
-    income = progress.income;
-    expenses = progress.expenses;
-    assets = progress.assets;
-    liabilities = progress.liabilities;
-    document.querySelector('#incomeStatement tbody').innerHTML = progress.incomeStatement;
-    document.querySelector('#balanceSheet tbody').innerHTML = progress.balanceSheet;
-    updateTotals();
+// Add Income
+function addIncome() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const amount = parseFloat(prompt("Enter Income Amount:"));
+  if (date && amount) {
+    incomeStatement.push({ date, type: "Income", amount });
+    updateIncomeStatement();
     updateFinancialHealth();
   }
 }
 
-// Update Totals
-function updateTotals() {
-  document.getElementById('totalIncome').innerText = income;
-  document.getElementById('totalExpenses').innerText = expenses;
-  document.getElementById('totalAssets').innerText = assets;
-  document.getElementById('totalLiabilities').innerText = liabilities;
-}
-
-// Currency Converter
-async function convertCurrency() {
-  const amount = document.getElementById('amount').value;
-  const fromCurrency = document.getElementById('fromCurrency').value;
-  const toCurrency = document.getElementById('toCurrency').value;
-
-  const url = `${baseURL}/${apiKey}/latest/${fromCurrency}`;
-  const response = await fetch(url);
-  const data = await response.json();
-  const rate = data.conversion_rates[toCurrency];
-  const convertedAmount = (amount * rate).toFixed(2);
-
-  document.getElementById('conversionResult').innerText = `${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`;
-}
-
-// Add Entry
-function addEntry() {
-  const name = document.getElementById('entryName').value;
-  const amount = parseFloat(document.getElementById('entryAmount').value);
-  const date = document.getElementById('entryDate').value;
-  const type = document.getElementById('entryType').value;
-
-  if (!name || isNaN(amount) || !date) {
-    alert('Please fill all fields correctly.');
-    return;
+// Add Expense
+function addExpense() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const amount = parseFloat(prompt("Enter Expense Amount:"));
+  if (date && amount) {
+    incomeStatement.push({ date, type: "Expense", amount });
+    updateIncomeStatement();
+    updateFinancialHealth();
   }
+}
 
-  const table = type === 'income' || type === 'expense' ? document.querySelector('#incomeStatement tbody') : document.querySelector('#balanceSheet tbody');
-  const row = `<tr>
-    <td>${date}</td>
-    <td class="${type === 'income' ? 'income' : ''}">${type === 'income' ? amount : ''}</td>
-    <td class="${type === 'expense' ? 'expense' : ''}">${type === 'expense' ? amount : ''}</td>
-  </tr>`;
-  table.insertAdjacentHTML('beforeend', row);
+// Add Asset
+function addAsset() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const amount = parseFloat(prompt("Enter Asset Value:"));
+  if (date && amount) {
+    balanceSheet.push({ date, type: "Asset", amount });
+    updateBalanceSheet();
+    updateFinancialHealth();
+  }
+}
 
-  // Update totals
-  if (type === 'income') income += amount;
-  else if (type === 'expense') expenses += amount;
-  else if (type === 'asset') assets += amount;
-  else if (type === 'liability') liabilities += amount;
+// Add Liability
+function addLiability() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const amount = parseFloat(prompt("Enter Liability Amount:"));
+  if (date && amount) {
+    balanceSheet.push({ date, type: "Liability", amount });
+    updateBalanceSheet();
+    updateFinancialHealth();
+  }
+}
 
-  updateTotals();
-  updateFinancialHealth();
-  provideTips();
-  clearInputs();
+// Update Income Statement
+function updateIncomeStatement() {
+  incomeStatementBody.innerHTML = "";
+  let totalIncomeAmount = 0;
+  let totalExpensesAmount = 0;
+
+  incomeStatement.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${entry.date}</td><td>${entry.type === "Income" ? entry.amount : ""}</td><td>${entry.type === "Expense" ? entry.amount : ""}</td>`;
+    incomeStatementBody.appendChild(row);
+
+    if (entry.type === "Income") totalIncomeAmount += entry.amount;
+    if (entry.type === "Expense") totalExpensesAmount += entry.amount;
+  });
+
+  totalIncome.textContent = totalIncomeAmount;
+  totalExpenses.textContent = totalExpensesAmount;
+}
+
+// Update Balance Sheet
+function updateBalanceSheet() {
+  balanceSheetBody.innerHTML = "";
+  let totalAssetsAmount = 0;
+  let totalLiabilitiesAmount = 0;
+
+  balanceSheet.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${entry.date}</td><td>${entry.type === "Asset" ? entry.amount : ""}</td><td>${entry.type === "Liability" ? entry.amount : ""}</td>`;
+    balanceSheetBody.appendChild(row);
+
+    if (entry.type === "Asset") totalAssetsAmount += entry.amount;
+    if (entry.type === "Liability") totalLiabilitiesAmount += entry.amount;
+  });
+
+  totalAssets.textContent = totalAssetsAmount;
+  totalLiabilities.textContent = totalLiabilitiesAmount;
 }
 
 // Update Financial Health
 function updateFinancialHealth() {
-  const netWorth = assets - liabilities;
-  const cashFlow = income - expenses;
-  const healthScore = ((netWorth + cashFlow) / (income + assets)) * 100 || 0;
+  const totalIncomeAmount = parseFloat(totalIncome.textContent);
+  const totalExpensesAmount = parseFloat(totalExpenses.textContent);
+  const totalAssetsAmount = parseFloat(totalAssets.textContent);
+  const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent);
 
-  const healthBar = document.querySelector('.health-bar');
-  healthBar.setAttribute('data-score', `${healthScore.toFixed(2)}%`);
+  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
+  const savingsRate = (totalIncomeAmount - totalExpensesAmount) / totalIncomeAmount || 0;
+  const healthScore = Math.round((netWorth + savingsRate * 100) / 2);
 
-  let color;
-  if (healthScore < 40) color = 'red';
-  else if (healthScore < 60) color = 'yellow';
-  else if (healthScore < 80) color = 'green';
-  else color = 'darkgreen';
+  healthChart.data.datasets[0].data = [healthScore];
+  healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
+  healthChart.update();
 
-  healthBar.style.background = `conic-gradient(
-    ${color} 0% ${healthScore}%,
-    #ddd ${healthScore}% 100%
-  )`;
+  healthPercentage.textContent = `${healthScore}%`;
+  healthTips.textContent = generateHealthTip(healthScore);
 }
 
-// Provide Tips
-function provideTips() {
+// Get Health Color
+function getHealthColor(score) {
+  if (score <= 39) return "#ff6384"; // Red
+  if (score <= 59) return "#ffcd56"; // Yellow
+  if (score <= 79) return "#4bc0c0"; // Green
+  return "#36a2eb"; // Deeper Green
+}
+
+// Generate Health Tip
+function generateHealthTip(score) {
   const tips = [
-    "Focus on increasing your income streams.",
-    "Reduce unnecessary expenses to improve cash flow.",
-    "Invest in assets that generate passive income.",
-    "Pay off high-interest liabilities as soon as possible.",
-    "Diversify your investments to reduce risk.",
-    "Track your spending to identify areas for improvement.",
-    "Set financial goals and review them regularly.",
-    "Build an emergency fund to cover unexpected expenses.",
-    "Avoid lifestyle inflation as your income grows.",
-    "Consider consulting a financial advisor for personalized advice.",
+    "Focus on reducing liabilities and increasing assets.",
+    "Consider cutting down on unnecessary expenses.",
+    "Great job! Keep building your assets.",
+    "You're on the right track. Keep saving!",
   ];
-  const randomTip = tips[Math.floor(Math.random() * tips.length)];
-  document.getElementById('tipText').innerText = randomTip;
+  return tips[Math.floor(Math.random() * tips.length)];
 }
 
-// Clear Inputs
-function clearInputs() {
-  document.getElementById('entryName').value = '';
-  document.getElementById('entryAmount').value = '';
-  document.getElementById('entryDate').value = '';
+// Convert Currency
+function convertCurrency() {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const from = fromCurrency.value;
+  const to = toCurrency.value;
+
+  if (amount && from && to) {
+    const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
+    conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+  }
 }
 
-// Download Summary
-function downloadSummary() {
-  const doc = new jspdf.jsPDF();
-  const profile = JSON.parse(localStorage.getItem('profile'));
-  const progress = JSON.parse(localStorage.getItem('progress'));
+// Save Data
+function saveData() {
+  const data = { profile, incomeStatement, balanceSheet };
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "financial_data.json";
+  a.click();
+}
 
-  let content = `Financial Summary for ${profile.name}\n\n`;
-  content += `Age: ${profile.age}\n`;
-  content += `Occupation: ${profile.occupation}\n`;
-  content += `Dream: ${profile.dream}\n\n`;
-  content += `Income: ${income}\n`;
-  content += `Expenses: ${expenses}\n`;
-  content += `Assets: ${assets}\n`;
-  content += `Liabilities: ${liabilities}\n\n`;
-  content += `Financial Health Score: ${document.querySelector('.health-bar').getAttribute('data-score')}\n\n`;
-  content += `Tips: ${document.getElementById('tipText').innerText}\n`;
+// Load Data
+function loadData() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = JSON.parse(e.target.result);
+      profile = data.profile;
+      incomeStatement = data.incomeStatement;
+      balanceSheet = data.balanceSheet;
+      updateIncomeStatement();
+      updateBalanceSheet();
+      updateFinancialHealth();
+      alert("Data Loaded!");
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
 
-  doc.text(content, 10, 10);
-  doc.save('financial_summary.pdf');
+// Clear Data
+function clearData() {
+  if (confirm("Are you sure you want to clear all data?")) {
+    profile = { name: "", age: "", occupation: "", dream: "" };
+    incomeStatement = [];
+    balanceSheet = [];
+    updateIncomeStatement();
+    updateBalanceSheet();
+    updateFinancialHealth();
+    alert("Data Cleared!");
+  }
 }
 
 // Share on WhatsApp
 function shareOnWhatsApp() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://wa.me/?text=Check%20out%20this%20awesome%20financial%20tracker:%20${url}`);
+  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20awesome%20Financial%20Tracker%20App%20${url}`);
 }
 
 // Share on Facebook
@@ -201,5 +262,11 @@ function shareOnFacebook() {
 // Share on Twitter
 function shareOnTwitter() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=${url}`);
-    }
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
+}
+
+// Generate Financial Story
+function generateStory() {
+  const story = `Once upon a time, ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, dreamed of ${profile.dream}. Through careful financial management, they achieved a net worth of ${parseFloat(totalAssets.textContent) - parseFloat(totalLiabilities.textContent)}. Their journey was filled with ups and downs, but they persevered. Keep going!`;
+  financialStory.textContent = story;
+      }
