@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GAP Financial Statement Tracker</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -46,6 +48,7 @@
       <h2>Add Entry</h2>
       <input type="text" id="entryName" placeholder="Entry Name" />
       <input type="number" id="entryAmount" placeholder="Amount" />
+      <input type="date" id="entryDate" />
       <select id="entryType">
         <option value="income">Income</option>
         <option value="expense">Expense</option>
@@ -63,8 +66,9 @@
     <table id="incomeStatement">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Amount</th>
+          <th>Date</th>
+          <th>Income (Green)</th>
+          <th>Expenses (Red)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -72,9 +76,11 @@
         <tr>
           <td><strong>Total Income</strong></td>
           <td id="totalIncome">0</td>
+          <td></td>
         </tr>
         <tr>
           <td><strong>Total Expenses</strong></td>
+          <td></td>
           <td id="totalExpenses">0</td>
         </tr>
       </tfoot>
@@ -85,8 +91,9 @@
     <table id="balanceSheet">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Amount</th>
+          <th>Date</th>
+          <th>Assets (Green)</th>
+          <th>Liabilities (Red)</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -94,9 +101,11 @@
         <tr>
           <td><strong>Total Assets</strong></td>
           <td id="totalAssets">0</td>
+          <td></td>
         </tr>
         <tr>
           <td><strong>Total Liabilities</strong></td>
+          <td></td>
           <td id="totalLiabilities">0</td>
         </tr>
       </tfoot>
@@ -108,8 +117,16 @@
       <p id="tipText">Add an entry to get tips!</p>
     </div>
 
-    <!-- Save Progress -->
-    <button onclick="saveProgress()" class="save-button">Save Progress</button>
+    <!-- Download Summary -->
+    <button onclick="downloadSummary()" class="save-button">Download Financial Summary</button>
+
+    <!-- Share Buttons -->
+    <div class="share-buttons">
+      <h3>Share Your Progress</h3>
+      <button onclick="shareOnWhatsApp()">WhatsApp</button>
+      <button onclick="shareOnFacebook()">Facebook</button>
+      <button onclick="shareOnTwitter()">X (Twitter)</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
