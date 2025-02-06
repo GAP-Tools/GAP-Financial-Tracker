@@ -91,15 +91,20 @@ async function convertCurrency() {
 function addEntry() {
   const name = document.getElementById('entryName').value;
   const amount = parseFloat(document.getElementById('entryAmount').value);
+  const date = document.getElementById('entryDate').value;
   const type = document.getElementById('entryType').value;
 
-  if (!name || isNaN(amount)) {
+  if (!name || isNaN(amount) || !date) {
     alert('Please fill all fields correctly.');
     return;
   }
 
   const table = type === 'income' || type === 'expense' ? document.querySelector('#incomeStatement tbody') : document.querySelector('#balanceSheet tbody');
-  const row = `<tr><td>${name}</td><td>${amount}</td></tr>`;
+  const row = `<tr>
+    <td>${date}</td>
+    <td class="${type === 'income' ? 'income' : ''}">${type === 'income' ? amount : ''}</td>
+    <td class="${type === 'expense' ? 'expense' : ''}">${type === 'expense' ? amount : ''}</td>
+  </tr>`;
   table.insertAdjacentHTML('beforeend', row);
 
   // Update totals
@@ -157,4 +162,44 @@ function provideTips() {
 function clearInputs() {
   document.getElementById('entryName').value = '';
   document.getElementById('entryAmount').value = '';
+  document.getElementById('entryDate').value = '';
+}
+
+// Download Summary
+function downloadSummary() {
+  const doc = new jspdf.jsPDF();
+  const profile = JSON.parse(localStorage.getItem('profile'));
+  const progress = JSON.parse(localStorage.getItem('progress'));
+
+  let content = `Financial Summary for ${profile.name}\n\n`;
+  content += `Age: ${profile.age}\n`;
+  content += `Occupation: ${profile.occupation}\n`;
+  content += `Dream: ${profile.dream}\n\n`;
+  content += `Income: ${income}\n`;
+  content += `Expenses: ${expenses}\n`;
+  content += `Assets: ${assets}\n`;
+  content += `Liabilities: ${liabilities}\n\n`;
+  content += `Financial Health Score: ${document.querySelector('.health-bar').getAttribute('data-score')}\n\n`;
+  content += `Tips: ${document.getElementById('tipText').innerText}\n`;
+
+  doc.text(content, 10, 10);
+  doc.save('financial_summary.pdf');
+}
+
+// Share on WhatsApp
+function shareOnWhatsApp() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://wa.me/?text=Check%20out%20this%20awesome%20financial%20tracker:%20${url}`);
+}
+
+// Share on Facebook
+function shareOnFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+}
+
+// Share on Twitter
+function shareOnTwitter() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?url=${url}`);
     }
