@@ -3,6 +3,7 @@ let profile = { name: "", age: "", occupation: "", dream: "" };
 let incomeStatement = [];
 let balanceSheet = [];
 let currencyRates = {};
+let selectedCurrency = "USD";
 
 // DOM Elements
 const incomeStatementBody = document.getElementById("income-statement-body");
@@ -71,44 +72,56 @@ function saveProfile() {
 // Add Income
 function addIncome() {
   const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Income Amount:"));
-  if (date && amount) {
-    incomeStatement.push({ date, type: "Income", amount });
+  if (date && description && amount) {
+    incomeStatement.push({ date, description, type: "Income", amount });
     updateIncomeStatement();
     updateFinancialHealth();
+  } else {
+    alert("Invalid Input!");
   }
 }
 
 // Add Expense
 function addExpense() {
   const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Expense Amount:"));
-  if (date && amount) {
-    incomeStatement.push({ date, type: "Expense", amount });
+  if (date && description && amount) {
+    incomeStatement.push({ date, description, type: "Expense", amount });
     updateIncomeStatement();
     updateFinancialHealth();
+  } else {
+    alert("Invalid Input!");
   }
 }
 
 // Add Asset
 function addAsset() {
   const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Asset Value:"));
-  if (date && amount) {
-    balanceSheet.push({ date, type: "Asset", amount });
+  if (date && description && amount) {
+    balanceSheet.push({ date, description, type: "Asset", amount });
     updateBalanceSheet();
     updateFinancialHealth();
+  } else {
+    alert("Invalid Input!");
   }
 }
 
 // Add Liability
 function addLiability() {
   const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Liability Amount:"));
-  if (date && amount) {
-    balanceSheet.push({ date, type: "Liability", amount });
+  if (date && description && amount) {
+    balanceSheet.push({ date, description, type: "Liability", amount });
     updateBalanceSheet();
     updateFinancialHealth();
+  } else {
+    alert("Invalid Input!");
   }
 }
 
@@ -118,17 +131,26 @@ function updateIncomeStatement() {
   let totalIncomeAmount = 0;
   let totalExpensesAmount = 0;
 
-  incomeStatement.forEach((entry) => {
+  incomeStatement.forEach((entry, index) => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${entry.date}</td><td>${entry.type === "Income" ? entry.amount : ""}</td><td>${entry.type === "Expense" ? entry.amount : ""}</td>`;
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.description}</td>
+      <td>${entry.type === "Income" ? `${selectedCurrency} ${entry.amount}` : ""}</td>
+      <td>${entry.type === "Expense" ? `${selectedCurrency} ${entry.amount}` : ""}</td>
+      <td class="actions">
+        <button onclick="editEntry('income', ${index})">✏️</button>
+        <button onclick="deleteEntry('income', ${index})">🗑️</button>
+      </td>
+    `;
     incomeStatementBody.appendChild(row);
 
     if (entry.type === "Income") totalIncomeAmount += entry.amount;
     if (entry.type === "Expense") totalExpensesAmount += entry.amount;
   });
 
-  totalIncome.textContent = totalIncomeAmount;
-  totalExpenses.textContent = totalExpensesAmount;
+  totalIncome.textContent = `${selectedCurrency} ${totalIncomeAmount}`;
+  totalExpenses.textContent = `${selectedCurrency} ${totalExpensesAmount}`;
 }
 
 // Update Balance Sheet
@@ -137,25 +159,61 @@ function updateBalanceSheet() {
   let totalAssetsAmount = 0;
   let totalLiabilitiesAmount = 0;
 
-  balanceSheet.forEach((entry) => {
+  balanceSheet.forEach((entry, index) => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${entry.date}</td><td>${entry.type === "Asset" ? entry.amount : ""}</td><td>${entry.type === "Liability" ? entry.amount : ""}</td>`;
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.description}</td>
+      <td>${entry.type === "Asset" ? `${selectedCurrency} ${entry.amount}` : ""}</td>
+      <td>${entry.type === "Liability" ? `${selectedCurrency} ${entry.amount}` : ""}</td>
+      <td class="actions">
+        <button onclick="editEntry('balance', ${index})">✏️</button>
+        <button onclick="deleteEntry('balance', ${index})">🗑️</button>
+      </td>
+    `;
     balanceSheetBody.appendChild(row);
 
     if (entry.type === "Asset") totalAssetsAmount += entry.amount;
     if (entry.type === "Liability") totalLiabilitiesAmount += entry.amount;
   });
 
-  totalAssets.textContent = totalAssetsAmount;
-  totalLiabilities.textContent = totalLiabilitiesAmount;
+  totalAssets.textContent = `${selectedCurrency} ${totalAssetsAmount}`;
+  totalLiabilities.textContent = `${selectedCurrency} ${totalLiabilitiesAmount}`;
+}
+
+// Edit Entry
+function editEntry(type, index) {
+  const entry = type === "income" ? incomeStatement[index] : balanceSheet[index];
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  if (newDescription && !isNaN(newAmount)) {
+    entry.description = newDescription;
+    entry.amount = newAmount;
+    if (type === "income") updateIncomeStatement();
+    else updateBalanceSheet();
+    updateFinancialHealth();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Delete Entry
+function deleteEntry(type, index) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    if (type === "income") incomeStatement.splice(index, 1);
+    else balanceSheet.splice(index, 1);
+    if (type === "income") updateIncomeStatement();
+    else updateBalanceSheet();
+    updateFinancialHealth();
+  }
 }
 
 // Update Financial Health
 function updateFinancialHealth() {
-  const totalIncomeAmount = parseFloat(totalIncome.textContent);
-  const totalExpensesAmount = parseFloat(totalExpenses.textContent);
-  const totalAssetsAmount = parseFloat(totalAssets.textContent);
-  const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent);
+  const totalIncomeAmount = parseFloat(totalIncome.textContent.replace(selectedCurrency, ""));
+  const totalExpensesAmount = parseFloat(totalExpenses.textContent.replace(selectedCurrency, ""));
+  const totalAssetsAmount = parseFloat(totalAssets.textContent.replace(selectedCurrency, ""));
+  const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(selectedCurrency, ""));
 
   const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
   const savingsRate = (totalIncomeAmount - totalExpensesAmount) / totalIncomeAmount || 0;
@@ -202,7 +260,7 @@ function convertCurrency() {
 
 // Save Data
 function saveData() {
-  const data = { profile, incomeStatement, balanceSheet };
+  const data = { profile, incomeStatement, balanceSheet, selectedCurrency };
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -224,6 +282,7 @@ function loadData() {
       profile = data.profile;
       incomeStatement = data.incomeStatement;
       balanceSheet = data.balanceSheet;
+      selectedCurrency = data.selectedCurrency;
       updateIncomeStatement();
       updateBalanceSheet();
       updateFinancialHealth();
@@ -240,6 +299,7 @@ function clearData() {
     profile = { name: "", age: "", occupation: "", dream: "" };
     incomeStatement = [];
     balanceSheet = [];
+    selectedCurrency = "USD";
     updateIncomeStatement();
     updateBalanceSheet();
     updateFinancialHealth();
@@ -249,24 +309,4 @@ function clearData() {
 
 // Share on WhatsApp
 function shareOnWhatsApp() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20awesome%20Financial%20Tracker%20App%20${url}`);
-}
-
-// Share on Facebook
-function shareOnFacebook() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
-}
-
-// Share on Twitter
-function shareOnTwitter() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
-}
-
-// Generate Financial Story
-function generateStory() {
-  const story = `Once upon a time, ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, dreamed of ${profile.dream}. Through careful financial management, they achieved a net worth of ${parseFloat(totalAssets.textContent) - parseFloat(totalLiabilities.textContent)}. Their journey was filled with ups and downs, but they persevered. Keep going!`;
-  financialStory.textContent = story;
-      }
+  const
