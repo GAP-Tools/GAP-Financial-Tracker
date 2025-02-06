@@ -45,6 +45,22 @@ th {
   color: white;
 }
 
+.income {
+  color: green;
+}
+
+.expense {
+  color: red;
+}
+
+.asset {
+  color: green;
+}
+
+.liability {
+  color: red;
+}
+
 input[type="text"], input[type="number"], select {
   width: 100%;
   padding: 8px;
@@ -101,3 +117,12 @@ button:hover {
   width: 100%;
   margin-top: 20px;
 }
+
+.share-buttons {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.share-buttons button {
+  margin: 5px;
+  }
