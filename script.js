@@ -6,6 +6,72 @@ let expenses = 0;
 let assets = 0;
 let liabilities = 0;
 
+// Load saved data
+window.onload = () => {
+  loadProfile();
+  loadProgress();
+};
+
+// Save Profile
+function saveProfile() {
+  const profile = {
+    name: document.getElementById('name').value,
+    age: document.getElementById('age').value,
+    occupation: document.getElementById('occupation').value,
+    dream: document.getElementById('dream').value,
+  };
+  localStorage.setItem('profile', JSON.stringify(profile));
+  alert('Profile saved!');
+}
+
+// Load Profile
+function loadProfile() {
+  const profile = JSON.parse(localStorage.getItem('profile'));
+  if (profile) {
+    document.getElementById('name').value = profile.name;
+    document.getElementById('age').value = profile.age;
+    document.getElementById('occupation').value = profile.occupation;
+    document.getElementById('dream').value = profile.dream;
+  }
+}
+
+// Save Progress
+function saveProgress() {
+  const progress = {
+    income,
+    expenses,
+    assets,
+    liabilities,
+    incomeStatement: document.querySelector('#incomeStatement tbody').innerHTML,
+    balanceSheet: document.querySelector('#balanceSheet tbody').innerHTML,
+  };
+  localStorage.setItem('progress', JSON.stringify(progress));
+  alert('Progress saved!');
+}
+
+// Load Progress
+function loadProgress() {
+  const progress = JSON.parse(localStorage.getItem('progress'));
+  if (progress) {
+    income = progress.income;
+    expenses = progress.expenses;
+    assets = progress.assets;
+    liabilities = progress.liabilities;
+    document.querySelector('#incomeStatement tbody').innerHTML = progress.incomeStatement;
+    document.querySelector('#balanceSheet tbody').innerHTML = progress.balanceSheet;
+    updateTotals();
+    updateFinancialHealth();
+  }
+}
+
+// Update Totals
+function updateTotals() {
+  document.getElementById('totalIncome').innerText = income;
+  document.getElementById('totalExpenses').innerText = expenses;
+  document.getElementById('totalAssets').innerText = assets;
+  document.getElementById('totalLiabilities').innerText = liabilities;
+}
+
 // Currency Converter
 async function convertCurrency() {
   const amount = document.getElementById('amount').value;
@@ -42,8 +108,9 @@ function addEntry() {
   else if (type === 'asset') assets += amount;
   else if (type === 'liability') liabilities += amount;
 
+  updateTotals();
   updateFinancialHealth();
-  provideTips(type);
+  provideTips();
   clearInputs();
 }
 
@@ -55,26 +122,39 @@ function updateFinancialHealth() {
 
   const healthBar = document.querySelector('.health-bar');
   healthBar.setAttribute('data-score', `${healthScore.toFixed(2)}%`);
+
+  let color;
+  if (healthScore < 40) color = 'red';
+  else if (healthScore < 60) color = 'yellow';
+  else if (healthScore < 80) color = 'green';
+  else color = 'darkgreen';
+
   healthBar.style.background = `conic-gradient(
-    green 0% 33%,
-    yellow 33% 66%,
-    red 66% 100%
+    ${color} 0% ${healthScore}%,
+    #ddd ${healthScore}% 100%
   )`;
 }
 
 // Provide Tips
-function provideTips(type) {
-  const tips = {
-    income: "Great job! Keep increasing your income streams.",
-    expense: "Try to reduce unnecessary expenses.",
-    asset: "Assets are key to building wealth. Keep investing!",
-    liability: "Focus on reducing liabilities to improve financial health."
-  };
-  document.getElementById('tipText').innerText = tips[type];
+function provideTips() {
+  const tips = [
+    "Focus on increasing your income streams.",
+    "Reduce unnecessary expenses to improve cash flow.",
+    "Invest in assets that generate passive income.",
+    "Pay off high-interest liabilities as soon as possible.",
+    "Diversify your investments to reduce risk.",
+    "Track your spending to identify areas for improvement.",
+    "Set financial goals and review them regularly.",
+    "Build an emergency fund to cover unexpected expenses.",
+    "Avoid lifestyle inflation as your income grows.",
+    "Consider consulting a financial advisor for personalized advice.",
+  ];
+  const randomTip = tips[Math.floor(Math.random() * tips.length)];
+  document.getElementById('tipText').innerText = randomTip;
 }
 
 // Clear Inputs
 function clearInputs() {
   document.getElementById('entryName').value = '';
   document.getElementById('entryAmount').value = '';
-                         }
+    }
