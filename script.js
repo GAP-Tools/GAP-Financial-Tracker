@@ -260,13 +260,13 @@ function updateFinancialHealth() {
 
   const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
   const savingsRate = (totalIncomeAmount - totalExpensesAmount) / totalIncomeAmount || 0;
-  const healthScore = Math.round((netWorth + savingsRate * 100) / 2);
+  const healthScore = Math.round((cashflow / profile.passiveIncomeTarget) * 100);
 
-  healthChart.data.datasets[0].data = [healthScore];
+  healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
   healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
   healthChart.update();
 
-  healthPercentage.textContent = `${healthScore}%`;
+  healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
   healthTips.textContent = generateHealthTip(healthScore, totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget);
 }
 
@@ -469,7 +469,7 @@ function generateStory() {
   const cashflow = totalIncomeAmount - totalExpensesAmount;
 
   const story = `
-    ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
+    ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances. 
     Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
     They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${profile.currency} ${netWorth}. 
