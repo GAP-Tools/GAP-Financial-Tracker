@@ -22,6 +22,8 @@ const currencySelect = document.getElementById("currency");
 const passiveIncomeTargetInput = document.getElementById("passive-income-target");
 const cashflowDisplay = document.getElementById("cashflow");
 const saveFileNameInput = document.getElementById("saveFileName");
+const calculatorPopup = document.getElementById("calculatorPopup");
+const calculatorInput = document.getElementById("calculatorInput");
 
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
@@ -479,3 +481,27 @@ function generateStory() {
   `;
   financialStory.textContent = story;
 }
+
+// Toggle Calculator Popup
+function toggleCalculator() {
+  calculatorPopup.style.display = calculatorPopup.style.display === "block" ? "none" : "block";
+}
+
+// Append to Calculator Input
+function appendToCalculator(value) {
+  calculatorInput.value += value;
+}
+
+// Calculate Result
+function calculateResult() {
+  try {
+    calculatorInput.value = eval(calculatorInput.value);
+  } catch (error) {
+    calculatorInput.value = "Error";
+  }
+}
+
+// Clear Calculator
+function clearCalculator() {
+  calculatorInput.value = "";
+        }
