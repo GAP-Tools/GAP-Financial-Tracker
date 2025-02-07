@@ -43,6 +43,7 @@ fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
   .then((data) => {
     currencyRates = data.conversion_rates;
     populateCurrencyDropdowns();
+    loadSavedData(); // Load saved data after currencies are fetched
   });
 
 // Populate Currency Dropdowns
@@ -50,14 +51,28 @@ function populateCurrencyDropdowns() {
   for (const currency in currencyRates) {
     const option1 = document.createElement("option");
     option1.value = currency;
-    option1.text = currency;
+    option1.text = `${currency} (${getCurrencySymbol(currency)})`;
     fromCurrency.appendChild(option1);
 
     const option2 = document.createElement("option");
     option2.value = currency;
-    option2.text = currency;
+    option2.text = `${currency} (${getCurrencySymbol(currency)})`;
     toCurrency.appendChild(option2);
+
+    const option3 = document.createElement("option");
+    option3.value = currency;
+    option3.text = `${currency} (${getCurrencySymbol(currency)})`;
+    currencySelect.appendChild(option3);
   }
+}
+
+// Get Currency Symbol
+function getCurrencySymbol(currency) {
+  const symbols = {
+    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$", CHF: "CHF", CNY: "¥",
+    // Add more currency symbols as needed
+  };
+  return symbols[currency] || currency;
 }
 
 // Save Profile
@@ -68,8 +83,7 @@ function saveProfile() {
   profile.dream = document.getElementById("dream").value;
   profile.currency = currencySelect.value;
   alert("Profile Saved!");
-  updateIncomeStatement();
-  updateBalanceSheet();
+  saveDataToLocalStorage();
 }
 
 // Add Income
@@ -81,6 +95,7 @@ function addIncome() {
     incomeStatement.push({ date, description, type: "Income", amount });
     updateIncomeStatement();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
@@ -95,6 +110,7 @@ function addExpense() {
     incomeStatement.push({ date, description, type: "Expense", amount });
     updateIncomeStatement();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
@@ -109,6 +125,7 @@ function addAsset() {
     balanceSheet.push({ date, description, type: "Asset", amount });
     updateBalanceSheet();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
@@ -123,6 +140,7 @@ function addLiability() {
     balanceSheet.push({ date, description, type: "Liability", amount });
     updateBalanceSheet();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
@@ -195,6 +213,7 @@ function editEntry(type, index) {
     if (type === "income") updateIncomeStatement();
     else updateBalanceSheet();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
@@ -208,6 +227,7 @@ function deleteEntry(type, index) {
     if (type === "income") updateIncomeStatement();
     else updateBalanceSheet();
     updateFinancialHealth();
+    saveDataToLocalStorage();
   }
 }
 
@@ -245,25 +265,53 @@ function generateHealthTip(score, income, expenses, assets, liabilities) {
     tips.push(
       "Your expenses are higher than your income. Consider cutting down on unnecessary spending.",
       "Focus on reducing liabilities and increasing assets to improve your financial health.",
-      "You're spending more than you earn. Try to find ways to increase your income or reduce expenses."
+      "You're spending more than you earn. Try to find ways to increase your income or reduce expenses.",
+      "High liabilities can lead to financial stress. Focus on paying off debts.",
+      "Your savings rate is low. Consider creating a budget to track your spending.",
+      "Invest in assets that generate passive income to improve your financial health.",
+      "Avoid unnecessary expenses and focus on building an emergency fund.",
+      "Your financial health is in danger. Take immediate steps to reduce liabilities.",
+      "Consider consulting a financial advisor to improve your financial situation.",
+      "Track your spending habits to identify areas where you can cut costs."
     );
   } else if (score <= 59) {
     tips.push(
       "Your financial health is improving, but there's still room for growth. Consider investing in assets.",
       "You're doing okay, but try to reduce your liabilities to improve your net worth.",
-      "Your savings rate is low. Consider increasing your income or reducing expenses."
+      "Your savings rate is low. Consider increasing your income or reducing expenses.",
+      "Focus on building assets that appreciate over time.",
+      "Avoid taking on new debts and focus on paying off existing ones.",
+      "Your net worth is improving, but you can do better by increasing your income.",
+      "Consider diversifying your income streams to improve financial stability.",
+      "Your financial health is stable, but you need to focus on long-term goals.",
+      "Invest in education or skills that can increase your earning potential.",
+      "Create a financial plan to achieve your dreams and goals."
     );
   } else if (score <= 79) {
     tips.push(
       "Great job! Your income is higher than your expenses. Keep building your assets.",
       "You're on the right track. Consider investing in assets to generate passive income.",
-      "Your financial health is good. Keep saving and investing to reach your goals."
+      "Your financial health is good. Keep saving and investing to reach your goals.",
+      "Your net worth is growing. Focus on maintaining a healthy savings rate.",
+      "Consider investing in real estate or stocks to grow your wealth.",
+      "Your financial habits are improving. Keep up the good work!",
+      "You're doing well, but don't forget to plan for retirement.",
+      "Your financial health is strong. Focus on long-term wealth-building strategies.",
+      "Consider creating multiple income streams to further improve your financial health.",
+      "You're on the path to financial freedom. Keep making smart financial decisions."
     );
   } else {
     tips.push(
       "Excellent! Your financial health is in great shape. Keep up the good work!",
       "You're doing amazing! Consider diversifying your investments to further grow your wealth.",
-      "Your net worth is impressive. Keep focusing on building assets and reducing liabilities."
+      "Your net worth is impressive. Keep focusing on building assets and reducing liabilities.",
+      "You've achieved financial stability. Focus on giving back and helping others.",
+      "Your financial health is exceptional. Consider mentoring others on financial management.",
+      "You're a financial role model. Keep inspiring others with your success.",
+      "Your wealth is growing steadily. Focus on legacy planning and philanthropy.",
+      "You've mastered financial management. Consider exploring new investment opportunities.",
+      "Your financial health is outstanding. Keep setting and achieving new goals.",
+      "You're financially free. Enjoy the fruits of your hard work and smart decisions."
     );
   }
   return tips[Math.floor(Math.random() * tips.length)];
@@ -278,6 +326,31 @@ function convertCurrency() {
   if (amount && from && to) {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+  }
+}
+
+// Save Data to LocalStorage
+function saveDataToLocalStorage() {
+  const data = { profile, incomeStatement, balanceSheet };
+  localStorage.setItem("financialData", JSON.stringify(data));
+}
+
+// Load Saved Data
+function loadSavedData() {
+  const savedData = localStorage.getItem("financialData");
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    profile = data.profile;
+    incomeStatement = data.incomeStatement;
+    balanceSheet = data.balanceSheet;
+    document.getElementById("name").value = profile.name;
+    document.getElementById("age").value = profile.age;
+    document.getElementById("occupation").value = profile.occupation;
+    document.getElementById("dream").value = profile.dream;
+    currencySelect.value = profile.currency;
+    updateIncomeStatement();
+    updateBalanceSheet();
+    updateFinancialHealth();
   }
 }
 
@@ -305,9 +378,15 @@ function loadData() {
       profile = data.profile;
       incomeStatement = data.incomeStatement;
       balanceSheet = data.balanceSheet;
+      document.getElementById("name").value = profile.name;
+      document.getElementById("age").value = profile.age;
+      document.getElementById("occupation").value = profile.occupation;
+      document.getElementById("dream").value = profile.dream;
+      currencySelect.value = profile.currency;
       updateIncomeStatement();
       updateBalanceSheet();
       updateFinancialHealth();
+      saveDataToLocalStorage();
       alert("Data Loaded!");
     };
     reader.readAsText(file);
@@ -321,9 +400,15 @@ function clearData() {
     profile = { name: "", age: "", occupation: "", dream: "", currency: "USD" };
     incomeStatement = [];
     balanceSheet = [];
+    document.getElementById("name").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("occupation").value = "";
+    document.getElementById("dream").value = "";
+    currencySelect.value = "USD";
     updateIncomeStatement();
     updateBalanceSheet();
     updateFinancialHealth();
+    localStorage.removeItem("financialData");
     alert("Data Cleared!");
   }
 }
@@ -363,4 +448,4 @@ function generateStory() {
     ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount)}
   `;
   financialStory.textContent = story;
-}
+      }
