@@ -463,7 +463,8 @@ function shareOnTwitter() {
 
 // Download App (APK)
 function downloadApp() {
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fappurl.io%2FZEdR7Z-ibu"/>
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.appcreator24.com/app3480869-q98157`);
 }
 
 // Generate Financial Story
