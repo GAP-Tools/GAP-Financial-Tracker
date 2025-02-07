@@ -1,5 +1,5 @@
 // Initialize variables
-let profile = { name: "", age: "", occupation: "", dream: "", currency: "USD" };
+let profile = { name: "", age: "", occupation: "", dream: "", currency: "USD", passiveIncomeTarget: 0 };
 let incomeStatement = [];
 let balanceSheet = [];
 let currencyRates = {};
@@ -19,6 +19,9 @@ const toCurrency = document.getElementById("toCurrency");
 const conversionResult = document.getElementById("conversionResult");
 const financialStory = document.getElementById("financialStory");
 const currencySelect = document.getElementById("currency");
+const passiveIncomeTargetInput = document.getElementById("passive-income-target");
+const cashflowDisplay = document.getElementById("cashflow");
+const saveFileNameInput = document.getElementById("saveFileName");
 
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
@@ -82,8 +85,22 @@ function saveProfile() {
   profile.occupation = document.getElementById("occupation").value;
   profile.dream = document.getElementById("dream").value;
   profile.currency = currencySelect.value;
+  profile.passiveIncomeTarget = parseFloat(passiveIncomeTargetInput.value) || 0;
   alert("Profile Saved!");
   saveDataToLocalStorage();
+}
+
+// Edit Passive Income Target
+function editPassiveIncomeTarget() {
+  const newTarget = prompt("Enter New Passive Income Target:", profile.passiveIncomeTarget);
+  if (newTarget && !isNaN(newTarget)) {
+    profile.passiveIncomeTarget = parseFloat(newTarget);
+    passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
 }
 
 // Add Income
@@ -172,6 +189,8 @@ function updateIncomeStatement() {
 
   totalIncome.textContent = `${profile.currency} ${totalIncomeAmount}`;
   totalExpenses.textContent = `${profile.currency} ${totalExpensesAmount}`;
+  const cashflow = totalIncomeAmount - totalExpensesAmount;
+  cashflowDisplay.textContent = `${profile.currency} ${cashflow}`;
 }
 
 // Update Balance Sheet
@@ -237,6 +256,7 @@ function updateFinancialHealth() {
   const totalExpensesAmount = parseFloat(totalExpenses.textContent.replace(profile.currency, ""));
   const totalAssetsAmount = parseFloat(totalAssets.textContent.replace(profile.currency, ""));
   const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(profile.currency, ""));
+  const cashflow = totalIncomeAmount - totalExpensesAmount;
 
   const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
   const savingsRate = (totalIncomeAmount - totalExpensesAmount) / totalIncomeAmount || 0;
@@ -247,7 +267,7 @@ function updateFinancialHealth() {
   healthChart.update();
 
   healthPercentage.textContent = `${healthScore}%`;
-  healthTips.textContent = generateHealthTip(healthScore, totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount);
+  healthTips.textContent = generateHealthTip(healthScore, totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget);
 }
 
 // Get Health Color
@@ -259,7 +279,7 @@ function getHealthColor(score) {
 }
 
 // Generate Health Tip
-function generateHealthTip(score, income, expenses, assets, liabilities) {
+function generateHealthTip(score, income, expenses, assets, liabilities, cashflow, passiveIncomeTarget) {
   const tips = [];
   if (score <= 39) {
     tips.push(
@@ -314,19 +334,23 @@ function generateHealthTip(score, income, expenses, assets, liabilities) {
       "You're financially free. Enjoy the fruits of your hard work and smart decisions."
     );
   }
-  return tips[Math.floor(Math.random() * tips.length)];
-}
 
-// Convert Currency
-function convertCurrency() {
-  const amount = parseFloat(document.getElementById("amount").value);
-  const from = fromCurrency.value;
-  const to = toCurrency.value;
-
-  if (amount && from && to) {
-    const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
-    conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+  // Add tips based on cashflow and passive income target
+  if (cashflow < passiveIncomeTarget) {
+    tips.push(
+      "Your cashflow is below your passive income target. Focus on increasing income or reducing expenses.",
+      "Consider investing in assets that generate passive income to bridge the gap.",
+      "Your financial freedom goal is within reach. Keep working towards it!"
+    );
+  } else {
+    tips.push(
+      "Congratulations! Your cashflow exceeds your passive income target. You're financially free!",
+      "You've achieved financial freedom. Consider reinvesting your surplus income to grow your wealth further.",
+      "Your financial health is excellent. Focus on maintaining your freedom and exploring new opportunities."
+    );
   }
+
+  return tips[Math.floor(Math.random() * tips.length)];
 }
 
 // Save Data to LocalStorage
@@ -348,6 +372,7 @@ function loadSavedData() {
     document.getElementById("occupation").value = profile.occupation;
     document.getElementById("dream").value = profile.dream;
     currencySelect.value = profile.currency;
+    passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
     updateIncomeStatement();
     updateBalanceSheet();
     updateFinancialHealth();
@@ -356,12 +381,13 @@ function loadSavedData() {
 
 // Save Data
 function saveData() {
+  const fileName = saveFileNameInput.value.trim() || "financial_data";
   const data = { profile, incomeStatement, balanceSheet };
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "financial_data.json";
+  a.download = `${fileName}.json`;
   a.click();
 }
 
@@ -383,6 +409,7 @@ function loadData() {
       document.getElementById("occupation").value = profile.occupation;
       document.getElementById("dream").value = profile.dream;
       currencySelect.value = profile.currency;
+      passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
       updateIncomeStatement();
       updateBalanceSheet();
       updateFinancialHealth();
@@ -397,7 +424,7 @@ function loadData() {
 // Clear Data
 function clearData() {
   if (confirm("Are you sure you want to clear all data?")) {
-    profile = { name: "", age: "", occupation: "", dream: "", currency: "USD" };
+    profile = { name: "", age: "", occupation: "", dream: "", currency: "USD", passiveIncomeTarget: 0 };
     incomeStatement = [];
     balanceSheet = [];
     document.getElementById("name").value = "";
@@ -405,6 +432,7 @@ function clearData() {
     document.getElementById("occupation").value = "";
     document.getElementById("dream").value = "";
     currencySelect.value = "USD";
+    passiveIncomeTargetInput.value = "";
     updateIncomeStatement();
     updateBalanceSheet();
     updateFinancialHealth();
@@ -438,14 +466,16 @@ function generateStory() {
   const totalAssetsAmount = parseFloat(totalAssets.textContent.replace(profile.currency, ""));
   const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(profile.currency, ""));
   const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
+  const cashflow = totalIncomeAmount - totalExpensesAmount;
 
   const story = `
     ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
     Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
     They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${profile.currency} ${netWorth}. 
+    Their cashflow is ${profile.currency} ${cashflow}, and their passive income target is ${profile.currency} ${profile.passiveIncomeTarget}. 
     ${profile.name}'s dream is to ${profile.dream}, and with careful financial management, they are on their way to achieving it. 
-    ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount)}
+    ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget)}
   `;
   financialStory.textContent = story;
-      }
+}
