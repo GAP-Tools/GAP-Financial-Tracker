@@ -44,9 +44,9 @@
           <tbody id="income-statement-body"></tbody>
         </table>
         <div class="totals">
-          <p>Total Income: <span id="total-income">0</span></p>
-          <p>Total Expenses: <span id="total-expenses">0</span></p>
-          <p>Cashflow: <span id="cashflow">0</span></p>
+          <p>Total Income: <span id="total-income">0</span> <span class="tooltip">💰 Money you earn</span></p>
+          <p>Total Expenses: <span id="total-expenses">0</span> <span class="tooltip">💸 Money you spend</span></p>
+          <p>Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
         </div>
       </div>
       <button onclick="addIncome()">Add Income</button>
@@ -70,8 +70,8 @@
           <tbody id="balance-sheet-body"></tbody>
         </table>
         <div class="totals">
-          <p>Total Assets: <span id="total-assets">0</span></p>
-          <p>Total Liabilities: <span id="total-liabilities">0</span></p>
+          <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things you own that make money</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Money you owe</span></p>
         </div>
       </div>
       <button onclick="addAsset()">Add Asset</button>
@@ -115,4 +115,4 @@
 
   <script src="script.js"></script>
 </body>
-  </html>
+        </html>
