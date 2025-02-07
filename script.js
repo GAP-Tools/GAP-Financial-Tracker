@@ -461,6 +461,11 @@ function shareOnTwitter() {
   window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
 }
 
+// Download App (APK)
+function downloadApp() {
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fappurl.io%2FZEdR7Z-ibu"/>
+}
+
 // Generate Financial Story
 function generateStory() {
   const totalIncomeAmount = parseFloat(totalIncome.textContent.replace(profile.currency, ""));
