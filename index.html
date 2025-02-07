@@ -19,6 +19,11 @@
       <input type="text" id="dream" placeholder="Dream">
       <label for="currency">Preferred Currency:</label>
       <select id="currency"></select>
+      <label for="passive-income-target">Passive Income Target:</label>
+      <div class="target-input">
+        <input type="number" id="passive-income-target" placeholder="Target">
+        <button onclick="editPassiveIncomeTarget()">✏️</button>
+      </div>
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
@@ -41,6 +46,7 @@
         <div class="totals">
           <p>Total Income: <span id="total-income">0</span></p>
           <p>Total Expenses: <span id="total-expenses">0</span></p>
+          <p>Cashflow: <span id="cashflow">0</span></p>
         </div>
       </div>
       <button onclick="addIncome()">Add Income</button>
@@ -82,19 +88,10 @@
       <p id="healthTips"></p>
     </section>
 
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
-    </section>
-
     <!-- Save, Load, and Clear Data -->
     <section class="data-management">
       <h2>Data Management</h2>
+      <input type="text" id="saveFileName" placeholder="Enter file name">
       <button onclick="saveData()">Save Data</button>
       <button onclick="loadData()">Load Data</button>
       <button onclick="clearData()">Clear Data</button>
@@ -118,4 +115,4 @@
 
   <script src="script.js"></script>
 </body>
-          </html>
+  </html>
