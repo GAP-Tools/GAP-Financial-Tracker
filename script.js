@@ -26,6 +26,16 @@ const saveFileNameInput = document.getElementById("saveFileName");
 const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
 
+// Switch to Personal
+document.addEventListener('DOMContentLoaded', function() {
+    var switchLink = document.getElementById('switchLink');
+    if (switchLink) {
+        switchLink.addEventListener('click', function() {
+            window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/Business';
+        });
+    }
+});
+
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
   type: "doughnut",
