@@ -136,6 +136,13 @@ function saveBusinessProfile() {
   saveDataToLocalStorage();
 }
 
+// Switch to Personal
+document.getElementById('switchLink').addEventListener('click', function() {
+    window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/';
+});
+ }
+}
+
 // Edit Revenue Target
 function editRevenueTarget() {
   const newTarget = prompt("Enter New Revenue Target:", businesses[currentBusinessIndex].revenueTarget);
