@@ -151,6 +151,7 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
+  color: #007bff; /* Deep blue text color */
 }
 
 .calculator-buttons button:hover {
