@@ -11,6 +11,7 @@ const totalIncome = document.getElementById("total-income");
 const totalExpenses = document.getElementById("total-expenses");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
+const netWorthDisplay = document.getElementById("net-worth");
 const healthChartCtx = document.getElementById("healthChart").getContext("2d");
 const healthPercentage = document.getElementById("healthPercentage");
 const healthTips = document.getElementById("healthTips");
@@ -221,6 +222,8 @@ function updateBalanceSheet() {
 
   totalAssets.textContent = `${profile.currency} ${totalAssetsAmount}`;
   totalLiabilities.textContent = `${profile.currency} ${totalLiabilitiesAmount}`;
+  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
+  netWorthDisplay.textContent = `${profile.currency} ${netWorth}`;
 }
 
 // Edit Entry
@@ -381,8 +384,8 @@ function loadSavedData() {
   }
 }
 
-// Save Data
-function saveData() {
+// Export Data
+function exportData() {
   const fileName = saveFileNameInput.value.trim() || "financial_data";
   const data = { profile, incomeStatement, balanceSheet };
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -393,8 +396,8 @@ function saveData() {
   a.click();
 }
 
-// Load Data
-function loadData() {
+// Import Data
+function importData() {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "application/json";
@@ -461,10 +464,9 @@ function shareOnTwitter() {
   window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
 }
 
-// Download App (APK)
+// Download App
 function downloadApp() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.appcreator24.com/app3480869-q98157`);
+  window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
 }
 
 // Generate Financial Story
@@ -477,7 +479,7 @@ function generateStory() {
   const cashflow = totalIncomeAmount - totalExpensesAmount;
 
   const story = `
-    ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances. 
+    ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
     Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
     They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${profile.currency} ${netWorth}. 
@@ -510,4 +512,16 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-        }
+}
+
+// Convert Currency
+function convertCurrency() {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const from = fromCurrency.value;
+  const to = toCurrency.value;
+
+  if (amount && from && to) {
+    const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
+    conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+  }
+      }
