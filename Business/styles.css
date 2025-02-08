@@ -164,6 +164,17 @@ th, td {
   margin-bottom: 20px;
 }
 
+#switchLink {
+    color: blue;
+    text-decoration: underline;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+}
+
+#switchLink:hover {
+    text-decoration: none;
+  }
+
 .business-controls {
   display: flex;
   gap: 10px;
