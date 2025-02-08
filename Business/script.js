@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var switchLink = document.getElementById('switchLink');
     if (switchLink) {
         switchLink.addEventListener('click', function() {
-            window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/Business';
+            window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/';
         });
     }
 });
