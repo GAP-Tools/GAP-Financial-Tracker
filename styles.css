@@ -109,6 +109,23 @@ th, td {
   margin-left: 5px;
 }
 
+#switchLink {
+    display: inline-block;
+    background-color: green;
+    box-shadow: 2px 2px 4px blue;
+    padding: 5px 10px;
+    margin: 0;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+#switchLink:hover {
+    box-shadow: 2px 2px 4px darkblue;
+      }
+
 .calculator-icon {
   position: fixed;
   bottom: 20px;
