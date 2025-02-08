@@ -17,7 +17,7 @@
       <input type="number" id="age" placeholder="Age">
       <input type="text" id="occupation" placeholder="Occupation">
       <input type="text" id="dream" placeholder="Dream">
-      <label for="currency">Currency:</label>
+      <label for="currency">Preferred Currency:</label>
       <select id="currency"></select>
       <label for="passive-income-target">Passive Income Target:</label>
       <div class="target-input">
@@ -82,6 +82,7 @@
         <div class="totals">
           <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things you own that make money</span></p>
           <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Money you owe</span></p>
+          <p>Net Worth: <span id="net-worth">0</span> <span class="tooltip">💼 Assets - Liabilities</span></p>
         </div>
       </div>
       <button onclick="addAsset()">Add Asset</button>
@@ -98,12 +99,12 @@
       <p id="healthTips"></p>
     </section>
 
-    <!-- Save, Load, and Clear Data -->
+    <!-- Data Management -->
     <section class="data-management">
       <h2>Data Management</h2>
       <input type="text" id="saveFileName" placeholder="Enter file name">
-      <button onclick="saveData()">Save Data</button>
-      <button onclick="loadData()">Load Data</button>
+      <button onclick="exportData()">Export Data</button>
+      <button onclick="importData()">Import Data</button>
       <button onclick="clearData()">Clear Data</button>
     </section>
 
@@ -113,7 +114,7 @@
       <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
       <button onclick="shareOnFacebook()">Share on Facebook</button>
       <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
-      <button onclick="downloadApp()">Download App (APK)</button>
+      <button onclick="downloadApp()">Download App</button>
     </section>
 
     <!-- Story Generation -->
