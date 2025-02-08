@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAP Financial Statement Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/deepseek-ai"></script> <!-- DeepSeek AI Integration -->
+</head>
+<body>
+  <div class="container">
+    <!-- Personal Profile Section -->
+    <section class="profile-section">
+      <h1>Personal Profile</h1>
+      <input type="text" id="name" placeholder="Name">
+      <input type="number" id="age" placeholder="Age">
+      <input type="text" id="occupation" placeholder="Occupation">
+      <input type="text" id="dream" placeholder="Dream">
+      <label for="currency">Preferred Currency:</label>
+      <select id="currency"></select>
+      <label for="passive-income-target">Passive Income Target:</label>
+      <div class="target-input">
+        <input type="number" id="passive-income-target" placeholder="Target">
+        <button onclick="editPassiveIncomeTarget()">✏️</button>
+      </div>
+      <button onclick="saveProfile()">Save Profile</button>
+    </section>
+
+    <!-- Currency Converter -->
+    <section class="currency-converter">
+      <h2>Currency Converter</h2>
+      <input type="number" id="amount" placeholder="Amount">
+      <select id="fromCurrency"></select>
+      <select id="toCurrency"></select>
+      <button onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult"></p>
+    </section>
+
+    <!-- Income Statement Section -->
+    <section class="income-statement">
+      <h2>Income Statement</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="income-statement-body"></tbody>
+        </table>
+        <div class="totals">
+          <p>Total Income: <span id="total-income">0</span> <span class="tooltip">💰 Money you earn</span></p>
+          <p>Total Expenses: <span id="total-expenses">0</span> <span class="tooltip">💸 Money you spend</span></p>
+          <p>Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
+        </div>
+      </div>
+      <button onclick="addIncome()">Add Income</button>
+      <button onclick="addExpense()">Add Expense</button>
+    </section>
+
+    <!-- Balance Sheet Section -->
+    <section class="balance-sheet">
+      <h2>Balance Sheet</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Assets</th>
+              <th>Liabilities</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="balance-sheet-body"></tbody>
+        </table>
+        <div class="totals">
+          <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things you own that make money</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Money you owe</span></p>
+          <p>Net Worth: <span id="net-worth">0</span> <span class="tooltip">💼 Assets - Liabilities</span></p>
+        </div>
+      </div>
+      <button onclick="addAsset()">Add Asset</button>
+      <button onclick="addLiability()">Add Liability</button>
+    </section>
+
+    <!-- Financial Health Score -->
+    <section class="health-score">
+      <h2>Financial Health Score</h2>
+      <div class="circle-container">
+        <canvas id="healthChart"></canvas>
+        <p id="healthPercentage">0%</p>
+      </div>
+      <p id="healthTips"></p>
+    </section>
+
+    <!-- Data Management -->
+    <section class="data-management">
+      <h2>Data Management</h2>
+      <input type="text" id="saveFileName" placeholder="Enter file name">
+      <button onclick="exportData()">Export Data</button>
+      <button onclick="importData()">Import Data</button>
+      <button onclick="clearData()">Clear Data</button>
+    </section>
+
+    <!-- Share App -->
+    <section class="share-app">
+      <h2>Share App</h2>
+      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+      <button onclick="shareOnFacebook()">Share on Facebook</button>
+      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
+      <button onclick="downloadApp()">Download App</button>
+    </section>
+
+    <!-- Story Generation -->
+    <section class="story-generation">
+      <h2>Financial Story</h2>
+      <button onclick="generateStory()">Generate Story</button>
+      <p id="financialStory"></p>
+    </section>
+  </div>
+
+  <!-- Floating Calculator Icon -->
+  <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
+
+  <!-- Calculator Popup -->
+  <div id="calculatorPopup" class="calculator-popup">
+    <div class="calculator-content">
+      <h3>Basic Calculator</h3>
+      <input type="text" id="calculatorInput" readonly>
+      <div class="calculator-buttons">
+        <button onclick="appendToCalculator('7')">7</button>
+        <button onclick="appendToCalculator('8')">8</button>
+        <button onclick="appendToCalculator('9')">9</button>
+        <button onclick="appendToCalculator('+')">+</button>
+        <button onclick="appendToCalculator('4')">4</button>
+        <button onclick="appendToCalculator('5')">5</button>
+        <button onclick="appendToCalculator('6')">6</button>
+        <button onclick="appendToCalculator('-')">-</button>
+        <button onclick="appendToCalculator('1')">1</button>
+        <button onclick="appendToCalculator('2')">2</button>
+        <button onclick="appendToCalculator('3')">3</button>
+        <button onclick="appendToCalculator('*')">*</button>
+        <button onclick="appendToCalculator('0')">0</button>
+        <button onclick="appendToCalculator('.')">.</button>
+        <button onclick="calculateResult()">=</button>
+        <button onclick="appendToCalculator('/')">/</button>
+        <button onclick="clearCalculator()">C</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+        </html
