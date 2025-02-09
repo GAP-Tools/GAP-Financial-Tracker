@@ -27,13 +27,13 @@ input, select, button {
 }
 
 button {
-  background-color: #007bff;
+  background-color: #0056b3;
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: green;
 }
 
 table {
@@ -87,7 +87,7 @@ th, td {
 }
 
 .actions button:hover {
-  color: #007bff;
+  color: green;
 }
 
 .target-input {
@@ -112,7 +112,7 @@ th, td {
 #switchLink {
     display: inline-block;
     background-color: green;
-    box-shadow: 2px 2px 4px #007bff;
+    box-shadow: 2px 2px 4px #0056b3;
     padding: 5px 10px;
     margin: 0;
     color: white;
@@ -123,7 +123,7 @@ th, td {
 }
 
 #switchLink:hover {
-    box-shadow: 2px 2px 4px #0056b3;
+    box-shadow: 2px 2px 4px #007bff;
       }
 
 .calculator-icon {
@@ -168,10 +168,10 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: #007bff; /* Deep blue text color */
+  color: #0056b3; /* Deep blue text color */
 }
 
 .calculator-buttons button:hover {
-  background-color: #007bff;
+  background-color: green;
   color: white;
   
