@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Edit Revenue Target
 function editRevenueTarget() {
-  const newTarget = prompt("Enter New Revenue Target:", businesses[currentBusinessIndex].revenueTarget);
+  const newTarget = prompt("Enter New Residual Income Target:", businesses[currentBusinessIndex].revenueTarget);
   if (newTarget && !isNaN(newTarget)) {
     businesses[currentBusinessIndex].revenueTarget = parseFloat(newTarget);
     revenueTargetInput.value = businesses[currentBusinessIndex].revenueTarget;
