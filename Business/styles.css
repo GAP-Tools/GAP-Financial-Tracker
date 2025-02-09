@@ -28,6 +28,20 @@ body {
   background-color: #0056b3;
 }
 
+.business-controls {
+    margin-bottom: 10px; /* Adds space below the controls */
+}
+
+.business-controls + select,
+.business-controls + div {
+    margin-left: 20px; /* Adjusts left margin for elements following the controls */
+  }
+
+.business-list-controls {
+    margin-left: 20px; /* Matches the indent of other controls */
+    margin-top: 10px; /* Adds space above the new div */
+}  
+
 h1, h2 {
   color: #333;
 }
