@@ -53,6 +53,95 @@ const healthChart = new Chart(healthChartCtx, {
   },
 });
 
+// Initialize Chart
+let personalChart;
+
+// Function to Initialize or Update Chart
+function initializeOrUpdatePersonalChart() {
+  const ctx = document.getElementById("personalChart").getContext("2d");
+
+  // Destroy existing chart if it exists
+  if (personalChart) personalChart.destroy();
+
+  // Get datasets for personal financial data
+  const datasets = [
+    {
+      label: "Net Worth",
+      data: profile.netWorthHistory || [],
+      borderColor: "#007bff",
+      backgroundColor: "#007bff",
+      fill: false,
+    },
+  ];
+
+  // Create new chart
+  personalChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      datasets: datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            unit: "day",
+            tooltipFormat: "YYYY-MM-DD",
+          },
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Net Worth",
+          },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label || "";
+              const value = context.raw.y || 0;
+              return `${label}: ${value}`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+// Function to Add Net Worth History
+function addNetWorthHistory(netWorth, date) {
+  if (!profile.netWorthHistory) profile.netWorthHistory = [];
+  profile.netWorthHistory.push({ x: date, y: netWorth });
+}
+
+// Update Graph on Data Change
+function updatePersonalGraph() {
+  initializeOrUpdatePersonalChart();
+}
+
+// Save Graph Data with Personal Data
+function saveDataToLocalStorage() {
+  localStorage.setItem("profile", JSON.stringify(profile));
+}
+
+// Load Graph Data with Personal Data
+function loadSavedData() {
+  const savedData = localStorage.getItem("profile");
+  if (savedData) {
+    profile = JSON.parse(savedData);
+    updatePersonalGraph();
+  }
+                            }
+                        
 // Fetch Currency Rates
 fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
   .then((response) => response.json())
