@@ -486,16 +486,56 @@ function generateStory() {
   const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(profile.currency, ""));
   const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
+  const passiveIncomeTarget = profile.passiveIncomeTarget;
+  const remainingToTarget = passiveIncomeTarget - cashflow;
 
-  const story = `
-    ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
-    Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
-    They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
-    resulting in a net worth of ${profile.currency} ${netWorth}. 
-    Their cashflow is ${profile.currency} ${cashflow}, and their passive income target is ${profile.currency} ${profile.passiveIncomeTarget}. 
-    TIPS: ${profile.name}'s dream is to ${profile.dream}, and with careful financial management, they are on their way to achieving it. 
-    ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget)}
-  `;
+  let story = `Meet ${profile.name}, a ${profile.age}-year-old ${profile.occupation} with a dream to ${profile.dream}. `;
+
+  // Income and Expenses
+  story += `Currently, ${profile.name} earns ${profile.currency} ${totalIncomeAmount} per month but spends ${profile.currency} ${totalExpensesAmount}, leaving a cashflow of ${profile.currency} ${cashflow}. `;
+
+  // Assets and Liabilities
+  story += `They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, resulting in a net worth of ${profile.currency} ${netWorth}. `;
+
+  // Passive Income Target
+  if (cashflow < passiveIncomeTarget) {
+    story += `Their goal is to achieve a passive income of ${profile.currency} ${passiveIncomeTarget}, but they are currently ${profile.currency} ${remainingToTarget} short. `;
+  } else {
+    story += `Congratulations! ${profile.name} has achieved their passive income target of ${profile.currency} ${passiveIncomeTarget}. `;
+  }
+
+  // Financial Health and Tips
+  if (cashflow < passiveIncomeTarget) {
+    story += `To bridge the gap, ${profile.name} needs to focus on increasing income or reducing expenses. `;
+    if (totalLiabilitiesAmount > totalAssetsAmount) {
+      story += `They should also consider paying off liabilities to improve their net worth. `;
+    }
+    if (totalIncomeAmount < totalExpensesAmount) {
+      story += `Their expenses are higher than their income, which is a red flag. Cutting unnecessary spending is crucial. `;
+    }
+    if (totalAssetsAmount < totalLiabilitiesAmount) {
+      story += `Their liabilities outweigh their assets, which could lead to financial stress. Focus on building assets. `;
+    }
+  } else {
+    story += `They are financially free and can now focus on growing their wealth further. `;
+  }
+
+  // Relatable Journey
+  story += `The journey hasn't been easy. ${profile.name} has faced setbacks like unexpected expenses and fluctuating income. `;
+  story += `However, they've also made progress by investing in assets and reducing liabilities. `;
+  story += `The key to their success has been consistent tracking and making informed financial decisions. `;
+
+  // Actionable Insights
+  if (remainingToTarget > 0) {
+    story += `To reach their passive income target, ${profile.name} needs to generate an additional ${profile.currency} ${remainingToTarget} per month. `;
+    story += `This can be achieved by increasing income streams, reducing expenses, or investing in assets that generate passive income. `;
+  } else {
+    story += `Now that they've achieved financial freedom, ${profile.name} can focus on giving back, mentoring others, or exploring new opportunities. `;
+  }
+
+  // Final Motivation
+  story += `Remember, financial freedom is a journey, not a destination. Keep tracking, keep improving, and you'll get there!`;
+
   financialStory.textContent = story;
 }
 
