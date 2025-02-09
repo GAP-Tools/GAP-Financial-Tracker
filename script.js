@@ -35,7 +35,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-                
+
+// Chart Initialization
+const healthChart = new Chart(healthChartCtx, {
+  type: "doughnut",
+  data: {
+    labels: ["Health"],
+    datasets: [{
+      data: [0],
+      backgroundColor: ["#ff6384"],
+    }],
+  },
+  options: {
+    cutout: "70%",
+    responsive: true,
+    maintainAspectRatio: false,
+  },
+});
+
 // Fetch Currency Rates
 fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
   .then((response) => response.json())
@@ -247,7 +264,6 @@ function deleteEntry(type, index) {
     saveDataToLocalStorage();
   }
 }
-
 // Update Financial Health
 function updateFinancialHealth() {
   const totalIncomeAmount = parseFloat(totalIncome.textContent.replace(profile.currency, ""));
@@ -274,7 +290,7 @@ function getHealthColor(score) {
   if (score <= 59) return "#ffcd56"; // Yellow
   if (score <= 79) return "#4bc0c0"; // Green
   return "#36a2eb"; // Deeper Green
-}
+      }
 
 // Generate Health Tip
 function generateHealthTip(score, income, expenses, assets, liabilities, cashflow, passiveIncomeTarget) {
@@ -473,14 +489,10 @@ function generateStory() {
 
   const story = `
     ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
-    <br>
     Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
-    <br>
     They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${profile.currency} ${netWorth}. 
-    <br>
     Their cashflow is ${profile.currency} ${cashflow}, and their passive income target is ${profile.currency} ${profile.passiveIncomeTarget}. 
-    <br>
     TIPS: ${profile.name}'s dream is to ${profile.dream}, and with careful financial management, they are on their way to achieving it. 
     ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget)}
   `;
