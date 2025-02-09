@@ -111,7 +111,7 @@ th, td {
 
 #switchLink {
     display: inline-block;
-    background-color: #f4f4f4;
+    background-color: #007bff;
     box-shadow: 2px 2px 4px green;
     padding: 5px 10px;
     margin: 0;
@@ -123,7 +123,7 @@ th, td {
 }
 
 #switchLink:hover {
-    box-shadow: 2px 2px 4px darkgreen;
+    box-shadow: 2px 2px 4px #0056b3;
       }
 
 .calculator-icon {
