@@ -15,6 +15,19 @@ body {
   margin-bottom: 40px;
 }
 
+.business-controls button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+.business-controls button:hover {
+  background-color: #0056b3;
+}
+
 h1, h2 {
   color: #333;
 }
@@ -71,49 +84,6 @@ th, td {
 #healthTips {
   text-align: center;
   margin-top: 10px;
-  color: #555;
-}
-
-/* Graph Container */
-.graph-container {
-  margin: 20px 0;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Graph Canvas */
-#graphCanvas {
-  width: 100%;
-  height: 300px;
-  border: 1px solid #ccc;
-  position: relative;
-}
-
-/* Graph Line */
-.graph-line {
-  position: absolute;
-  height: 100%;
-  width: 1px;
-  background-color: #ccc;
-  top: 0;
-}
-
-/* Graph Point */
-.graph-point {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: #007bff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Graph Label */
-.graph-label {
-  position: absolute;
-  font-size: 12px;
   color: #555;
 }
   
