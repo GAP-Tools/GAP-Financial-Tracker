@@ -27,7 +27,7 @@ input, select, button {
 }
 
 button {
-  background-color: #007bff;
+  background-color: green;
   color: white;
   cursor: pointer;
 }
@@ -37,7 +37,7 @@ button:hover {
 }
 
 table {
-  width: 100%;
+  width: 90%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
@@ -151,7 +151,7 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: #007bff; /* Deep blue text color */
+  color: deepgreen; /* Deep green text color */
 }
 
 .calculator-buttons button:hover {
