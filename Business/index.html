@@ -18,7 +18,7 @@
         <input type="text" id="businessName" placeholder="Enter Business Name">
         <button onclick="addBusiness()">Add Business</button>
       </div>
-        <select id="businessList" onchange="switchBusiness()"></select>
+      <select id="businessList" onchange="switchBusiness()"></select>
         <button onclick="editBusinessName()">✏️</button> <!-- Edit Button -->
         <button onclick="deleteBusiness()">🗑️</button> <!-- Delete Button -->
     </section>
@@ -27,12 +27,12 @@
     <section class="profile-section">
       <h2>Business Profile</h2>
         <input type="text" id="businessDescription" placeholder="Business Description">
-        <br>
-        <label for="currency">Preferred Currency:</label>
+          <br>
+         <label for="currency">Preferred Currency:</label>
         <select id="currency"></select>
-        <br>
-         <br>
-        <label for="revenue-target">Revenue/Residual Income Target:</label>
+          <br>
+          <br>
+         <label for="revenue-target">Revenue/Residual Income Target:</label>
         <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
         <button onclick="editRevenueTarget()">✏️</button>
@@ -95,7 +95,7 @@
         </table>
         <div class="totals">
           <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things owned that makes money</span></p>
-          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Thing owned/owed that takes money away</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Things owned/owed that takes money</span></p>
           <p>Net Worth: <span id="net-worth">0</span> <span class="tooltip">💼 Assets - Liabilities</span></p>
         </div>
       </div>
