@@ -292,11 +292,11 @@ function updateIncomeStatement() {
     if (entry.type === "Expense") totalExpensesAmount += entry.amount;
   });
 
-  totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
-  totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
+  totalIncome.textContent = `${profile.currency} ${totalIncomeAmount}`;
+  totalExpenses.textContent = `${profile.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
-  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
-}
+  cashflowDisplay.textContent = `${profile.currency} ${cashflow}`;
+      }
 
 // Update Balance Sheet
 function updateBalanceSheet() {
