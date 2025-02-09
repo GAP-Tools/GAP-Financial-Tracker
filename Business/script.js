@@ -159,6 +159,50 @@ function editRevenueTarget() {
   }
 }
 
+// Edit Business Name
+function editBusinessName() {
+  const newName = prompt("Enter New Business Name:", businesses[currentBusinessIndex].name);
+  if (newName && newName.trim()) {
+    businesses[currentBusinessIndex].name = newName.trim();
+    updateBusinessList();
+    saveDataToLocalStorage();
+    alert("Business Name Updated!");
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Delete Business
+function deleteBusiness() {
+  if (confirm("Are you sure you want to delete this business? This action cannot be undone.")) {
+    businesses.splice(currentBusinessIndex, 1); // Remove the business from the array
+    if (businesses.length > 0) {
+      currentBusinessIndex = 0; // Switch to the first business
+      switchBusiness();
+    } else {
+      // If no businesses are left, reset the UI
+      currentBusinessIndex = -1;
+      businessDescriptionInput.value = "";
+      currencySelect.value = "USD";
+      revenueTargetInput.value = "";
+      incomeStatementBody.innerHTML = "";
+      balanceSheetBody.innerHTML = "";
+      totalIncome.textContent = "0";
+      totalExpenses.textContent = "0";
+      totalAssets.textContent = "0";
+      totalLiabilities.textContent = "0";
+      netWorthDisplay.textContent = "0";
+      healthChart.data.datasets[0].data = [0];
+      healthChart.update();
+      healthPercentage.textContent = "0%";
+      healthTips.textContent = "";
+    }
+    updateBusinessList();
+    saveDataToLocalStorage();
+    alert("Business Deleted!");
+  }
+}
+
 // Add Income
 function addIncome() {
   const business = businesses[currentBusinessIndex];
