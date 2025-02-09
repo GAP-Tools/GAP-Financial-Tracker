@@ -37,7 +37,7 @@ button:hover {
 }
 
 table {
-  width: 90%;
+  width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
@@ -87,7 +87,7 @@ th, td {
 }
 
 .actions button:hover {
-  color: #007bff;
+  color: #0056b3;
 }
 
 .target-input {
@@ -151,11 +151,11 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: deepgreen; /* Deep green text color */
+  color: green; /* Deep green text color */
 }
 
 .calculator-buttons button:hover {
-  background-color: #007bff;
+  background-color: #0056b3;
   color: white;
 }
 
@@ -166,7 +166,7 @@ th, td {
 
 #switchLink {
     display: inline-block;
-    background-color: #007bff;
+    background-color: #0056b3;
     box-shadow: 2px 2px 4px green;
     padding: 5px 10px;
     margin: 0;
@@ -178,7 +178,7 @@ th, td {
 }
 
 #switchLink:hover {
-    box-shadow: 2px 2px 4px #0056b3;
+    box-shadow: 2px 2px 4px #007bff;
     }
 
 
