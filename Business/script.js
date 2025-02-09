@@ -420,6 +420,142 @@ function generateHealthTip(score, income, expenses, assets, liabilities, cashflo
   return tips[Math.floor(Math.random() * tips.length)];
 }
 
+// Graph Data
+let graphData = [];
+
+// Function to Update Graph
+function updateGraph() {
+  const canvas = document.getElementById("graphCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+  if (graphData.length === 0) return;
+
+  // Find min and max values for scaling
+  const minDate = new Date(Math.min(...graphData.map((point) => new Date(point.date))));
+  const maxDate = new Date(Math.max(...graphData.map((point) => new Date(point.date))));
+  const minAmount = Math.min(...graphData.map((point) => point.amount));
+  const maxAmount = Math.max(...graphData.map((point) => point.amount));
+
+  // Draw graph lines and points
+  graphData.forEach((point) => {
+    const x = ((new Date(point.date) - minDate) / (maxDate - minDate)) * canvas.width;
+    const y = canvas.height - ((point.amount - minAmount) / (maxAmount - minAmount)) * canvas.height;
+
+    // Draw point
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = "#007bff";
+    ctx.fill();
+
+    // Draw label
+    ctx.fillStyle = "#555";
+    ctx.font = "12px Arial";
+    ctx.fillText(`${point.amount}`, x + 5, y - 5);
+  });
+
+  // Draw connecting lines
+  ctx.beginPath();
+  ctx.strokeStyle = "#007bff";
+  ctx.lineWidth = 2;
+  graphData.forEach((point, index) => {
+    const x = ((new Date(point.date) - minDate) / (maxDate - minDate)) * canvas.width;
+    const y = canvas.height - ((point.amount - minAmount) / (maxAmount - minAmount)) * canvas.height;
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  ctx.stroke();
+}
+
+// Function to Add Data to Graph
+function addToGraph(date, amount) {
+  graphData.push({ date, amount });
+  updateGraph();
+}
+
+// Update Graph When Adding Income/Expense/Asset/Liability
+function addIncome() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Income Amount:"));
+  if (date && description && amount) {
+    incomeStatement.push({ date, description, type: "Income", amount });
+    addToGraph(date, amount); // Add to graph
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+function addExpense() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Expense Amount:"));
+  if (date && description && amount) {
+    incomeStatement.push({ date, description, type: "Expense", amount });
+    addToGraph(date, -amount); // Add to graph (negative for expenses)
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+function addAsset() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Asset Value:"));
+  if (date && description && amount) {
+    balanceSheet.push({ date, description, type: "Asset", amount });
+    addToGraph(date, amount); // Add to graph
+    updateBalanceSheet();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+function addLiability() {
+  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Liability Amount:"));
+  if (date && description && amount) {
+    balanceSheet.push({ date, description, type: "Liability", amount });
+    addToGraph(date, -amount); // Add to graph (negative for liabilities)
+    updateBalanceSheet();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Load Graph Data from LocalStorage
+function loadGraphData() {
+  const savedData = localStorage.getItem("graphData");
+  if (savedData) {
+    graphData = JSON.parse(savedData);
+    updateGraph();
+  }
+}
+
+// Save Graph Data to LocalStorage
+function saveGraphData() {
+  localStorage.setItem("graphData", JSON.stringify(graphData));
+}
+
+// Initialize Graph on Page Load
+document.addEventListener("DOMContentLoaded", () => {
+  loadGraphData();
+});
+
 // Save Data to LocalStorage
 function saveDataToLocalStorage() {
   localStorage.setItem("businesses", JSON.stringify(businesses));
