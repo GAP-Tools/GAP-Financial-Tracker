@@ -111,7 +111,7 @@ th, td {
 
 #switchLink {
     display: inline-block;
-    background-color: blue;
+    background-color: #f4f4f4;
     box-shadow: 2px 2px 4px green;
     padding: 5px 10px;
     margin: 0;
