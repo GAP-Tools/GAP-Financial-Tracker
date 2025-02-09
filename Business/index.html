@@ -18,6 +18,8 @@
         <input type="text" id="businessName" placeholder="Enter Business Name">
         <button onclick="addBusiness()">Add Business</button>
         <select id="businessList" onchange="switchBusiness()"></select>
+        <button onclick="editBusinessName()">✏️</button> <!-- Edit Button -->
+        <button onclick="deleteBusiness()">🗑️</button> <!-- Delete Button -->
       </div>
     </section>
 
@@ -27,7 +29,7 @@
       <input type="text" id="businessDescription" placeholder="Business Description">
       <label for="currency">Currency:</label>
       <select id="currency"></select>
-      <label for="revenue-target">Residual Income Target:</label>
+      <label for="revenue-target">Revenue/Residual Income Target:</label>
       <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
         <button onclick="editRevenueTarget()">✏️</button>
