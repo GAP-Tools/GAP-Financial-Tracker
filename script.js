@@ -35,112 +35,109 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+      
+// Initialize Personal Chart
+let personalChart;
 
-// Add these at the top with your other variables
-let passiveIncomeEntries = [];
-let passiveIncomeChart;
+// Function to Initialize or Update Personal Chart
+function initializeOrUpdatePersonalChart() {
+  const ctx = document.getElementById("personalChart").getContext("2d");
 
-// Function to draw a line on canvas
-function drawLine(ctx, startX, startY, endX, endY, color) {
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  // Destroy existing chart if it exists
+  if (personalChart) personalChart.destroy();
+
+  // Get datasets for personal financial data
+  const datasets = [
+    {
+      label: "Passive Income",
+      data: profile.passiveIncomeHistory || [],
+      borderColor: "#007bff",
+      backgroundColor: "#007bff",
+      fill: false,
+    },
+  ];
+
+  // Create new chart
+  personalChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      datasets: datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            unit: "day",
+            tooltipFormat: "YYYY-MM-DD",
+          },
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Passive Income",
+          },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label || "";
+              const value = context.raw.y || 0;
+              return `${label}: ${value}`;
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
-// Function to draw the chart
-function drawPassiveIncomeChart() {
-  const ctx = document.getElementById("passiveIncomeChart").getContext("2d");
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+// Function to Add Passive Income History
+function addPassiveIncomeHistory(passiveIncome, date) {
+  if (!profile.passiveIncomeHistory) profile.passiveIncomeHistory = [];
+  profile.passiveIncomeHistory.push({ x: date, y: passiveIncome });
+}
 
-  // Assuming canvas width and height
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
-  const padding = 30;
+// Update Graph on Data Change
+function updatePersonalGraph() {
+  initializeOrUpdatePersonalChart();
+}
 
-  // Sort entries by date
-  passiveIncomeEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+// Save Graph Data with Personal Data
+function saveDataToLocalStorage() {
+  localStorage.setItem("profile", JSON.stringify(profile));
+}
 
-  // Find max passive income for y axis scaling
-  const maxIncome = Math.max(...passiveIncomeEntries.map(entry => entry.income), 0);
-
-  // Draw axes
-  drawLine(ctx, padding, height - padding, padding, padding, "#000"); // y-axis
-  drawLine(ctx, padding, height - padding, width - padding, height - padding, "#000"); // x-axis
-
-  // Draw labels
-  ctx.font = "12px Arial";
-  ctx.fillText("Passive Income", 5, 15);
-  ctx.fillText("Date", width - padding - 30, height - 5);
-
-  // Scale for y-axis
-  const yScale = (height - 2 * padding) / maxIncome;
-  const xScale = (width - 2 * padding) / (passiveIncomeEntries.length - 1);
-
-  // Plot points and line
-  for (let i = 0; i < passiveIncomeEntries.length; i++) {
-    const x = padding + i * xScale;
-    const y = height - padding - passiveIncomeEntries[i].income * yScale;
-    ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = "#007bff";
-    ctx.fill();
-
-    if (i > 0) {
-      const prevX = padding + (i - 1) * xScale;
-      const prevY = height - padding - passiveIncomeEntries[i - 1].income * yScale;
-      drawLine(ctx, prevX, prevY, x, y, "#007bff");
-    }
-  }
-
-  // Draw y-axis ticks and labels (simplified)
-  for (let i = 0; i <= maxIncome; i += maxIncome / 5) {
-    const y = height - padding - i * yScale;
-    drawLine(ctx, padding - 5, y, padding, y, "#000");
-    ctx.fillText(i.toFixed(0), 5, y + 5);
+// Load Graph Data with Personal Data
+function loadSavedData() {
+  const savedData = localStorage.getItem("profile");
+  if (savedData) {
+    profile = JSON.parse(savedData);
+    updatePersonalGraph();
   }
 }
 
-// Function to add passive income entry
-function addPassiveIncomeEntry() {
-  const date = prompt("Enter Date (YYYY-MM-DD):");
-  const income = parseFloat(prompt("Enter Passive Income Amount:"));
-  if (date && !isNaN(income)) {
-    passiveIncomeEntries.push({ date, income });
-    drawPassiveIncomeChart();
-    savePassiveIncomeData();
+// Update Passive Income History When Target is Updated
+function editPassiveIncomeTarget() {
+  const newTarget = prompt("Enter New Passive Income Target:", profile.passiveIncomeTarget);
+  if (newTarget && !isNaN(newTarget)) {
+    profile.passiveIncomeTarget = parseFloat(newTarget);
+    passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
+    addPassiveIncomeHistory(profile.passiveIncomeTarget, new Date().toISOString().split("T")[0]);
+    updatePersonalGraph();
+    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
-}
-
-// Function to save passive income data
-function savePassiveIncomeData() {
-  localStorage.setItem("passiveIncomeData", JSON.stringify(passiveIncomeEntries));
-}
-
-// Function to load passive income data
-function loadPassiveIncomeData() {
-  const savedData = localStorage.getItem("passiveIncomeData");
-  if (savedData) {
-    passiveIncomeEntries = JSON.parse(savedData);
-    drawPassiveIncomeChart();
   }
-}
-
-// Call this in your DOMContentLoaded event
-document.addEventListener('DOMContentLoaded', function() {
-  loadPassiveIncomeData();
-  // ... (your other initializations)
-});
-
-// Add this to your saveDataToLocalStorage function
-function saveDataToLocalStorage() {
-  // ... (your existing code)
-  savePassiveIncomeData(); // Save passive income data
-}
                         
 // Fetch Currency Rates
 fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
