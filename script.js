@@ -35,110 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-      
-// Initialize Personal Chart
-let personalChart;
-
-// Function to Initialize or Update Personal Chart
-function initializeOrUpdatePersonalChart() {
-  const ctx = document.getElementById("personalChart").getContext("2d");
-
-  // Destroy existing chart if it exists
-  if (personalChart) personalChart.destroy();
-
-  // Get datasets for personal financial data
-  const datasets = [
-    {
-      label: "Passive Income",
-      data: profile.passiveIncomeHistory || [],
-      borderColor: "#007bff",
-      backgroundColor: "#007bff",
-      fill: false,
-    },
-  ];
-
-  // Create new chart
-  personalChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      datasets: datasets,
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: "time",
-          time: {
-            unit: "day",
-            tooltipFormat: "YYYY-MM-DD",
-          },
-          title: {
-            display: true,
-            text: "Date",
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: "Passive Income",
-          },
-        },
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.dataset.label || "";
-              const value = context.raw.y || 0;
-              return `${label}: ${value}`;
-            },
-          },
-        },
-      },
-    },
-  });
-}
-
-// Function to Add Passive Income History
-function addPassiveIncomeHistory(passiveIncome, date) {
-  if (!profile.passiveIncomeHistory) profile.passiveIncomeHistory = [];
-  profile.passiveIncomeHistory.push({ x: date, y: passiveIncome });
-}
-
-// Update Graph on Data Change
-function updatePersonalGraph() {
-  initializeOrUpdatePersonalChart();
-}
-
-// Save Graph Data with Personal Data
-function saveDataToLocalStorage() {
-  localStorage.setItem("profile", JSON.stringify(profile));
-}
-
-// Load Graph Data with Personal Data
-function loadSavedData() {
-  const savedData = localStorage.getItem("profile");
-  if (savedData) {
-    profile = JSON.parse(savedData);
-    updatePersonalGraph();
-  }
-}
-
-// Update Passive Income History When Target is Updated
-function editPassiveIncomeTarget() {
-  const newTarget = prompt("Enter New Passive Income Target:", profile.passiveIncomeTarget);
-  if (newTarget && !isNaN(newTarget)) {
-    profile.passiveIncomeTarget = parseFloat(newTarget);
-    passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
-    addPassiveIncomeHistory(profile.passiveIncomeTarget, new Date().toISOString().split("T")[0]);
-    updatePersonalGraph();
-    saveDataToLocalStorage();
-  } else {
-    alert("Invalid Input!");
-  }
-  }
-                        
+                
 // Fetch Currency Rates
 fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
   .then((response) => response.json())
@@ -576,11 +473,15 @@ function generateStory() {
 
   const story = `
     ${profile.name}, a ${profile.age}-year-old ${profile.occupation}, has been tracking their finances diligently. 
+    <br>
     Their total income is ${profile.currency} ${totalIncomeAmount}, while their expenses amount to ${profile.currency} ${totalExpensesAmount}. 
+    <br>
     They own assets worth ${profile.currency} ${totalAssetsAmount} and have liabilities of ${profile.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${profile.currency} ${netWorth}. 
+    <br>
     Their cashflow is ${profile.currency} ${cashflow}, and their passive income target is ${profile.currency} ${profile.passiveIncomeTarget}. 
-    ${profile.name}'s dream is to ${profile.dream}, and with careful financial management, they are on their way to achieving it. 
+    <br>
+    TIPS: ${profile.name}'s dream is to ${profile.dream}, and with careful financial management, they are on their way to achieving it. 
     ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, profile.passiveIncomeTarget)}
   `;
   financialStory.textContent = story;
