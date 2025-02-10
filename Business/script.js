@@ -295,8 +295,7 @@ function updateIncomeStatement() {
   totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
   totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
-  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
-  cashflowDisplay.textContent = `${business.currency} (${totalIncomeAmount} - ${totalExpensesAmount})`;
+  cashflowDisplay.textContent = `${business.currency} ${totalIncomeAmount} - ${totalExpensesAmount}`;
             }
 
 // Update Balance Sheet
