@@ -268,7 +268,6 @@ function addLiability() {
 }
 
 // Update Income Statement
-// Update Income Statement
 function updateIncomeStatement() {
   const business = businesses[currentBusinessIndex];
   incomeStatementBody.innerHTML = "";
@@ -297,6 +296,7 @@ function updateIncomeStatement() {
   totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
   cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
+  cashflowDisplay.textContent = `${business.currency} (${totalIncomeAmount} - ${totalExpensesAmount})`;
             }
 
 // Update Balance Sheet
