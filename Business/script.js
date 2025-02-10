@@ -569,7 +569,7 @@ function generateBusinessStory() {
   const cashflow = totalIncomeAmount - totalExpensesAmount;
 
   const story = `
-    ${business.name}, a business focused on ${business.description}, has been tracking its finances diligently. 
+    ${business.name}, a business focused on ${business.description}, has been tracking its finances. 
 
     Its total income is ${business.currency} ${totalIncomeAmount}, while its expenses amount to ${business.currency} ${totalExpensesAmount}. 
 
