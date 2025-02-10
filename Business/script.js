@@ -570,19 +570,18 @@ function generateBusinessStory() {
 
   const story = `
     ${business.name}, a business focused on ${business.description}, has been tracking its finances diligently. 
-    \n
+
     Its total income is ${business.currency} ${totalIncomeAmount}, while its expenses amount to ${business.currency} ${totalExpensesAmount}. 
-    \n
+
     It owns assets worth ${business.currency} ${totalAssetsAmount} and has liabilities of ${business.currency} ${totalLiabilitiesAmount}, 
     resulting in a net worth of ${business.currency} ${netWorth}. 
-    \n
-    Its cashflow is ${business.currency} ${cashflow}, and its revenue target is ${business.currency} ${business.revenueTarget}. 
-    \n
-    TIPS: ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, business.revenueTarget)}
-  `;
-  businessFinancialStory.textContent = story;
-}
 
+    Its cashflow is ${business.currency} ${cashflow}, and its revenue target is ${business.currency} ${business.revenueTarget}. 
+
+    TIPS: ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncomeAmount, totalExpensesAmount, totalAssetsAmount, totalLiabilitiesAmount, cashflow, business.revenueTarget)}
+`;
+businessFinancialStory.textContent = story;
+  
 // Toggle Calculator Popup
 function toggleCalculator() {
   calculatorPopup.style.display = calculatorPopup.style.display === "block" ? "none" : "block";
