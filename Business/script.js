@@ -268,6 +268,7 @@ function addLiability() {
 }
 
 // Update Income Statement
+// Update Income Statement
 function updateIncomeStatement() {
   const business = businesses[currentBusinessIndex];
   incomeStatementBody.innerHTML = "";
@@ -292,11 +293,11 @@ function updateIncomeStatement() {
     if (entry.type === "Expense") totalExpensesAmount += entry.amount;
   });
 
-  totalIncome.textContent = `${profile.currency} ${totalIncomeAmount}`;
-  totalExpenses.textContent = `${profile.currency} ${totalExpensesAmount}`;
+  totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
+  totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
-  cashflowDisplay.textContent = `${profile.currency} ${cashflow}`;
-      }
+  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
+            }
 
 // Update Balance Sheet
 function updateBalanceSheet() {
