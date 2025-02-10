@@ -171,5 +171,56 @@
   </div>
 
   <script src="script.js"></script>
+
+<!-- Add this before </body> -->
+<script type="module">
+  import { auth, db } from './firebaseConfig.js';
+
+  // Firebase Auth Functions
+  window.signIn = async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Signed in successfully!');
+    } catch (error) {
+      alert('Error signing in: ' + error.message);
+    }
+  };
+
+  window.signUp = async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Account created successfully!');
+    } catch (error) {
+      alert('Error signing up: ' + error.message);
+    }
+  };
+
+  window.signOutUser = async () => {
+    try {
+      await signOut(auth);
+      alert('Signed out successfully!');
+    } catch (error) {
+      alert('Error signing out: ' + error.message);
+    }
+  };
+
+  // Sync Data
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      const userDocRef = doc(db, 'users', user.uid);
+      onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data().businesses;
+          localStorage.setItem('businesses', JSON.stringify(data));
+          alert('Data synced from cloud!');
+        }
+      });
+    }
+  });
+    </script>
 </body>
           </html>
