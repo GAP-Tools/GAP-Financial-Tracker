@@ -221,3 +221,16 @@ th, td {
   border-radius: 5px;
   flex-grow: 1;
 }
+
+/* Add this to styles.css */
+#sync-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #007bff; /* Deep blue color */
+  font-size: 14px;
+  }
