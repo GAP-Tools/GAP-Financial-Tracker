@@ -297,7 +297,7 @@ function updateIncomeStatement() {
   totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
   cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
-            }
+}
 
 // Update Balance Sheet
 function updateBalanceSheet() {
