@@ -15,6 +15,7 @@ const totalExpenses = document.getElementById("total-expenses");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
 const netWorthDisplay = document.getElementById("net-worth");
+const cashflowdDisplay = document.getElementById("cashflow");
 const healthChartCtx = document.getElementById("healthChart").getContext("2d");
 const healthPercentage = document.getElementById("healthPercentage");
 const healthTips = document.getElementById("healthTips");
@@ -295,7 +296,7 @@ function updateIncomeStatement() {
   totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
   totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
-  cashflowDisplay.textContent = `${business.currency} ${totalIncomeAmount} - ${totalExpensesAmount}`;
+  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
             }
 
 // Update Balance Sheet
