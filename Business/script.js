@@ -1,370 +1,347 @@
-let businesses = [];
-let currentBusinessIndex = -1;
-let currencyRates = {};
+// Initialize variables
+let businesses = []; // Array to store multiple businesses
+let currentBusinessIndex = 0; // Index of the currently selected business
+let currencyRates = {}; // Store currency conversion rates
 
-function populateCurrencyDropdown() {
-    fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
-        .then(response => response.json())
-        .then(data => {
-            currencyRates = data.conversion_rates;
-            const currencySelect = document.getElementById('currency');
-            for (const currency in currencyRates) {
-                const option = document.createElement("option");
-                option.value = currency;
-                option.text = `${currency} (${getCurrencySymbol(currency)})`;
-                currencySelect.appendChild(option);
-            }
-        });
+// DOM Elements
+const businessList = document.getElementById("businessList");
+const businessNameInput = document.getElementById("businessName");
+const businessDescriptionInput = document.getElementById("businessDescription");
+const currencySelect = document.getElementById("currency");
+const revenueTargetInput = document.getElementById("revenue-target");
+const incomeStatementBody = document.getElementById("income-statement-body");
+const balanceSheetBody = document.getElementById("balance-sheet-body");
+const totalIncome = document.getElementById("total-income");
+const totalExpenses = document.getElementById("total-expenses");
+const totalAssets = document.getElementById("total-assets");
+const totalLiabilities = document.getElementById("total-liabilities");
+const netWorthDisplay = document.getElementById("net-worth");
+const cashflowDisplay = document.getElementById("cashflow");
+const healthChartCtx = document.getElementById("healthChart").getContext("2d");
+const healthPercentage = document.getElementById("healthPercentage");
+const healthTips = document.getElementById("healthTips");
+const fromCurrency = document.getElementById("fromCurrency");
+const toCurrency = document.getElementById("toCurrency");
+const conversionResult = document.getElementById("conversionResult");
+const businessFinancialStory = document.getElementById("businessFinancialStory");
+const saveFileNameInput = document.getElementById("saveFileName");
+const calculatorPopup = document.getElementById("calculatorPopup");
+const calculatorInput = document.getElementById("calculatorInput");
+
+// Chart Initialization
+const healthChart = new Chart(healthChartCtx, {
+  type: "doughnut",
+  data: {
+    labels: ["Health"],
+    datasets: [{
+      data: [0],
+      backgroundColor: ["#ff6384"],
+    }],
+  },
+  options: {
+    cutout: "70%",
+    responsive: true,
+    maintainAspectRatio: false,
+  },
+});
+
+// Fetch Currency Rates
+fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
+  .then((response) => response.json())
+  .then((data) => {
+    currencyRates = data.conversion_rates;
+    populateCurrencyDropdowns();
+    loadSavedData(); // Load saved data after currencies are fetched
+  });
+
+// Populate Currency Dropdowns
+function populateCurrencyDropdowns() {
+  for (const currency in currencyRates) {
+    const option1 = document.createElement("option");
+    option1.value = currency;
+    option1.text = `${currency} (${getCurrencySymbol(currency)})`;
+    fromCurrency.appendChild(option1);
+
+    const option2 = document.createElement("option");
+    option2.value = currency;
+    option2.text = `${currency} (${getCurrencySymbol(currency)})`;
+    toCurrency.appendChild(option2);
+
+    const option3 = document.createElement("option");
+    option3.value = currency;
+    option3.text = `${currency} (${getCurrencySymbol(currency)})`;
+    currencySelect.appendChild(option3);
+  }
 }
 
+// Get Currency Symbol
 function getCurrencySymbol(currency) {
-    const symbols = {
-        USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$", CHF: "CHF", CNY: "¥",
-    };
-    return symbols[currency] || currency;
+  const symbols = {
+    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$", CHF: "CHF", CNY: "¥",
+  };
+  return symbols[currency] || currency;
 }
 
+// Add Business
 function addBusiness() {
-    const name = prompt("Enter Business Name:");
-    if (name) {
-        businesses.push({
-            name: name,
-            description: "",
-            currency: "USD",
-            revenueTarget: 0,
-            incomeStatement: [],
-            balanceSheet: []
-        });
-        updateBusinessList();
-        switchBusiness(businesses.length - 1);
-    }
+  const name = businessNameInput.value.trim();
+  if (name) {
+    const newBusiness = {
+      name,
+      description: "",
+      currency: "USD",
+      revenueTarget: 0,
+      incomeStatement: {},
+      balanceSheet: [],
+    };
+    businesses.push(newBusiness);
+    updateBusinessList();
+    switchBusiness(businesses.length - 1);
+    businessNameInput.value = "";
+    saveDataToLocalStorage();
+  } else {
+    alert("Please enter a business name!");
+  }
 }
 
+// Update Business List
 function updateBusinessList() {
-    const list = document.getElementById('businessList');
-    list.innerHTML = '';
-    businesses.forEach((business, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.text = business.name;
-        list.appendChild(option);
-    });
+  businessList.innerHTML = "";
+  businesses.forEach((business, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.text = business.name;
+    businessList.appendChild(option);
+  });
 }
 
+// Switch Business
 function switchBusiness() {
-    currentBusinessIndex = parseInt(document.getElementById('businessList').value);
-    const business = businesses[currentBusinessIndex];
-    document.getElementById('businessName').value = business.name;
-    document.getElementById('businessDescription').value = business.description;
-    document.getElementById('currency').value = business.currency;
-    document.getElementById('revenueTarget').value = business.revenueTarget;
-    updateIncomeStatement();
-    updateBalanceSheet();
-    updateFinancialHealth();
+  currentBusinessIndex = businessList.value;
+  const business = businesses[currentBusinessIndex];
+  businessDescriptionInput.value = business.description;
+  currencySelect.value = business.currency;
+  revenueTargetInput.value = business.revenueTarget;
+  updateIncomeStatement();
+  updateBalanceSheet();
+  updateFinancialHealth();
 }
 
+// Save Business Profile
 function saveBusinessProfile() {
-    if (currentBusinessIndex >= 0) {
-        const business = businesses[currentBusinessIndex];
-        business.name = document.getElementById('businessName').value;
-        business.description = document.getElementById('businessDescription').value;
-        business.currency = document.getElementById('currency').value;
-        business.revenueTarget = parseFloat(document.getElementById('revenueTarget').value) || 0;
-        updateBusinessList();
-    }
+  const business = businesses[currentBusinessIndex];
+  business.description = businessDescriptionInput.value;
+  business.currency = currencySelect.value;
+  business.revenueTarget = parseFloat(revenueTargetInput.value) || 0;
+  alert("Business Profile Saved!");
+  saveDataToLocalStorage();
 }
 
-function addTransaction(type, tableId) {
-    const date = promptForDate("Enter Date (YYYY-MM-DD):");
-    const description = prompt("Enter Description:");
-    const amount = parseFloat(prompt("Enter Amount:"));
-    if (date && description && !isNaN(amount)) {
-        businesses[currentBusinessIndex][tableId].push({ date, description, type, amount });
-        if (tableId === 'incomeStatement') updateIncomeStatement();
-        else updateBalanceSheet();
-        updateFinancialHealth();
-    }
-}
-
-function promptForDate(message) {
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.valueAsDate = new Date();
-    const result = prompt(message, dateInput.outerHTML);
-    if (result) {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = result;
-        return tempDiv.querySelector('input').value;
-    }
-    return null;
-}
-
-function addIncome() { addTransaction('Income', 'incomeStatement'); }
-function addExpense() { addTransaction('Expense', 'incomeStatement'); }
-function addAsset() { addTransaction('Asset', 'balanceSheet'); }
-function addLiability() { addTransaction('Liability', 'balanceSheet'); }
-
-function updateIncomeStatement() {
-    const business = businesses[currentBusinessIndex];
-    const body = document.getElementById('incomeStatementBody');
-    body.innerHTML = '';
-    const grouped = groupByMonth(business.incomeStatement);
-
-    Object.entries(grouped).forEach(([month, entries]) => {
-        const monthlySum = entries.reduce((sum, entry) => {
-            sum[entry.type] = (sum[entry.type] || 0) + entry.amount;
-            return sum;
-        }, {});
-        const row = document.createElement('tr');
-        row.className = 'monthly-row';
-        row.innerHTML = `
-            ${month}
-            ${formatCurrency(monthlySum.Income || 0)}
-            ${formatCurrency(monthlySum.Expense || 0)}
-            ${formatCurrency((monthlySum.Income || 0) - (monthlySum.Expense || 0))}
-            🔽
-        `;
-        body.appendChild(row);
-
-        const details = document.createElement('tr');
-        details.className = 'details';
-        details.innerHTML = `${entries.map(entry => `
-                
-            `).join('')}
-${entry.date}	${entry.description}	${entry.type === 'Income' ? formatCurrency(entry.amount) : ''}	${entry.type === 'Expense' ? formatCurrency(entry.amount) : ''}	
-                        ✏️
-                        📋
-                        📝
-                        🗑️
-                    
-`;
-        body.appendChild(details);
-    });
-
-    updateIncomeSummary();
-}
-
-function toggleDetails(element) {
-    const details = element.closest('.monthly-row').nextElementSibling;
-    if (details.style.display === "none" || !details.style.display) {
-        details.style.display = "table-row";
-        element.textContent = "🔼";
-    } else {
-        details.style.display = "none";
-        element.textContent = "🔽";
-    }
-}
-
-function groupByMonth(entries) {
-    return entries.reduce((acc, entry, index) => {
-        const date = new Date(entry.date);
-        const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
-        entry.index = index;
-        acc[monthYear] = acc[monthYear] || [];
-        acc[monthYear].push(entry);
-        return acc;
-    }, {});
-}
-
-function updateIncomeSummary() {
-    const business = businesses[currentBusinessIndex];
-    const grouped = groupByMonth(business.incomeStatement);
-    const monthlySums = Object.values(grouped).map(entries => entries.reduce((sum, entry) => {
-        sum[entry.type] = (sum[entry.type] || 0) + entry.amount;
-        return sum;
-    }, {}));
-    
-    const avgIncome = monthlySums.reduce((sum, m) => sum + (m.Income || 0), 0) / monthlySums.length || 0;
-    const avgExpense = monthlySums.reduce((sum, m) => sum + (m.Expense || 0), 0) / monthlySums.length || 0;
-    const avgCashflow = avgIncome - avgExpense;
-
-    document.getElementById('avgIncome').textContent = formatCurrency(avgIncome);
-    document.getElementById('avgExpenses').textContent = formatCurrency(avgExpense);
-    document.getElementById('avgCashflow').textContent = formatCurrency(avgCashflow);
-}
-
-function updateBalanceSheet() {
-    const business = businesses[currentBusinessIndex];
-    const body = document.getElementById('balanceSheetBody');
-    body.innerHTML = '';
-    const totals = { Asset: 0, Liability: 0 };
-
-    business.balanceSheet.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            ${entry.date}
-            ${entry.description}
-            ${entry.type === 'Asset' ? formatCurrency(entry.amount) : ''}
-            ${entry.type === 'Liability' ? formatCurrency(entry.amount) : ''}
-            
-                ✏️
-                📋
-                📝
-                🗑️
-            
-        `;
-        body.appendChild(row);
-        totals[entry.type] += entry.amount;
-    });
-
-    document.getElementById('totalAssets').textContent = formatCurrency(totals.Asset);
-    document.getElementById('totalLiabilities').textContent = formatCurrency(totals.Liability);
-    document.getElementById('netWorth').textContent = formatCurrency(totals.Asset - totals.Liability);
-}
-
-function editEntry(tableId, index) {
-    const entry = businesses[currentBusinessIndex][tableId][index];
-    const newDate = promptForDate("Edit Date:", entry.date);
-    const newDescription = prompt("Edit Description:", entry.description);
-    const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-    if (newDate && newDescription && !isNaN(newAmount)) {
-        entry.date = newDate;
-        entry.description = newDescription;
-        entry.amount = newAmount;
-        if (tableId === 'incomeStatement') updateIncomeStatement();
-        else updateBalanceSheet();
-        updateFinancialHealth();
-    }
-}
-
-function duplicateEntry(tableId, index) {
-    const entry = businesses[currentBusinessIndex][tableId][index];
-    const newEntry = { ...entry, date: promptForDate("Enter New Date:", entry.date) };
-    businesses[currentBusinessIndex][tableId].push(newEntry);
-    if (tableId === 'incomeStatement') updateIncomeStatement();
-    else updateBalanceSheet();
+// Edit Revenue Target
+function editRevenueTarget() {
+  const newTarget = prompt("Enter New Revenue/Residual Income Target:", businesses[currentBusinessIndex].revenueTarget);
+  if (newTarget && !isNaN(newTarget)) {
+    businesses[currentBusinessIndex].revenueTarget = parseFloat(newTarget);
+    revenueTargetInput.value = businesses[currentBusinessIndex].revenueTarget;
     updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
 }
 
-function copyEntry(tableId, index) {
-    const entry = businesses[currentBusinessIndex][tableId][index];
-    const text = `${entry.date} - ${entry.description}: ${entry.amount}`;
-    navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"), () => alert("Copy failed."));
+// Edit Business Name
+function editBusinessName() {
+  const newName = prompt("Enter New Business Name:", businesses[currentBusinessIndex].name);
+  if (newName && newName.trim()) {
+    businesses[currentBusinessIndex].name = newName.trim();
+    updateBusinessList();
+    saveDataToLocalStorage();
+    alert("Business Name Updated!");
+  } else {
+    alert("Invalid Input!");
+  }
 }
 
-function deleteEntry(tableId, index) {
-    if (confirm("Delete this entry?")) {
-        businesses[currentBusinessIndex][tableId].splice(index, 1);
-        if (tableId === 'incomeStatement') updateIncomeStatement();
-        else updateBalanceSheet();
-        updateFinancialHealth();
-    }
-}
-
-function formatCurrency(amount) {
-    const business = businesses[currentBusinessIndex];
-    if (business) {
-        return `${business.currency} ${amount.toFixed(2)}`;
-    }
-    return `${amount.toFixed(2)}`;
-}
-
-function updateFinancialHealth() {
-    const business = businesses[currentBusinessIndex];
-    if (!business) return;
-
-    const incomeStatement = business.incomeStatement;
-    const balanceSheet = business.balanceSheet;
-
-    // Calculate Passive Income based on Kiyosaki's principles
-    const passiveIncome = balanceSheet.filter(e => e.type === 'Asset').reduce((sum, asset) => sum + asset.amount, 0) * 0.05; // Assuming 5% return on assets
-    document.getElementById('passiveIncome').textContent = formatCurrency(passiveIncome);
-
-    const avgCashflow = parseFloat(document.getElementById('avgCashflow').textContent.replace(/[^0-9.-]+/g,""));
-    const progress = (avgCashflow / business.revenueTarget) * 100;
-
-    document.getElementById('progressToGoal').textContent = `${progress.toFixed(2)}%`;
-
-    // Generate health tips
-    let tips = [];
-    if (progress < 50) {
-        tips.push("Your business is facing hurdles. Aim to increase your passive income sources or decrease expenses.");
-    } else if (progress < 80) {
-        tips.push("You're on track but not there yet. Consider investing in assets that generate regular income.");
+// Delete Business
+function deleteBusiness() {
+  if (confirm("Are you sure you want to delete this business? This action cannot be undone.")) {
+    businesses.splice(currentBusinessIndex, 1);
+    if (businesses.length > 0) {
+      currentBusinessIndex = 0;
+      switchBusiness();
     } else {
-        tips.push("Great progress! Keep building your asset base to ensure steady passive income.");
+      currentBusinessIndex = -1;
+      businessDescriptionInput.value = "";
+      currencySelect.value = "USD";
+      revenueTargetInput.value = "";
+      incomeStatementBody.innerHTML = "";
+      balanceSheetBody.innerHTML = "";
+      totalIncome.textContent = "0";
+      totalExpenses.textContent = "0";
+      totalAssets.textContent = "0";
+      totalLiabilities.textContent = "0";
+      netWorthDisplay.textContent = "0";
+      healthChart.data.datasets[0].data = [0];
+      healthChart.update();
+      healthPercentage.textContent = "0%";
+      healthTips.textContent = "";
     }
-    document.getElementById('healthTips').textContent = tips[Math.floor(Math.random() * tips.length)];
+    updateBusinessList();
+    saveDataToLocalStorage();
+    alert("Business Deleted!");
+  }
 }
 
-function generateStory() {
-    const business = businesses[currentBusinessIndex];
-    if (!business) return;
-
-    const incomeStatement = business.incomeStatement;
-    const balanceSheet = business.balanceSheet;
-    const avgCashflow = parseFloat(document.getElementById('avgCashflow').textContent.replace(/[^0-9.-]+/g,""));
-    const progress = (avgCashflow / business.revenueTarget) * 100;
-
-    let story = `
-${business.name}'s Financial Journey
-
-    
-Your business, focused on ${business.description}, has been on a rollercoaster of financial ups and downs. Starting from ${incomeStatement[0]?.date || "the beginning"}, you've seen:
-
-
-    
-`;
-
-    // Analyze financial events
-    incomeStatement.forEach(entry => {
-        if (entry.type === 'Expense' && entry.amount > (avgCashflow * 2)) {
-            story += `
-A significant expense on ${entry.date}: ${entry.description} for ${formatCurrency(entry.amount)}. This might have been a hurdle!
-`;
-        } else if (entry.type === 'Income' && entry.amount > (avgCashflow * 2)) {
-            story += `
-A notable income boost on ${entry.date}: ${entry.description} brought in ${formatCurrency(entry.amount)}. A step forward!
-`;
-        }
-    });
-
-    story += `
-With an average monthly cashflow of ${formatCurrency(avgCashflow)}, you're ${progress.toFixed(2)}% towards your financial freedom goal of ${formatCurrency(business.revenueTarget)}.
-
-
-    
-Here's how you can push forward:
-
-
-    
-`;
-
-    // Tips based on current financial status
-    if (progress < 50) {
-        story += "
-Focus on reducing liabilities and increasing assets.
-";
-        story += "
-Seek new income streams that require minimal active involvement.
-";
-    } else if (progress < 80) {
-        story += "
-Continue to invest in assets that generate income.
-";
-        story += "
-Consider scaling up operations if cashflow permits.
-";
-    } else {
-        story += "
-Maintain your momentum by reinvesting in growth opportunities.
-";
-        story += "
-Plan for future expansion or diversification to keep the momentum going.
-";
+// Add Income
+function addIncome() {
+  const business = businesses[currentBusinessIndex];
+  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" });
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Income Amount:"));
+  if (description && amount) {
+    if (!business.incomeStatement[date]) {
+      business.incomeStatement[date] = [];
     }
-
-    story += "
-";
-
-    document.getElementById('storyContent').innerHTML = story;
+    business.incomeStatement[date].push({ date: new Date().toLocaleDateString(), description, type: "Income", amount });
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
 }
 
-// Initialize
-populateCurrencyDropdown();
-if (businesses.length === 0) {
-    addBusiness();
-} else {
+// Add Expense
+function addExpense() {
+  const business = businesses[currentBusinessIndex];
+  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" });
+  const description = prompt("Enter Description:");
+  const amount = parseFloat(prompt("Enter Expense Amount:"));
+  if (description && amount) {
+    if (!business.incomeStatement[date]) {
+      business.incomeStatement[date] = [];
+    }
+    business.incomeStatement[date].push({ date: new Date().toLocaleDateString(), description, type: "Expense", amount });
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Update Income Statement
+function updateIncomeStatement() {
+  const business = businesses[currentBusinessIndex];
+  incomeStatementBody.innerHTML = "";
+  let totalIncomeAmount = 0;
+  let totalExpensesAmount = 0;
+
+  for (const month in business.incomeStatement) {
+    const monthRow = document.createElement("tr");
+    monthRow.classList.add("month-row");
+    monthRow.innerHTML = `
+      <td>${month}</td>
+      <td>${business.incomeStatement[month].reduce((sum, entry) => entry.type === "Income" ? sum + entry.amount : sum, 0)}</td>
+      <td>${business.incomeStatement[month].reduce((sum, entry) => entry.type === "Expense" ? sum + entry.amount : sum, 0)}</td>
+      <td>${business.incomeStatement[month].reduce((sum, entry) => entry.type === "Income" ? sum + entry.amount : sum, 0) - business.incomeStatement[month].reduce((sum, entry) => entry.type === "Expense" ? sum + entry.amount : sum, 0)}</td>
+      <td><button onclick="toggleMonth('${month}')">Expand</button></td>
+    `;
+    incomeStatementBody.appendChild(monthRow);
+
+    const detailsRow = document.createElement("tr");
+    detailsRow.classList.add("details-row", "hidden");
+    detailsRow.id = `details-${month}`;
+    detailsRow.innerHTML = `
+      <td colspan="5">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${business.incomeStatement[month].map(entry => `
+              <tr>
+                <td>${entry.date}</td>
+                <td>${entry.description}</td>
+                <td>${entry.type === "Income" ? entry.amount : ""}</td>
+                <td>${entry.type === "Expense" ? entry.amount : ""}</td>
+                <td>
+                  <button onclick="editEntry('income', '${month}', ${business.incomeStatement[month].indexOf(entry)})">✏️</button>
+                  <button onclick="deleteEntry('income', '${month}', ${business.incomeStatement[month].indexOf(entry)})">🗑️</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </td>
+    `;
+    incomeStatementBody.appendChild(detailsRow);
+
+    totalIncomeAmount += business.incomeStatement[month].reduce((sum, entry) => entry.type === "Income" ? sum + entry.amount : sum, 0);
+    totalExpensesAmount += business.incomeStatement[month].reduce((sum, entry) => entry.type === "Expense" ? sum + entry.amount : sum, 0);
+  }
+
+  totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
+  totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
+  const cashflow = totalIncomeAmount - totalExpensesAmount;
+  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
+}
+
+// Toggle Month Details
+function toggleMonth(month) {
+  const detailsRow = document.getElementById(`details-${month}`);
+  detailsRow.classList.toggle("hidden");
+}
+
+// Update Balance Sheet
+function updateBalanceSheet() {
+  const business = businesses[currentBusinessIndex];
+  balanceSheetBody.innerHTML = "";
+  let totalAssetsAmount = 0;
+  let totalLiabilitiesAmount = 0;
+
+  business.balanceSheet.forEach((entry, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.description}</td>
+      <td>${entry.type === "Asset" ? entry.amount : ""}</td>
+      <td>${entry.type === "Liability" ? entry.amount : ""}</td>
+      <td>
+        <button onclick="editEntry('balance', ${index})">✏️</button>
+        <button onclick="deleteEntry('balance', ${index})">🗑️</button>
+      </td>
+    `;
+    balanceSheetBody.appendChild(row);
+
+    if (entry.type === "Asset") totalAssetsAmount += entry.amount;
+    if (entry.type === "Liability") totalLiabilitiesAmount += entry.amount;
+  });
+
+  totalAssets.textContent = `${business.currency} ${totalAssetsAmount}`;
+  totalLiabilities.textContent = `${business.currency} ${totalLiabilitiesAmount}`;
+  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
+  netWorthDisplay.textContent = `${business.currency} ${netWorth}`;
+}
+
+// Save Data to LocalStorage
+function saveDataToLocalStorage() {
+  localStorage.setItem("businesses", JSON.stringify(businesses));
+}
+
+// Load Saved Data
+function loadSavedData() {
+  const savedData = localStorage.getItem("businesses");
+  if (savedData) {
+    businesses = JSON.parse(savedData);
     updateBusinessList();
     switchBusiness(0);
+  }
 }
