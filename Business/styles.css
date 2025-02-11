@@ -32,13 +32,9 @@ body {
   margin-bottom: 10px;
 }
 
-.business-controls + select, .business-controls + div {
+.business-controls + select,
+.business-controls + div {
   margin-left: 20px;
-}
-
-.business-list-controls {
-  margin-left: 20px;
-  margin-top: 10px;
 }
 
 h1, h2 {
@@ -129,6 +125,12 @@ th, td {
   font-size: 16px;
 }
 
+.tooltip {
+  font-size: 12px;
+  color: #555;
+  margin-left: 5px;
+}
+
 .calculator-icon {
   position: fixed;
   bottom: 20px;
@@ -212,31 +214,4 @@ th, td {
   border: 1px solid #ccc;
   border-radius: 5px;
   flex-grow: 1;
-}
-
-/* New Styles for Income Statement Expansion */
-.monthly-row {
-  cursor: pointer;
-}
-
-.monthly-row .details {
-  display: none;
-}
-
-.monthly-row.expanded .details {
-  display: table-row-group;
-}
-
-.monthly-row .monthly-total {
-  font-weight: bold;
-}
-
-/* Date Picker */
-.flatpickr-calendar {
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-}
-
-/* Numeric Input */
-.cleave {
-  text-align: right;
   }
