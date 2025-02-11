@@ -495,22 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
             date = await promptForDate("Edit Date:", args[0] === 'income' ? businesses[currentBusinessIndex].incomeStatement[args[1]].date : businesses[currentBusinessIndex].balanceSheet[args[1]].date);
           } else {
             date = await promptForDate("Enter Date for New Entry:", new Date().toISOString().split('T')[0]);
-          }
-          args[1] = date; // Update the date in the arguments
-        } else {
-          args[0] = await promptForDate("Enter Date (YYYY-MM-DD):");
-        }
-        await originalFunction.apply(this, args);
-      } catch (error) {
-        if (error.message !== 'Date selection cancelled') {
-          alert(error.message); // If it's not a cancellation, show the error
-        }
-      }
-    };
-  });
-
-  // You can now use these functions in your existing code, and they'll use the enhanced date picker
-});
 
   // Update Financial Health
   function updateFinancialHealth() {
