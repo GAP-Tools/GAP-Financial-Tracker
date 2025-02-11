@@ -1,217 +1,95 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
 }
-
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+    max-width: 1200px;
+    margin: auto;
 }
-
-.profile-section, .income-statement, .balance-sheet, .health-score, .currency-converter, .data-management, .share-app, .story-generation {
-  margin-bottom: 40px;
+h2 {
+    color: #333;
 }
-
-.business-controls button {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-}
-
-.business-controls button:hover {
-  background-color: #0056b3;
-}
-
-.business-controls {
-  margin-bottom: 10px;
-}
-
-.business-controls + select,
-.business-controls + div {
-  margin-left: 20px;
-}
-
-h1, h2 {
-  color: #333;
-}
-
-input, select, button {
-  margin: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
 button {
-  background-color: green;
-  color: white;
-  cursor: pointer;
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin: 5px;
 }
-
 button:hover {
-  background-color: #0056b3;
+    background-color: #0056b3;
 }
-
+input, select {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
 }
-
 th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: left;
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
 }
-
-.totals, .summary {
-  font-weight: bold;
-}
-
-.circle-container {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-}
-
-#healthPercentage {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 20px;
-  font-weight: bold;
-}
-
-#healthTips {
-  text-align: center;
-  margin-top: 10px;
-  color: #555;
-}
-
-.actions {
-  display: flex;
-  gap: 5px;
-}
-
 .actions button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
 }
-
 .actions button:hover {
-  color: #0056b3;
+    color: #0056b3;
 }
-
-.target-input {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.summary {
+    font-weight: bold;
+    margin-top: 10px;
 }
-
-.target-input button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
+#businessDropdown {
+    margin-bottom: 20px;
 }
-
-.tooltip {
-  font-size: 12px;
-  color: #555;
-  margin-left: 5px;
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
 }
-
-.calculator-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
-  border-radius: 50%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.dropdown-content button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: inherit;
+    padding: 12px 16px;
 }
-
-.calculator-popup {
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.dropdown-content button:hover {
+    background-color: #f1f1f1;
 }
-
-.calculator-content {
-  text-align: center;
+.dropdown:hover .dropdown-content {
+    display: block;
 }
-
-.calculator-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 10px;
+.monthly-row:hover {
+    background-color: #f4f4f4;
+    cursor: pointer;
 }
-
-.calculator-buttons button {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f4f4f4;
-  cursor: pointer;
-  color: green;
+.monthly-row .details {
+    display: none;
 }
-
-.calculator-buttons button:hover {
-  background-color: #0056b3;
-  color: white;
+.monthly-row.expanded .details {
+    display: table-row-group;
 }
-
-/* Business version specific styles */
-.business-selector {
-  margin-bottom: 20px;
+input[type="number"] {
+    -moz-appearance: textfield;
 }
-
-#switchLink {
-  display: inline-block;
-  background-color: #0056b3;
-  box-shadow: 2px 2px 4px green;
-  padding: 5px 10px;
-  margin: 0;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
-
-#switchLink:hover {
-  box-shadow: 2px 2px 4px #007bff;
-}
-
-.business-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-#businessList {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  flex-grow: 1;
-  }
