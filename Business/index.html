@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-Business Financial Tracker</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -21,10 +20,8 @@
         <button onclick="addBusiness()">Add Business</button>
       </div>
       <select id="businessList" onchange="switchBusiness()"></select>
-      <div class="business-list-controls">
-        <button onclick="editBusinessName()">✏️</button>
-        <button onclick="deleteBusiness()">🗑️</button>
-      </div>
+      <button onclick="editBusinessName()">✏️</button>
+      <button onclick="deleteBusiness()">🗑️</button>
     </section>
 
     <!-- Business Profile Section -->
@@ -43,11 +40,21 @@
       <button onclick="saveBusinessProfile()">Save Business Profile</button>
     </section>
 
+    <!-- Currency Converter -->
+    <section class="currency-converter">
+      <h2>Currency Converter</h2>
+      <input type="number" id="amount" placeholder="Amount">
+      <select id="fromCurrency"></select>
+      <select id="toCurrency"></select>
+      <button onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult"></p>
+    </section>
+
     <!-- Income Statement Section -->
     <section class="income-statement">
       <h2>Income Statement</h2>
       <div class="table-container">
-        <table id="incomeStatementTable">
+        <table id="income-statement-table">
           <thead>
             <tr>
               <th>Monthly Date</th>
@@ -60,9 +67,9 @@
           <tbody id="income-statement-body"></tbody>
         </table>
         <div class="summary">
-          <p>Average Monthly Income: <span id="avgIncome"></span></p>
-          <p>Average Monthly Expenses: <span id="avgExpenses"></span></p>
-          <p>Average Monthly Cashflow: <span id="avgCashflow"></span></p>
+          <p>Average Monthly Income: <span id="avg-income">0</span></p>
+          <p>Average Monthly Expenses: <span id="avg-expenses">0</span></p>
+          <p>Average Monthly Cashflow: <span id="avg-cashflow">0</span></p>
         </div>
       </div>
       <button onclick="addIncome()">Add Income</button>
@@ -73,7 +80,7 @@
     <section class="balance-sheet">
       <h2>Balance Sheet</h2>
       <div class="table-container">
-        <table id="balanceSheetTable">
+        <table id="balance-sheet-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -85,7 +92,7 @@
           </thead>
           <tbody id="balance-sheet-body"></tbody>
         </table>
-        <div class="summary">
+        <div class="totals">
           <p>Total Assets: <span id="total-assets">0</span></p>
           <p>Total Liabilities: <span id="total-liabilities">0</span></p>
           <p>Net Worth: <span id="net-worth">0</span></p>
@@ -103,16 +110,6 @@
         <p id="healthPercentage">0%</p>
       </div>
       <p id="healthTips"></p>
-    </section>
-
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
     </section>
 
     <!-- Data Management -->
