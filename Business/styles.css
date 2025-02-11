@@ -1,95 +1,92 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
 }
+
 .container {
-    max-width: 1200px;
-    margin: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
-h2 {
-    color: #333;
+
+.profile-section, .income-statement, .balance-sheet, .health-score, .data-management {
+  margin-bottom: 40px;
 }
+
+.business-controls button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+.business-controls button:hover {
+  background-color: #0056b3;
+}
+
+h1, h2 {
+  color: #333;
+}
+
+input, select, button {
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
 button {
-    background-color: green;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    margin: 5px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
 }
+
 button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
-input, select {
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
+
 th, td {
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: left;
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: left;
 }
-.actions button {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
+
+.totals {
+  font-weight: bold;
 }
-.actions button:hover {
-    color: #0056b3;
+
+.circle-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
 }
-.summary {
-    font-weight: bold;
-    margin-top: 10px;
+
+#healthPercentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: bold;
 }
-#businessDropdown {
-    margin-bottom: 20px;
+
+#healthTips {
+  text-align: center;
+  margin-top: 10px;
+  color: #555;
 }
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-}
-.dropdown-content button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background-color: inherit;
-    padding: 12px 16px;
-}
-.dropdown-content button:hover {
-    background-color: #f1f1f1;
-}
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-.monthly-row:hover {
-    background-color: #f4f4f4;
-    cursor: pointer;
-}
-.monthly-row .details {
-    display: none;
-}
-.monthly-row.expanded .details {
-    display: table-row-group;
-}
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
+
+.hidden {
+  display: none;
+      }
