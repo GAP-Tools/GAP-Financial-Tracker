@@ -32,10 +32,10 @@
       <select id="currency"></select>
       <br>
       <br>
-      <label for="revenue-target">Revenue/Residual Income Target:</label>
+      <label for="residual-income-target">Residual Income Target:</label>
       <div class="target-input">
-        <input type="number" id="revenue-target" placeholder="Target">
-        <button onclick="editRevenueTarget()">✏️</button>
+        <input type="number" id="residual-income-target" placeholder="Target">
+        <button onclick="editResidualIncomeTarget()">✏️</button>
       </div>
       <button onclick="saveBusinessProfile()">Save Business Profile</button>
     </section>
@@ -60,16 +60,13 @@
               <th>Month</th>
               <th>Total Income</th>
               <th>Total Expenses</th>
-              <th>Net Income</th>
+              <th>Cashflow</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="income-statement-body"></tbody>
         </table>
         <div class="totals">
-          <p>Total Income: <span id="total-income">0</span></p>
-          <p>Total Expenses: <span id="total-expenses">0</span></p>
-          <p>Cashflow: <span id="cashflow">0</span></p>
           <p>Average Monthly Income: <span id="average-income">0</span></p>
           <p>Average Monthly Expenses: <span id="average-expenses">0</span></p>
           <p>Average Monthly Cashflow: <span id="average-cashflow">0</span></p>
