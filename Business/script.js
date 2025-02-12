@@ -16,7 +16,9 @@ const totalExpenses = document.getElementById("total-expenses");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
 const netWorthDisplay = document.getElementById("net-worth");
-const cashflowDisplay = document.getElementById("cashflow");
+const averageIncomeDisplay = document.getElementById("average-income");
+const averageExpensesDisplay = document.getElementById("average-expenses");
+const averageCashflowDisplay = document.getElementById("average-cashflow");
 const healthChartCtx = document.getElementById("healthChart").getContext("2d");
 const healthPercentage = document.getElementById("healthPercentage");
 const healthTips = document.getElementById("healthTips");
@@ -323,15 +325,13 @@ function updateIncomeStatement() {
   totalIncome.textContent = `${business.currency} ${totalIncomeAmount}`;
   totalExpenses.textContent = `${business.currency} ${totalExpensesAmount}`;
   const cashflow = totalIncomeAmount - totalExpensesAmount;
-  cashflowDisplay.textContent = `${business.currency} ${cashflow}`;
-
-  // Update Summary Section
   const averageIncome = totalIncomeAmount / months.length || 0;
   const averageExpenses = totalExpensesAmount / months.length || 0;
   const averageCashflow = cashflow / months.length || 0;
-  document.getElementById("average-income").textContent = `${business.currency} ${averageIncome.toFixed(2)}`;
-  document.getElementById("average-expenses").textContent = `${business.currency} ${averageExpenses.toFixed(2)}`;
-  document.getElementById("average-cashflow").textContent = `${business.currency} ${averageCashflow.toFixed(2)}`;
+
+  averageIncomeDisplay.textContent = `${business.currency} ${averageIncome.toFixed(2)}`;
+  averageExpensesDisplay.textContent = `${business.currency} ${averageExpenses.toFixed(2)}`;
+  averageCashflowDisplay.textContent = `${business.currency} ${averageCashflow.toFixed(2)}`;
 }
 
 // Toggle Month Details
