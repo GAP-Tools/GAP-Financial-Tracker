@@ -1,23 +1,23 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Financial Manager</title>
+  <title>Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <!-- Business Selector -->
-    <section class="business-section">
-      <h2>Business Manager</h2>
+    <section class="business-selector">
+      <h3><span id="switchLink">Switch to Personal</span></h3>
+      <h2>BUSINESS FINANCIAL TRACKER</h2>
       <div class="business-controls">
-        <input type="text" id="businessName" placeholder="New Business Name">
+        <input type="text" id="businessName" placeholder="Enter Business Name">
         <button onclick="addBusiness()">Add Business</button>
-        <select id="businessList" onchange="switchBusiness()"></select>
       </div>
+      <select id="businessList" onchange="switchBusiness()"></select>
     </section>
 
     <!-- Income Statement -->
@@ -67,15 +67,15 @@
     </section>
 
     <!-- Financial Health -->
-    <section class="health-section">
-      <h2>Financial Health</h2>
-      <div class="health-chart">
+    <section class="health-score">
+      <h2>Financial Health Score</h2>
+      <div class="circle-container">
         <canvas id="healthChart"></canvas>
-        <div id="healthPercentage">0%</div>
+        <p id="healthPercentage">0%</p>
       </div>
-      <div id="healthTips" class="health-tips"></div>
+      <p id="healthTips"></p>
     </section>
   </div>
   <script src="script.js"></script>
 </body>
-  </html>
+</html>
