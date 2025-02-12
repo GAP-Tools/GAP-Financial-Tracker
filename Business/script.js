@@ -28,11 +28,6 @@ const businessFinancialStory = document.getElementById("businessFinancialStory")
 const saveFileNameInput = document.getElementById("saveFileName");
 const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
-// Add these to your DOM elements list
-const clickForOptionsButtons = document.querySelectorAll("button[onclick*='showEntryOptions'], button[onclick*='showBalanceSheetOptions']");
-document.addEventListener("DOMContentLoaded", () => {
-  // Your JavaScript code here
-});
 
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
@@ -297,7 +292,10 @@ function updateIncomeStatement() {
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Income").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Expense").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td class="actions">
-                  <button onclick="showCategoryOptions(event, '${month}', ${catIndex})">Click for Options</button>
+                  <button onclick="toggleCategoryEntries('${month}', ${catIndex})">▼</button>
+                  <button onclick="editCategory('${month}', ${catIndex})">✏️</button>
+                  <button onclick="duplicateCategory('${month}', ${catIndex})">⎘</button>
+                  <button onclick="deleteCategory('${month}', ${catIndex})">🗑️</button>
                 </td>
               </tr>
               <tr id="category-detail-${month}-${catIndex}" style="display: none;">
@@ -320,7 +318,9 @@ function updateIncomeStatement() {
                           <td>${entry.type === "Income" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td>${entry.type === "Expense" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td class="actions">
-                            <button onclick="showDailyEntryOptions(event, '${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
+                            <button onclick="editDailyEntry('${month}', ${catIndex}, ${entryIndex})">✏️</button>
+                            <button onclick="duplicateDailyEntry('${month}', ${catIndex}, ${entryIndex})">⎘</button>
+                            <button onclick="deleteDailyEntry('${month}', ${catIndex}, ${entryIndex})">🗑️</button>
                           </td>
                         </tr>
                       `).join("")}
@@ -356,90 +356,77 @@ function toggleMonthlyEntries(month) {
   detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
 }
 
-// Show Category Options
-function showCategoryOptions(event, month, catIndex) {
-  const options = ["Go to Daily Entry", "Edit Category", "Duplicate Category", "Delete Category"];
-  showDropdownMenu(event, options, (action) => {
-    handleCategoryAction(month, catIndex, action);
-  });
-}
-
-// Handle Category Action
-function handleCategoryAction(month, catIndex, action) {
-  const business = businesses[currentBusinessIndex];
-  const category = business.incomeStatement[month].categories[catIndex];
-  switch (action) {
-    case "go to daily entry":
-      toggleCategoryEntries(month, catIndex);
-      break;
-    case "edit category":
-      const newName = prompt("Edit Category Name:", category.name);
-      if (newName) {
-        category.name = newName;
-        updateIncomeStatement();
-        saveDataToLocalStorage();
-      }
-      break;
-    case "duplicate category":
-      business.incomeStatement[month].categories.push({ ...category });
-      updateIncomeStatement();
-      saveDataToLocalStorage();
-      break;
-    case "delete category":
-      if (confirm("Are you sure you want to delete this category?")) {
-        business.incomeStatement[month].categories.splice(catIndex, 1);
-        updateIncomeStatement();
-        saveDataToLocalStorage();
-      }
-      break;
-  }
-}
-
 // Toggle Category Entries
 function toggleCategoryEntries(month, catIndex) {
   const detailRow = document.getElementById(`category-detail-${month}-${catIndex}`);
   detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
 }
 
-// Show Daily Entry Options
-function showDailyEntryOptions(event, month, catIndex, entryIndex) {
-  const options = ["Edit Daily Entry", "Duplicate Daily Entry", "Delete Daily Entry"];
-  showDropdownMenu(event, options, (action) => {
-    handleDailyEntryAction(month, catIndex, entryIndex, action);
-  });
+// Edit Category
+function editCategory(month, catIndex) {
+  const business = businesses[currentBusinessIndex];
+  const category = business.incomeStatement[month].categories[catIndex];
+  const newName = prompt("Edit Category Name:", category.name);
+  if (newName) {
+    category.name = newName;
+    updateIncomeStatement();
+    saveDataToLocalStorage();
+  }
 }
 
-// Handle Daily Entry Action
-function handleDailyEntryAction(month, catIndex, entryIndex, action) {
+// Duplicate Category
+function duplicateCategory(month, catIndex) {
+  const business = businesses[currentBusinessIndex];
+  const category = business.incomeStatement[month].categories[catIndex];
+  business.incomeStatement[month].categories.push({ ...category });
+  updateIncomeStatement();
+  saveDataToLocalStorage();
+}
+
+// Delete Category
+function deleteCategory(month, catIndex) {
+  if (confirm("Are you sure you want to delete this category?")) {
+    const business = businesses[currentBusinessIndex];
+    business.incomeStatement[month].categories.splice(catIndex, 1);
+    updateIncomeStatement();
+    saveDataToLocalStorage();
+  }
+}
+
+// Edit Daily Entry
+function editDailyEntry(month, catIndex, entryIndex) {
   const business = businesses[currentBusinessIndex];
   const entry = business.incomeStatement[month].categories[catIndex].entries[entryIndex];
-  switch (action) {
-    case "edit daily entry":
-      const newDescription = prompt("Edit Description:", entry.description);
-      const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-      if (newDescription && !isNaN(newAmount)) {
-        entry.description = newDescription;
-        entry.amount = newAmount;
-        updateIncomeStatement();
-        updateFinancialHealth();
-        saveDataToLocalStorage();
-      } else {
-        alert("Invalid Input!");
-      }
-      break;
-    case "duplicate daily entry":
-      business.incomeStatement[month].categories[catIndex].entries.push({ ...entry });
-      updateIncomeStatement();
-      saveDataToLocalStorage();
-      break;
-    case "delete daily entry":
-      if (confirm("Are you sure you want to delete this entry?")) {
-        business.incomeStatement[month].categories[catIndex].entries.splice(entryIndex, 1);
-        updateIncomeStatement();
-        updateFinancialHealth();
-        saveDataToLocalStorage();
-      }
-      break;
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  if (newDescription && !isNaN(newAmount)) {
+    entry.description = newDescription;
+    entry.amount = newAmount;
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Duplicate Daily Entry
+function duplicateDailyEntry(month, catIndex, entryIndex) {
+  const business = businesses[currentBusinessIndex];
+  const entry = business.incomeStatement[month].categories[catIndex].entries[entryIndex];
+  business.incomeStatement[month].categories[catIndex].entries.push({ ...entry });
+  updateIncomeStatement();
+  saveDataToLocalStorage();
+}
+
+// Delete Daily Entry
+function deleteDailyEntry(month, catIndex, entryIndex) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    const business = businesses[currentBusinessIndex];
+    business.incomeStatement[month].categories[catIndex].entries.splice(entryIndex, 1);
+    updateIncomeStatement();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
   }
 }
 
@@ -458,7 +445,9 @@ function updateBalanceSheet() {
       <td>${entry.type === "Asset" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td>${entry.type === "Liability" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td class="actions">
-        <button onclick="showBalanceSheetOptions(event, ${index})">Click for Options</button>
+        <button onclick="editBalanceSheetEntry(${index})">✏️</button>
+        <button onclick="duplicateBalanceSheetEntry(${index})">⎘</button>
+        <button onclick="deleteBalanceSheetEntry(${index})">🗑️</button>
       </td>
     `;
     balanceSheetBody.appendChild(row);
@@ -472,45 +461,40 @@ function updateBalanceSheet() {
   netWorthDisplay.textContent = `${business.currency} ${totalAssetsAmount - totalLiabilitiesAmount}`;
 }
 
-// Show Balance Sheet Options
-function showBalanceSheetOptions(event, index) {
-  const options = ["Edit", "Duplicate", "Delete"];
-  showDropdownMenu(event, options, (action) => {
-    handleBalanceSheetAction(index, action);
-  });
-}
-
-// Handle Balance Sheet Action
-function handleBalanceSheetAction(index, action) {
+// Edit Balance Sheet Entry
+function editBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
   const entry = business.balanceSheet[index];
-  switch (action) {
-    case "edit":
-      const newDescription = prompt("Edit Description:", entry.description);
-      const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-      if (newDescription && !isNaN(newAmount)) {
-        entry.description = newDescription;
-        entry.amount = newAmount;
-        updateBalanceSheet();
-        updateFinancialHealth();
-        saveDataToLocalStorage();
-      } else {
-        alert("Invalid Input!");
-      }
-      break;
-    case "duplicate":
-      business.balanceSheet.push({ ...entry });
-      updateBalanceSheet();
-      saveDataToLocalStorage();
-      break;
-    case "delete":
-      if (confirm("Are you sure you want to delete this entry?")) {
-        business.balanceSheet.splice(index, 1);
-        updateBalanceSheet();
-        updateFinancialHealth();
-        saveDataToLocalStorage();
-      }
-      break;
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  if (newDescription && !isNaN(newAmount)) {
+    entry.description = newDescription;
+    entry.amount = newAmount;
+    updateBalanceSheet();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid Input!");
+  }
+}
+
+// Duplicate Balance Sheet Entry
+function duplicateBalanceSheetEntry(index) {
+  const business = businesses[currentBusinessIndex];
+  const entry = business.balanceSheet[index];
+  business.balanceSheet.push({ ...entry });
+  updateBalanceSheet();
+  saveDataToLocalStorage();
+}
+
+// Delete Balance Sheet Entry
+function deleteBalanceSheetEntry(index) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    const business = businesses[currentBusinessIndex];
+    business.balanceSheet.splice(index, 1);
+    updateBalanceSheet();
+    updateFinancialHealth();
+    saveDataToLocalStorage();
   }
 }
 
@@ -772,85 +756,7 @@ function convertCurrency() {
   }
 }
 
-// Show Dropdown Menu
-function showDropdownMenu(event, options, callback) {
-  const dropdown = document.createElement("div");
-  dropdown.className = "dropdown-menu";
-  dropdown.style.position = "absolute";
-
-  // Adjust position if near the edge of the viewport
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const dropdownWidth = 150; // Approximate width of the dropdown
-  const dropdownHeight = options.length * 40; // Approximate height of the dropdown
-
-  let left = event.clientX;
-  let top = event.clientY;
-
-  if (left + dropdownWidth > viewportWidth) {
-    left = viewportWidth - dropdownWidth;
-  }
-  if (top + dropdownHeight > viewportHeight) {
-    top = viewportHeight - dropdownHeight;
-  }
-
-  dropdown.style.left = `${left}px`;
-  dropdown.style.top = `${top}px`;
-  dropdown.style.backgroundColor = "green";
-  dropdown.style.border = "1px solid #ccc";
-  dropdown.style.borderRadius = "5px";
-  dropdown.style.zIndex = "1000";
-
-  options.forEach(option => {
-    const button = document.createElement("button");
-    button.textContent = option;
-    button.style.display = "block";
-    button.style.width = "100%";
-    button.style.padding = "10px";
-    button.style.color = "white";
-    button.style.backgroundColor = "green";
-    button.style.border = "none";
-    button.style.textAlign = "left";
-    button.onclick = () => {
-      callback(option.toLowerCase());
-      document.body.removeChild(dropdown);
-    };
-    dropdown.appendChild(button);
-  });
-
-  document.body.appendChild(dropdown);
-
-  // Close dropdown when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target)) {
-      document.body.removeChild(dropdown);
-    }
-  }, { once: true });
-}
-
 // Switch to Personal Page
 document.getElementById("switchLink").addEventListener("click", () => {
   window.location.href = personalWebsiteURL;
 });
-
-// Attach event listeners to "Click for Options" buttons
-clickForOptionsButtons.forEach(button => {
-  button.addEventListener("click", (event) => {
-    if (button.getAttribute("onclick").includes("showEntryOptions")) {
-      const [month, catIndex, entryIndex] = parseOnClickArguments(button.getAttribute("onclick"));
-      showEntryOptions(event, month, catIndex, entryIndex);
-    } else if (button.getAttribute("onclick").includes("showBalanceSheetOptions")) {
-      const [index] = parseOnClickArguments(button.getAttribute("onclick"));
-      showBalanceSheetOptions(event, index);
-    }
-  });
-});
-
-// Helper function to parse onclick arguments
-function parseOnClickArguments(onclickString) {
-  return onclickString
-    .replace(/.*\(/, "") // Remove everything before the arguments
-    .replace(/\).*/, "") // Remove everything after the arguments
-    .split(",") // Split into individual arguments
-    .map(arg => arg.trim().replace(/'/g, "")); // Clean up the arguments
-}
