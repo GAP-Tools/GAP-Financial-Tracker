@@ -8,7 +8,7 @@ const businessList = document.getElementById("businessList");
 const businessNameInput = document.getElementById("businessName");
 const businessDescriptionInput = document.getElementById("businessDescription");
 const currencySelect = document.getElementById("currency");
-const revenueTargetInput = document.getElementById("residual-income-target");
+const residualIncomeTargetInput = document.getElementById("residual-income-target");
 const incomeStatementBody = document.getElementById("income-statement-body");
 const balanceSheetBody = document.getElementById("balance-sheet-body");
 const totalIncome = document.getElementById("total-income");
@@ -121,7 +121,7 @@ function switchBusiness() {
   const business = businesses[currentBusinessIndex];
   businessDescriptionInput.value = business.description;
   currencySelect.value = business.currency;
-  revenueTargetInput.value = business.residualIncomeTarget;
+  residualIncomeTargetInput.value = business.residualIncomeTarget;
   updateIncomeStatement();
   updateBalanceSheet();
   updateFinancialHealth();
@@ -132,7 +132,7 @@ function saveBusinessProfile() {
   const business = businesses[currentBusinessIndex];
   business.description = businessDescriptionInput.value;
   business.currency = currencySelect.value;
-  business.residualIncomeTarget = parseFloat(revenueTargetInput.value) || 0;
+  business.residualIncomeTarget = parseFloat(residualIncomeTargetInput.value) || 0;
   alert("Business Profile Saved!");
   saveDataToLocalStorage();
 }
@@ -142,7 +142,7 @@ function editResidualIncomeTarget() {
   const newTarget = prompt("Enter New Residual Income Target:", businesses[currentBusinessIndex].residualIncomeTarget);
   if (newTarget && !isNaN(newTarget)) {
     businesses[currentBusinessIndex].residualIncomeTarget = parseFloat(newTarget);
-    revenueTargetInput.value = businesses[currentBusinessIndex].residualIncomeTarget;
+    residualIncomeTargetInput.value = businesses[currentBusinessIndex].residualIncomeTarget;
     updateFinancialHealth();
     saveDataToLocalStorage();
   } else {
@@ -175,7 +175,7 @@ function deleteBusiness() {
       currentBusinessIndex = -1;
       businessDescriptionInput.value = "";
       currencySelect.value = "USD";
-      revenueTargetInput.value = "";
+      residualIncomeTargetInput.value = "";
       incomeStatementBody.innerHTML = "";
       balanceSheetBody.innerHTML = "";
       totalIncome.textContent = "0";
@@ -612,7 +612,7 @@ function clearBusinessData() {
     };
     businessDescriptionInput.value = "";
     currencySelect.value = "USD";
-    revenueTargetInput.value = "";
+    residualIncomeTargetInput.value = "";
     updateIncomeStatement();
     updateBalanceSheet();
     updateFinancialHealth();
@@ -703,4 +703,4 @@ function convertCurrency() {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
-  }
+}
