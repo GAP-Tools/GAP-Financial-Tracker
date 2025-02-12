@@ -161,3 +161,63 @@ th, td {
 }
 
 .calculator-content {
+  text-align: center;
+}
+
+.calculator-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.calculator-buttons button {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  cursor: pointer;
+  color: green; /* Deep green text color */
+}
+
+.calculator-buttons button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* Business version specific styles */
+.business-selector {
+  margin-bottom: 20px;
+}
+
+#switchLink {
+    display: inline-block;
+    background-color: #0056b3;
+    box-shadow: 2px 2px 4px green;
+    padding: 5px 10px;
+    margin: 0;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+
+#switchLink:hover {
+    box-shadow: 2px 2px 4px #007bff;
+    }
+
+
+.business-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#businessList {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  flex-grow: 1;
+  }
