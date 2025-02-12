@@ -260,7 +260,7 @@ function updateIncomeStatement() {
       <td>${business.currency} ${monthlyExpenses}</td>
       <td>${business.currency} ${netIncome}</td>
       <td class="actions">
-        <button onclick="toggleMonthlyEntries('${month}')">▼</button>
+        <button onclick="toggleMonthlyEntries(event, '${month}')">▼</button>
       </td>
     `;
     incomeStatementBody.appendChild(row);
@@ -291,7 +291,7 @@ function updateIncomeStatement() {
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Income").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Expense").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td class="actions">
-                  <button onclick="toggleCategoryEntries('${month}', ${catIndex})">▼</button>
+                  <button onclick="toggleCategoryEntries(event, '${month}', ${catIndex})">▼</button>
                 </td>
               </tr>
               <tr id="category-detail-${month}-${catIndex}" style="display: none;">
@@ -314,7 +314,7 @@ function updateIncomeStatement() {
                           <td>${entry.type === "Income" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td>${entry.type === "Expense" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td class="actions">
-                            <button onclick="showEntryOptions('${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
+                            <button onclick="showEntryOptions(event, '${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
                           </td>
                         </tr>
                       `).join("")}
@@ -345,22 +345,25 @@ function updateIncomeStatement() {
 }
 
 // Toggle Monthly Entries
-function toggleMonthlyEntries(month) {
+function toggleMonthlyEntries(event, month) {
   const detailRow = document.getElementById(`detail-${month}`);
   detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+  event.stopPropagation(); // Prevent event bubbling
 }
 
 // Toggle Category Entries
-function toggleCategoryEntries(month, catIndex) {
+function toggleCategoryEntries(event, month, catIndex) {
   const detailRow = document.getElementById(`category-detail-${month}-${catIndex}`);
   detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+  event.stopPropagation(); // Prevent event bubbling
 }
 
 // Show Entry Options
-function showEntryOptions(month, catIndex, entryIndex) {
+function showEntryOptions(event, month, catIndex, entryIndex) {
   const options = ["Edit", "Duplicate", "Delete"];
-  const optionList = options.map(option => `<button onclick="handleEntryAction('${month}', ${catIndex}, ${entryIndex}, '${option.toLowerCase()}')">${option}</button>`).join("");
-  alert(`Select an action: ${optionList}`);
+  showDropdownMenu(event, options, (action) => {
+    handleEntryAction(month, catIndex, entryIndex, action);
+  });
 }
 
 // Handle Entry Action
@@ -412,7 +415,7 @@ function updateBalanceSheet() {
       <td>${entry.type === "Asset" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td>${entry.type === "Liability" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td class="actions">
-        <button onclick="showBalanceSheetOptions(${index})">Click for Options</button>
+        <button onclick="showBalanceSheetOptions(event, ${index})">Click for Options</button>
       </td>
     `;
     balanceSheetBody.appendChild(row);
@@ -427,10 +430,11 @@ function updateBalanceSheet() {
 }
 
 // Show Balance Sheet Options
-function showBalanceSheetOptions(index) {
+function showBalanceSheetOptions(event, index) {
   const options = ["Edit", "Duplicate", "Delete"];
-  const optionList = options.map(option => `<button onclick="handleBalanceSheetAction(${index}, '${option.toLowerCase()}')">${option}</button>`).join("");
-  alert(`Select an action: ${optionList}`);
+  showDropdownMenu(event, options, (action) => {
+    handleBalanceSheetAction(index, action);
+  });
 }
 
 // Handle Balance Sheet Action
@@ -723,4 +727,60 @@ function convertCurrency() {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
-      }
+}
+
+// Show Dropdown Menu
+function showDropdownMenu(event, options, callback) {
+  const dropdown = document.createElement("div");
+  dropdown.className = "dropdown-menu";
+  dropdown.style.position = "absolute";
+
+  // Adjust position if near the edge of the viewport
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const dropdownWidth = 150; // Approximate width of the dropdown
+  const dropdownHeight = options.length * 40; // Approximate height of the dropdown
+
+  let left = event.clientX;
+  let top = event.clientY;
+
+  if (left + dropdownWidth > viewportWidth) {
+    left = viewportWidth - dropdownWidth;
+  }
+  if (top + dropdownHeight > viewportHeight) {
+    top = viewportHeight - dropdownHeight;
+  }
+
+  dropdown.style.left = `${left}px`;
+  dropdown.style.top = `${top}px`;
+  dropdown.style.backgroundColor = "green";
+  dropdown.style.border = "1px solid #ccc";
+  dropdown.style.borderRadius = "5px";
+  dropdown.style.zIndex = "1000";
+
+  options.forEach(option => {
+    const button = document.createElement("button");
+    button.textContent = option;
+    button.style.display = "block";
+    button.style.width = "100%";
+    button.style.padding = "10px";
+    button.style.color = "white";
+    button.style.backgroundColor = "green";
+    button.style.border = "none";
+    button.style.textAlign = "left";
+    button.onclick = () => {
+      callback(option.toLowerCase());
+      document.body.removeChild(dropdown);
+    };
+    dropdown.appendChild(button);
+  });
+
+  document.body.appendChild(dropdown);
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      document.body.removeChild(dropdown);
+    }
+  }, { once: true });
+    }
