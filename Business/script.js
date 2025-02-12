@@ -832,3 +832,25 @@ function showDropdownMenu(event, options, callback) {
 document.getElementById("switchLink").addEventListener("click", () => {
   window.location.href = personalWebsiteURL;
 });
+
+// Attach event listeners to "Click for Options" buttons
+clickForOptionsButtons.forEach(button => {
+  button.addEventListener("click", (event) => {
+    if (button.getAttribute("onclick").includes("showEntryOptions")) {
+      const [month, catIndex, entryIndex] = parseOnClickArguments(button.getAttribute("onclick"));
+      showEntryOptions(event, month, catIndex, entryIndex);
+    } else if (button.getAttribute("onclick").includes("showBalanceSheetOptions")) {
+      const [index] = parseOnClickArguments(button.getAttribute("onclick"));
+      showBalanceSheetOptions(event, index);
+    }
+  });
+});
+
+// Helper function to parse onclick arguments
+function parseOnClickArguments(onclickString) {
+  return onclickString
+    .replace(/.*\(/, "") // Remove everything before the arguments
+    .replace(/\).*/, "") // Remove everything after the arguments
+    .split(",") // Split into individual arguments
+    .map(arg => arg.trim().replace(/'/g, "")); // Clean up the arguments
+}
