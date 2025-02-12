@@ -28,6 +28,8 @@ const businessFinancialStory = document.getElementById("businessFinancialStory")
 const saveFileNameInput = document.getElementById("saveFileName");
 const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
+// Add these to your DOM elements list
+const clickForOptionsButtons = document.querySelectorAll("button[onclick*='showEntryOptions'], button[onclick*='showBalanceSheetOptions']");
 
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
