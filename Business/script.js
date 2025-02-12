@@ -1,3 +1,5 @@
+ { once: true });
+    }
 // Initialize variables
 let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
@@ -260,7 +262,7 @@ function updateIncomeStatement() {
       <td>${business.currency} ${monthlyExpenses}</td>
       <td>${business.currency} ${netIncome}</td>
       <td class="actions">
-        <button onclick="toggleMonthlyEntries(event, '${month}')">▼</button>
+        <button onclick="toggleMonthlyEntries('${month}')">▼</button>
       </td>
     `;
     incomeStatementBody.appendChild(row);
@@ -291,7 +293,7 @@ function updateIncomeStatement() {
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Income").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td>${business.currency} ${category.entries.filter(e => e.type === "Expense").reduce((sum, e) => sum + e.amount, 0)}</td>
                 <td class="actions">
-                  <button onclick="toggleCategoryEntries(event, '${month}', ${catIndex})">▼</button>
+                  <button onclick="showCategoryOptions(event, '${month}', ${catIndex})">Click for Options</button>
                 </td>
               </tr>
               <tr id="category-detail-${month}-${catIndex}" style="display: none;">
@@ -314,7 +316,7 @@ function updateIncomeStatement() {
                           <td>${entry.type === "Income" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td>${entry.type === "Expense" ? `${business.currency} ${entry.amount}` : ""}</td>
                           <td class="actions">
-                            <button onclick="showEntryOptions(event, '${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
+                            <button onclick="showDailyEntryOptions(event, '${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
                           </td>
                         </tr>
                       `).join("")}
@@ -345,33 +347,70 @@ function updateIncomeStatement() {
 }
 
 // Toggle Monthly Entries
-function toggleMonthlyEntries(event, month) {
+function toggleMonthlyEntries(month) {
   const detailRow = document.getElementById(`detail-${month}`);
   detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
-  event.stopPropagation(); // Prevent event bubbling
 }
 
-// Toggle Category Entries
-function toggleCategoryEntries(event, month, catIndex) {
-  const detailRow = document.getElementById(`category-detail-${month}-${catIndex}`);
-  detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
-  event.stopPropagation(); // Prevent event bubbling
-}
-
-// Show Entry Options
-function showEntryOptions(event, month, catIndex, entryIndex) {
-  const options = ["Edit", "Duplicate", "Delete"];
+// Show Category Options
+function showCategoryOptions(event, month, catIndex) {
+  const options = ["Go to Daily Entry", "Edit Category", "Duplicate Category", "Delete Category"];
   showDropdownMenu(event, options, (action) => {
-    handleEntryAction(month, catIndex, entryIndex, action);
+    handleCategoryAction(month, catIndex, action);
   });
 }
 
-// Handle Entry Action
-function handleEntryAction(month, catIndex, entryIndex, action) {
+// Handle Category Action
+function handleCategoryAction(month, catIndex, action) {
+  const business = businesses[currentBusinessIndex];
+  const category = business.incomeStatement[month].categories[catIndex];
+  switch (action) {
+    case "go to daily entry":
+      toggleCategoryEntries(month, catIndex);
+      break;
+    case "edit category":
+      const newName = prompt("Edit Category Name:", category.name);
+      if (newName) {
+        category.name = newName;
+        updateIncomeStatement();
+        saveDataToLocalStorage();
+      }
+      break;
+    case "duplicate category":
+      business.incomeStatement[month].categories.push({ ...category });
+      updateIncomeStatement();
+      saveDataToLocalStorage();
+      break;
+    case "delete category":
+      if (confirm("Are you sure you want to delete this category?")) {
+        business.incomeStatement[month].categories.splice(catIndex, 1);
+        updateIncomeStatement();
+        saveDataToLocalStorage();
+      }
+      break;
+  }
+}
+
+// Toggle Category Entries
+function toggleCategoryEntries(month, catIndex) {
+  const detailRow = document.getElementById(`category-detail-${month}-${catIndex}`);
+  detailRow.style.display = detailRow.style.display === "none" ? "table-row" : "none";
+}
+
+// Show Daily Entry Options
+function showDailyEntryOptions(event, month, catIndex, entryIndex) {
+  const options = ["Edit Daily Entry", "Duplicate Daily Entry", "Delete Daily Entry"];
+  showDropdownMenu(event, options, (action) => {
+    handleDailyEntryAction(month, catIndex, entryIndex, action);
+  });
+}
+
+// Handle Daily Entry Action
+function handleDailyEntryAction(month, catIndex, entryIndex, action) {
   const business = businesses[currentBusinessIndex];
   const entry = business.incomeStatement[month].categories[catIndex].entries[entryIndex];
   switch (action) {
-    case "edit":
+    case "edit daily entry":
       const newDescription = prompt("Edit Description:", entry.description);
       const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
       if (newDescription && !isNaN(newAmount)) {
@@ -384,12 +423,12 @@ function handleEntryAction(month, catIndex, entryIndex, action) {
         alert("Invalid Input!");
       }
       break;
-    case "duplicate":
+    case "duplicate daily entry":
       business.incomeStatement[month].categories[catIndex].entries.push({ ...entry });
       updateIncomeStatement();
       saveDataToLocalStorage();
       break;
-    case "delete":
+    case "delete daily entry":
       if (confirm("Are you sure you want to delete this entry?")) {
         business.incomeStatement[month].categories[catIndex].entries.splice(entryIndex, 1);
         updateIncomeStatement();
@@ -783,4 +822,4 @@ function showDropdownMenu(event, options, callback) {
       document.body.removeChild(dropdown);
     }
   }, { once: true });
-    }
+  }
