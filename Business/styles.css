@@ -107,7 +107,7 @@ th, td {
 }
 
 .actions button {
-  background: none;
+  background: green;
   border: none;
   cursor: pointer;
   font-size: 16px;
