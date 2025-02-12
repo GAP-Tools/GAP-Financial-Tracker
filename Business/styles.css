@@ -11,7 +11,7 @@ body {
   padding: 20px;
 }
 
-.business-selector, .income-statement, .balance-sheet, .health-score {
+.profile-section, .income-statement, .balance-sheet, .health-score, .currency-converter, .data-management, .share-app, .story-generation {
   margin-bottom: 40px;
 }
 
@@ -28,6 +28,41 @@ body {
   background-color: #0056b3;
 }
 
+.business-controls {
+    margin-bottom: 10px; /* Adds space below the controls */
+}
+
+.business-controls + select,
+.business-controls + div {
+    margin-left: 20px; /* Adjusts left margin for elements following the controls */
+  }
+
+.business-list-controls {
+    margin-left: 20px; /* Matches the indent of other controls */
+    margin-top: 10px; /* Adds space above the new div */
+}  
+
+h1, h2 {
+  color: #333;
+}
+
+input, select, button {
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -40,9 +75,8 @@ th, td {
   text-align: left;
 }
 
-.totals, .averages {
+.totals {
   font-weight: bold;
-  margin-top: 20px;
 }
 
 .circle-container {
@@ -66,35 +100,64 @@ th, td {
   margin-top: 10px;
   color: #555;
 }
-
-.dropdown {
-  position: relative;
-  display: inline-block;
+  
+.actions {
+  display: flex;
+  gap: 5px;
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background: white;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  z-index: 1;
-  min-width: 160px;
-}
-
-.dropdown-content button {
-  width: 100%;
-  text-align: left;
+.actions button {
   background: none;
-  color: #333;
-  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.dropdown-content button:hover {
-  background: #f8f9fa;
+.actions button:hover {
+  color: #0056b3;
 }
 
-.show { display: block; }
+.target-input {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-.collapsed + tr:not(.month-row) {
+.target-input button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tooltip {
+  font-size: 12px;
+  color: #555;
+  margin-left: 5px;
+}
+
+.calculator-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.calculator-popup {
   display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.calculator-content {
