@@ -2,7 +2,7 @@
 let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
 let currencyRates = {}; // Object to store currency conversion rates
-const personalWebsiteURL = "https://gap-tools.github.io/GAP-Financial-Tracker"; // Replace with your personal website URL
+const personalWebsiteURL = "https://gap-tools.github.io/GAP-Financial-Tracker/"; // Replace with your personal website URL
 
 // DOM Elements
 const businessList = document.getElementById("businessList");
