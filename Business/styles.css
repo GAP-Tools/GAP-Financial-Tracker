@@ -1,52 +1,70 @@
-/* styles.css */
 body {
   font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
   margin: 0;
-  padding: 20px;
-  background: #f0f2f5;
+  padding: 0;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
 }
 
-.business-section, .income-statement, .balance-sheet, .health-section {
-  background: white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.business-selector, .income-statement, .balance-sheet, .health-score {
+  margin-bottom: 40px;
+}
+
+.business-controls button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+.business-controls button:hover {
+  background-color: #0056b3;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
 th, td {
-  padding: 12px;
+  padding: 10px;
+  border: 1px solid #ccc;
   text-align: left;
-  border-bottom: 1px solid #ddd;
 }
 
-th {
-  background-color: #f8f9fa;
+.totals, .averages {
+  font-weight: bold;
+  margin-top: 20px;
 }
 
-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 5px;
+.circle-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
 }
 
-button:hover {
-  background: #0056b3;
+#healthPercentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#healthTips {
+  text-align: center;
+  margin-top: 10px;
+  color: #555;
 }
 
 .dropdown {
@@ -77,40 +95,6 @@ button:hover {
 
 .show { display: block; }
 
-.health-chart {
-  width: 200px;
-  height: 200px;
-  margin: 20px auto;
-  position: relative;
-}
-
-#healthPercentage {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.health-tips {
-  background: #fff9e6;
-  padding: 15px;
-  border-radius: 4px;
-  margin-top: 20px;
-}
-
 .collapsed + tr:not(.month-row) {
   display: none;
-}
-
-.averages, .totals {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  margin-top: 20px;
-}
-
-.averages p, .totals p {
-  margin: 5px 0;
 }
