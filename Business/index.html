@@ -6,11 +6,9 @@
   <title>Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <!-- Business Selector -->
     <section class="business-selector">
       <h3><span id="switchLink">Switch to Personal</span></h3>
       <h2>BUSINESS FINANCIAL TRACKER</h2>
@@ -23,24 +21,20 @@
       <button onclick="deleteBusiness()">🗑️</button>
     </section>
 
-    <!-- Business Profile Section -->
     <section class="profile-section">
       <h2>Business Profile</h2>
       <input type="text" id="businessDescription" placeholder="Business Description">
       <br>
       <label for="currency">Preferred Currency:</label>
       <select id="currency"></select>
-      <br>
-      <br>
+      <br><br>
       <label for="residual-income-target">Residual Income Target:</label>
       <div class="target-input">
         <input type="number" id="residual-income-target" placeholder="Target">
-        <button onclick="editResidualIncomeTarget()">✏️</button>
       </div>
       <button onclick="saveBusinessProfile()">Save Business Profile</button>
     </section>
 
-    <!-- Currency Converter -->
     <section class="currency-converter">
       <h2>Currency Converter</h2>
       <input type="number" id="amount" placeholder="Amount">
@@ -50,7 +44,6 @@
       <p id="conversionResult"></p>
     </section>
 
-    <!-- Income Statement Section -->
     <section class="income-statement">
       <h2>Income Statement</h2>
       <div class="table-container">
@@ -60,23 +53,22 @@
               <th>Month</th>
               <th>Total Income</th>
               <th>Total Expenses</th>
-              <th>Net Income</th>
-              <th>Actions</th>
+              <th>Cashflow</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="income-statement-body"></tbody>
         </table>
         <div class="totals">
-          <p>Average Monthly Income: <span id="average-income">0</span></p>
-          <p>Average Monthly Expenses: <span id="average-expenses">0</span></p>
-          <p>Average Monthly Cashflow: <span id="average-cashflow">0</span></p>
+          <p>Average Total Income: <span id="average-total-income">0</span></p>
+          <p>Average Total Expenses: <span id="average-total-expenses">0</span></p>
+          <p>Average Cashflow: <span id="average-cashflow">0</span></p>
         </div>
       </div>
-      <button onclick="addIncome()">Add Income</button>
-      <button onclick="addExpense()">Add Expense</button>
+      <button onclick="addIncomeOrExpense(true)">Add Income</button>
+      <button onclick="addIncomeOrExpense(false)">Add Expense</button>
     </section>
 
-    <!-- Balance Sheet Section -->
     <section class="balance-sheet">
       <h2>Balance Sheet</h2>
       <div class="table-container">
@@ -85,9 +77,9 @@
             <tr>
               <th>Date</th>
               <th>Description</th>
-              <th>Assets</th>
-              <th>Liabilities</th>
-              <th>Actions</th>
+              <th>Asset</th>
+              <th>Liability</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="balance-sheet-body"></tbody>
@@ -102,7 +94,6 @@
       <button onclick="addLiability()">Add Liability</button>
     </section>
 
-    <!-- Financial Health Score -->
     <section class="health-score">
       <h2>Financial Health Score</h2>
       <div class="circle-container">
@@ -112,25 +103,6 @@
       <p id="healthTips"></p>
     </section>
 
-    <!-- Data Management -->
-    <section class="data-management">
-      <h2>Data Management</h2>
-      <input type="text" id="saveFileName" placeholder="Enter file name">
-      <button onclick="exportBusinessData()">Export Business Data</button>
-      <button onclick="importBusinessData()">Import Business Data</button>
-      <button onclick="clearBusinessData()">Clear Business Data</button>
-    </section>
-
-    <!-- Share App -->
-    <section class="share-app">
-      <h2>Share App</h2>
-      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
-      <button onclick="shareOnFacebook()">Share on Facebook</button>
-      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
-      <button onclick="downloadApp()">Download App</button>
-    </section>
-
-    <!-- Story Generation -->
     <section class="story-generation">
       <h2>Business Financial Story</h2>
       <button onclick="generateBusinessStory()">Generate Story</button>
@@ -138,10 +110,8 @@
     </section>
   </div>
 
-  <!-- Floating Calculator Icon -->
   <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
 
-  <!-- Calculator Popup -->
   <div id="calculatorPopup" class="calculator-popup">
     <div class="calculator-content">
       <h3>Basic Calculator</h3>
@@ -167,5 +137,7 @@
       </div>
     </div>
   </div>
+
+  <script src="script.js"></script>
 </body>
   </html>
