@@ -1,5 +1,3 @@
- { once: true });
-    }
 // Initialize variables
 let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
@@ -822,4 +820,4 @@ function showDropdownMenu(event, options, callback) {
       document.body.removeChild(dropdown);
     }
   }, { once: true });
-  }
+   }
