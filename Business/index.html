@@ -64,6 +64,16 @@
               <th>Net Income</th>
               <th>Actions</th>
             </tr>
+
+<!-- Update the actions column in the income statement table -->
+<td class="actions">
+  <button onclick="toggleMonthlyEntries(event, '${month}')">▼</button>
+</td>
+
+<!-- Update the actions column in the category row -->
+<td class="actions">
+  <button onclick="toggleCategoryEntries(event, '${month}', ${catIndex})">▼</button>
+</td>
           </thead>
           <tbody id="income-statement-body"></tbody>
         </table>
@@ -93,6 +103,11 @@
               <th>Liabilities</th>
               <th>Actions</th>
             </tr>
+
+            <!-- Update the actions column in the balance sheet table -->
+<td class="actions">
+  <button onclick="showBalanceSheetOptions(event, ${index})">Click for Options</button>
+</td>
           </thead>
           <tbody id="balance-sheet-body"></tbody>
         </table>
