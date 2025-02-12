@@ -64,17 +64,13 @@
               <th>Net Income</th>
               <th>Actions</th>
             </tr>
-            <!-- Example for Income Statement -->
-<td class="actions">
-  <button onclick="showEntryOptions(event, '${month}', ${catIndex}, ${entryIndex})">Click for Options</button>
-</td>
           </thead>
           <tbody id="income-statement-body"></tbody>
         </table>
         <div class="totals">
           <p>Total Income: <span id="total-income">0</span> <span class="tooltip">💰 Money earned</span></p>
           <p>Total Expenses: <span id="total-expenses">0</span> <span class="tooltip">💸 Money spent</span></p>
-          <p>Net Income/Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
+          <p>Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
           <p>Average Monthly Income: <span id="average-income">0</span></p>
           <p>Average Monthly Expenses: <span id="average-expenses">0</span></p>
           <p>Average Monthly Cashflow: <span id="average-cashflow">0</span></p>
@@ -97,10 +93,6 @@
               <th>Liabilities</th>
               <th>Actions</th>
             </tr>
-            <!-- Example for Balance Sheet -->
-<td class="actions">
-  <button onclick="showBalanceSheetOptions(event, ${index})">Click for Options</button>
-</td>
           </thead>
           <tbody id="balance-sheet-body"></tbody>
         </table>
