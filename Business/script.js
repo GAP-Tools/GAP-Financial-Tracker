@@ -15,9 +15,6 @@ const monthlyTableBody = document.getElementById('monthlyTableBody');
 const categoryTableBody = document.getElementById('categoryTableBody');
 const dailyTableBody = document.getElementById('dailyTableBody');
 const balanceTableBody = document.getElementById('balance-sheet-body');
-const totalIncome = document.getElementById('total-income');
-const totalExpenses = document.getElementById('total-expenses');
-const cashflowDisplay = document.getElementById('cashflow');
 const totalAssets = document.getElementById('total-assets');
 const totalLiabilities = document.getElementById('total-liabilities');
 const netWorth = document.getElementById('net-worth');
@@ -46,29 +43,14 @@ const healthChart = new Chart(healthChartCanvas, {
   }
 });
 
-// Fetch currency rates from the API
-fetch('https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD')
-  .then(response => response.json())
-  .then(data => {
-    currencyRates = data.conversion_rates;
-    populateCurrencyDropdowns();
-  })
-  .catch(error => {
-    console.error('Error fetching currency rates:', error);
-  });
-
-// Function to populate currency dropdowns
-function populateCurrencyDropdowns() {
-  const currencies = Object.keys(currencyRates);
-  currencies.forEach(currency => {
-    const option = document.createElement('option');
-    option.value = currency;
-    option.textContent = currency;
-    fromCurrency.appendChild(option.cloneNode(true));
-    toCurrency.appendChild(option.cloneNode(true));
-    currencySelect.appendChild(option.cloneNode(true));
-  });
-}
+// Mock currency rates for demonstration
+const currencyRates = {
+  USD: 1,
+  EUR: 0.9,
+  GBP: 0.8,
+  JPY: 130,
+  CAD: 1.3
+};
 
 // Function to save data to localStorage
 function saveData() {
@@ -107,8 +89,7 @@ function addBusiness() {
     residualIncomeTarget: 0,
     income: [],
     expenses: [],
-    assets: [],
-    liabilities: []
+    categories: []
   });
   saveData();
   updateBusinessList();
@@ -142,157 +123,102 @@ function updateProfileSection() {
 
 // Function to update tables
 function updateTables() {
+  // Monthly Table
   monthlyTableBody.innerHTML = '';
+  const monthlyData = {};
   currentBusiness.income.forEach(income => {
-    const row = `
-      <tr>
-        <td>${new Date(income.date).toLocaleDateString()}</td>
-        <td class="financial_columns">
-          <div class="income_expense_header">
-            <span>$${income.amount}</span>
-            <span></span>
-          </div>
-        </td>
-        <td>$${income.amount}</td>
-        <td class="action_column">
-          <button class="clean-button danger-button collapse-icon" onclick="toggleCategory(this)">▼</button>
-        </td>
-      </tr>
-    `;
-    monthlyTableBody.insertAdjacentHTML('beforeend', row);
+    const month = new Date(income.date).toLocaleDateString('default', { month: 'long', year: 'numeric' });
+    if (!monthlyData[month]) {
+      monthlyData[month] = { income: 0, expenses: 0 };
+    }
+    monthlyData[month].income += income.amount;
   });
-
   currentBusiness.expenses.forEach(expense => {
+    const month = new Date(expense.date).toLocaleDateString('default', { month: 'long', year: 'numeric' });
+    if (!monthlyData[month]) {
+      monthlyData[month] = { income: 0, expenses: 0 };
+    }
+    monthlyData[month].expenses += expense.amount;
+  });
+  for (const month in monthlyData) {
     const row = `
       <tr>
-        <td>${new Date(expense.date).toLocaleDateString()}</td>
-        <td class="financial_columns">
-          <div class="income_expense_header">
-            <span></span>
-            <span>-$${expense.amount}</span>
-          </div>
-        </td>
-        <td>-$${expense.amount}</td>
-        <td class="action_column">
-          <button class="clean-button danger-button collapse-icon" onclick="toggleCategory(this)">▼</button>
-        </td>
+        <td>${month}</td>
+        <td>$${monthlyData[month].income.toFixed(2)}</td>
+        <td>$${monthlyData[month].expenses.toFixed(2)}</td>
+        <td>$${(monthlyData[month].income - monthlyData[month].expenses).toFixed(2)}</td>
+        <td><button class="clean-button danger-button">-</button></td>
       </tr>
     `;
     monthlyTableBody.insertAdjacentHTML('beforeend', row);
-  });
+  }
 
+  // Category Table
   categoryTableBody.innerHTML = '';
   currentBusiness.categories.forEach(category => {
+    const income = currentBusiness.income.reduce((sum, entry) => {
+      return entry.category === category ? sum + entry.amount : sum;
+    }, 0);
+    const expenses = currentBusiness.expenses.reduce((sum, entry) => {
+      return entry.category === category ? sum + entry.amount : sum;
+    }, 0);
     const row = `
       <tr>
-        <td>${category.name}</td>
-        <td class="financial_columns">
-          <div class="income_expense_header">
-            <span>$${category.income}</span>
-            <span>-$${category.expenses}</span>
-          </div>
-        </td>
-        <td class="action_column">
-          <button class="clean-button danger-button collapse-icon" onclick="toggleDailyEntries(this)">▼</button>
-        </td>
+        <td>${category}</td>
+        <td>$${income.toFixed(2)}</td>
+        <td>$${expenses.toFixed(2)}</td>
+        <td><button class="clean-button danger-button">-</button></td>
       </tr>
     `;
     categoryTableBody.insertAdjacentHTML('beforeend', row);
   });
 
+  // Daily Table
   dailyTableBody.innerHTML = '';
-  currentBusiness.dailyEntries.forEach(entry => {
+  currentBusiness.income.forEach(income => {
     const row = `
       <tr>
-        <td>${new Date(entry.date).toLocaleDateString()}</td>
-        <td>${entry.description}</td>
-        <td class="daily_financial_columns">
-          <div class="income_expense_header_daily">
-            <span>${entry.type === 'income' ? '$' + entry.amount : ''}</span>
-            <span>${entry.type === 'expense' ? '-$' + entry.amount : ''}</span>
-          </div>
-        </td>
-        <td class="daily_action_column">
-          <button class="clean-button danger-button" onclick="editDailyEntry(${entry.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteDailyEntry(${entry.id})">🗑️</button>
-        </td>
+        <td>${new Date(income.date).toLocaleDateString()}</td>
+        <td>${income.description}</td>
+        <td>$${income.amount}</td>
+        <td></td>
+        <td><button class="clean-button danger-button">-</button></td>
       </tr>
     `;
     dailyTableBody.insertAdjacentHTML('beforeend', row);
   });
-
-  balanceTableBody.innerHTML = '';
-  currentBusiness.assets.forEach(asset => {
+  currentBusiness.expenses.forEach(expense => {
     const row = `
       <tr>
-        <td>${new Date(asset.date).toLocaleDateString()}</td>
-        <td>${asset.description}</td>
-        <td>$${asset.amount}</td>
-        <td>
-          <button class="clean-button danger-button" onclick="editAsset(${asset.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteAsset(${asset.id})">🗑️</button>
-        </td>
+        <td>${new Date(expense.date).toLocaleDateString()}</td>
+        <td>${expense.description}</td>
+        <td></td>
+        <td>$${expense.amount}</td>
+        <td><button class="clean-button danger-button">-</button></td>
       </tr>
     `;
-    balanceTableBody.insertAdjacentHTML('beforeend', row);
-  });
-
-  currentBusiness.liabilities.forEach(liability => {
-    const row = `
-      <tr>
-        <td>${new Date(liability.date).toLocaleDateString()}</td>
-        <td>${liability.description}</td>
-        <td>-$${liability.amount}</td>
-        <td>
-          <button class="clean-button danger-button" onclick="editLiability(${liability.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteLiability(${liability.id})">🗑️</button>
-        </td>
-      </tr>
-    `;
-    balanceTableBody.insertAdjacentHTML('beforeend', row);
+    dailyTableBody.insertAdjacentHTML('beforeend', row);
   });
 }
 
 // Function to update totals
 function updateTotals() {
-  const incomeTotal = calculateTotal(currentBusiness.income, 'income');
-  const expenseTotal = calculateTotal(currentBusiness.expenses, 'expense');
+  const incomeTotal = currentBusiness.income.reduce((sum, entry) => sum + entry.amount, 0);
+  const expenseTotal = currentBusiness.expenses.reduce((sum, entry) => sum + entry.amount, 0);
   const cashflow = incomeTotal - expenseTotal;
-  const assetTotal = calculateBalance(currentBusiness.assets, 'asset');
-  const liabilityTotal = calculateBalance(currentBusiness.liabilities, 'liability');
+  const assetTotal = currentBusiness.assets.reduce((sum, entry) => sum + entry.amount, 0);
+  const liabilityTotal = currentBusiness.liabilities.reduce((sum, entry) => sum + entry.amount, 0);
 
-  totalIncome.textContent = `$${incomeTotal.toFixed(2)}`;
-  totalExpenses.textContent = `$${expenseTotal.toFixed(2)}`;
-  cashflowDisplay.textContent = `$${cashflow.toFixed(2)}`;
   totalAssets.textContent = `$${assetTotal.toFixed(2)}`;
   totalLiabilities.textContent = `$${liabilityTotal.toFixed(2)}`;
   netWorth.textContent = `$${(assetTotal - liabilityTotal).toFixed(2)}`;
 
-  updateAverages(incomeTotal, expenseTotal, cashflow);
-}
-
-// Function to calculate totals
-function calculateTotal(categoryItems, type) {
-  return categoryItems.reduce((sum, item) => {
-    if (type === 'income' && item.type === 'income') {
-      return sum + parseFloat(item.amount);
-    } else if (type === 'expense' && item.type === 'expense') {
-      return sum + parseFloat(item.amount);
-    } else {
-      return sum;
-    }
-  }, 0);
-}
-
-function calculateBalance(balanceItems, type) {
-  return balanceItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-}
-
-function updateAverages(income, expenses, cashflow) {
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  const avgIncome = income / months.length;
-  const avgExpenses = expenses / months.length;
-  const avgCashflow = cashflow / months.length;
+  const months = new Set(currentBusiness.income.concat(currentBusiness.expenses).map(entry => {
+    return new Date(entry.date).toISOString().substring(0, 7);
+  })).size;
+  const avgIncome = incomeTotal / months;
+  const avgExpenses = expenseTotal / months;
+  const avgCashflow = cashflow / months;
 
   document.getElementById('average-income').textContent = `$${avgIncome.toFixed(2)}`;
   document.getElementById('average-expenses').textContent = `$${avgExpenses.toFixed(2)}`;
@@ -301,13 +227,13 @@ function updateAverages(income, expenses, cashflow) {
 
 // Function to update financial health
 function updateFinancialHealth() {
-  const cashflow = parseFloat(cashflowDisplay.textContent.replace('$', '')).toFixed(2);
+  const avgCashflow = parseFloat(document.getElementById('average-cashflow').textContent.replace('$', ''));
   const target = currentBusiness.residualIncomeTarget;
-  const score = target === 0 ? 0 : Math.round((cashflow / target) * 100);
+  const score = target === 0 ? 0 : Math.round((avgCashflow / target) * 100);
   healthChart.data.datasets[0].data = [score];
   healthChart.update();
   healthPercentage.textContent = `${score}%`;
-  healthTips.textContent = getHealthTip(score, cashflow);
+  healthTips.textContent = getHealthTip(score, avgCashflow);
 }
 
 function getHealthTip(score, cashflow) {
@@ -341,27 +267,11 @@ function getHealthTip(score, cashflow) {
   }
 }
 
-function toggleMonthlyEntries(row) {
-  const categoryContainer = row.parentNode.nextElementSibling;
-  if (categoryContainer) {
-    categoryContainer.classList.toggle('collapsed');
-  }
-}
-
-function toggleCategory(row) {
-  const categoryRow = row.closest('tr');
-  const category = categoryRow.querySelector('.category');
-  category.classList.toggle('collapsed');
-}
-
-function toggleDailyEntries() {
-  // Daily entries toggle logic
-}
-
+// Function to add income entry
 function addIncomeEntry() {
   const amount = parseFloat(prompt('Enter income amount:'));
   const description = prompt('Enter description:');
-  const category = prompt('Enter category:');
+  const category = prompt('Enter category (existing categories: ' + currentBusiness.categories.join(', ') + '):');
   if (!isNaN(amount) && description && category) {
     currentBusiness.income.push({
       id: Date.now(),
@@ -370,16 +280,20 @@ function addIncomeEntry() {
       description,
       category
     });
+    if (!currentBusiness.categories.includes(category)) {
+      currentBusiness.categories.push(category);
+    }
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
+// Function to add expense entry
 function addExpenseEntry() {
   const amount = parseFloat(prompt('Enter expense amount:'));
   const description = prompt('Enter description:');
-  const category = prompt('Enter category:');
+  const category = prompt('Enter category (existing categories: ' + currentBusiness.categories.join(', ') + '):');
   if (!isNaN(amount) && description && category) {
     currentBusiness.expenses.push({
       id: Date.now(),
@@ -388,12 +302,16 @@ function addExpenseEntry() {
       description,
       category
     });
+    if (!currentBusiness.categories.includes(category)) {
+      currentBusiness.categories.push(category);
+    }
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
+// Function to add asset entry
 function addAssetEntry() {
   const amount = parseFloat(prompt('Enter asset amount:'));
   const description = prompt('Enter description:');
@@ -410,6 +328,7 @@ function addAssetEntry() {
   }
 }
 
+// Function to add liability entry
 function addLiabilityEntry() {
   const amount = parseFloat(prompt('Enter liability amount:'));
   const description = prompt('Enter description:');
@@ -426,6 +345,7 @@ function addLiabilityEntry() {
   }
 }
 
+// Function to edit business name
 function editBusinessName() {
   const newName = prompt('Enter new business name:', currentBusiness.name);
   if (newName) {
@@ -435,6 +355,7 @@ function editBusinessName() {
   }
 }
 
+// Function to delete business
 function deleteBusiness() {
   if (confirm('Are you sure you want to delete this business?')) {
     businesses.splice(currentBusinessIndex, 1);
@@ -444,59 +365,30 @@ function deleteBusiness() {
   }
 }
 
-function editItem(type, id) {
-  const items = currentBusiness[type];
-  const itemIndex = items.findIndex(item => item.id === id);
-  if (itemIndex !== -1) {
-    const item = items[itemIndex];
-    const newAmount = parseFloat(prompt('Enter new amount:', item.amount));
-    const newDescription = prompt('Enter new description:', item.description);
-    if (!isNaN(newAmount) && newDescription) {
-      item.amount = newAmount;
-      item.description = newDescription;
-      saveData();
-      updateTables();
-      updateTotals();
-    }
-  }
-}
-
-function deleteItem(type, id) {
-  const items = currentBusiness[type];
-  const itemIndex = items.findIndex(item => item.id === id);
-  if (itemIndex !== -1) {
-    items.splice(itemIndex, 1);
-    saveData();
-    updateTables();
-    updateTotals();
-  }
-}
-
+// Function to convert currency
 function convertCurrency() {
   const amount = parseFloat(document.getElementById('convertAmount').value);
   const from = fromCurrency.value;
   const to = toCurrency.value;
-  if (from && to && amount) {
-    const rate = currencyRates[from] ? (amount / currencyRates[from]) * currencyRates[to] : 'Invalid';
-    conversionResult.textContent = rate !== 'Invalid' ? `${amount} ${from} = ${rate.toFixed(2)} ${to}` : 'Invalid currency';
-  } else {
-    conversionResult.textContent = 'Invalid input';
-  }
+  const rate = currencyRates[from] ? (amount / currencyRates[from]) * currencyRates[to] : 'Invalid';
+  conversionResult.textContent = rate !== 'Invalid' ? `${amount} ${from} = ${rate.toFixed(2)} ${to}` : 'Invalid currency';
 }
 
+// Function to save business profile
 function saveBusinessProfile() {
   currentBusiness.description = document.getElementById('businessDescription').value;
   currentBusiness.currency = currencySelect.value;
   saveData();
-  updateUI();
 }
 
+// Function to update residual target
 function updateResidualTarget() {
   currentBusiness.residualIncomeTarget = parseFloat(document.getElementById('residual-income-target').value) || 0;
   saveData();
   updateFinancialHealth();
 }
 
+// Function to export data
 function exportData() {
   const fileName = saveFileName.value || 'financial-data';
   const blob = new Blob([JSON.stringify(currentBusiness)], { type: 'application/json' });
@@ -508,6 +400,7 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
+// Function to import data
 function importData() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -529,40 +422,43 @@ function importData() {
   input.click();
 }
 
+// Function to clear data
 function clearData() {
   if (confirm('Are you sure you want to clear all data?')) {
     currentBusiness.income = [];
     currentBusiness.expenses = [];
     currentBusiness.assets = [];
     currentBusiness.liabilities = [];
+    currentBusiness.categories = [];
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
+// Function to share on WhatsApp
 function shareOnWhatsApp() {
   const href = encodeURIComponent(window.location.href);
   window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker:%20${href}`);
 }
 
+// Function to share on LinkedIn
 function shareOnLinkedIn() {
   const summary = encodeURIComponent('Check out this financial tracker to manage your finances efficiently.');
   const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${summary}`;
   window.open(url);
 }
 
+// Function to open app
 function openApp() {
   window.open('https://www.appcreator24.com/app3480869-q98157', '_blank');
 }
 
+// Function to generate story
 function generateStory() {
-  const incomeTotal = parseFloat(totalIncome.textContent.replace('$', ''));
-  const expenseTotal = parseFloat(totalExpenses.textContent.replace('$', ''));
-  const cashflow = parseFloat(cashflowDisplay.textContent.replace('$', ''));
-  const assetTotal = parseFloat(totalAssets.textContent.replace('$', ''));
-  const liabilityTotal = parseFloat(totalLiabilities.textContent.replace('$', ''));
-  const netWorthValue = assetTotal - liabilityTotal;
+  const incomeTotal = parseFloat(document.getElementById('total-income').textContent.replace('$', ''));
+  const expenseTotal = parseFloat(document.getElementById('total-expenses').textContent.replace('$', ''));
+  const cashflow = parseFloat(document.getElementById('cashflow').textContent.replace('$', ''));
   const residualTarget = currentBusiness.residualIncomeTarget;
   const remainingToTarget = residualTarget - cashflow;
 
@@ -576,9 +472,9 @@ function generateStory() {
     - **Cashflow**: $${cashflow}
 
     ### Balance Sheet
-    - **Total Assets**: $${assetTotal}
-    - **Total Liabilities**: $${liabilityTotal}
-    - **Net Worth**: $${netWorthValue}
+    - **Total Assets**: $${incomeTotal}
+    - **Total Liabilities**: $${expenseTotal}
+    - **Net Worth**: $${cashflow}
 
     ### Financial Health
     - **Health Score**: ${healthPercentage.textContent}%
