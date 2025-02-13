@@ -1,173 +1,566 @@
-/* Base Styles */
-:root {
-    --primary-color: #2c836d;
-    --secondary-color: #f5f7fb;
-    --accent-color: #28a745;
-    --text-color: #333;
-    --border-color: #e0e0e0;
-}
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap');
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--secondary-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    padding: 20px;
+  background: #f0f5f9;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Sections */
-.section {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.section-title {
+  color: #2c836d;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #2c836d;
 }
 
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+.clean-button {
+  background: #2c836d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+  margin: 5px;
 }
 
-/* Tables */
-.financial-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 15px 0;
-    background: white;
+.clean-button:hover {
+  background: #28a745;
 }
 
-.financial-table th {
-    background: var(--primary-color);
-    color: white;
-    padding: 12px;
-    text-align: left;
+.danger-button {
+  background: #dc3545;
 }
 
-.financial-table td {
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
+.danger-button:hover {
+  background: #a71d2a;
 }
 
-.financial-table tr:hover {
-    background-color: #f8f9fa;
+.business-controls {
+  margin-bottom: 20px;
 }
 
-/* Buttons */
-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.business-controls > * {
+  margin-right: 10px;
 }
 
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
+.business-list-wrapper {
+  margin-top: 15px;
 }
 
-.btn-secondary {
-    background: #6c757d;
-    color: white;
+.business-list {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-top: 10px;
 }
 
-.btn-small {
-    padding: 4px 8px;
-    font-size: 0.9em;
+.profile-data {
+  margin-top: 20px;
 }
 
-/* Modals */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+.residual-target {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
+.residual-target input {
+  flex: 1;
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-.modal-body {
-    margin: 15px 0;
+.residual-target button {
+  padding: 8px 20px;
 }
 
-.input-group {
-    margin-bottom: 15px;
+.currency-converter {
+  margin-top: 40px;
 }
 
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
+.convert-pair {
+  display: flex;
+  margin-top: 20px;
 }
 
-.form-control {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+.convert-pair select {
+  flex: 1;
+  padding: 8px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-/* Health Chart */
-.health-container {
-    display: flex;
-    gap: 30px;
-    align-items: center;
+.convert-pair input {
+  flex: 1;
+  padding: 8px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-.health-chart {
-    position: relative;
-    width: 200px;
-    height: 200px;
+.convert-pair button {
+  margin: 5px;
+}
+
+.conversion-result {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.income-statement {
+  margin-top: 40px;
+  background: #edf8f5;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.INCOME-table-container {
+  margin-top: 20px;
+}
+
+.star {
+  color: #f5ab35;
+  margin-right: 5px;
+}
+
+.add-Category {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.add-Category button {
+  margin-left: 5px;
+}
+
+.category-table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.category-table th,
+.category-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.category-table th {
+  background: #2c836d;
+  color: #fff;
+}
+
+.collapse-icon {
+  cursor: pointer;
+  background: #2c836d;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.collapse-icon:hover {
+  background: #28a745;
+}
+
+.collapsed > tbody {
+  display: none;
+}
+
+.month-container,
+.category-container,
+.daily-container {
+  border: 1px solid #ddd;
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.month-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #c5e2db;
+  border-radius: 5px;
+}
+
+.category-table-body {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.category-row {
+  cursor: pointer;
+}
+
+.category-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.daily-table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.daily-table th,
+.daily-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.daily-table th {
+  background: #2c836d;
+  color: #fff;
+}
+
+.balance-sheet {
+  margin-top: 40px;
+  background: #edf8f5;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.balance-table {
+  margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.balance-table th,
+.balance-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.balance-table th {
+  background: #2c836d;
+  color: #fff;
+}
+
+.balance-totals {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  background: #c5e2db;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.balance-total {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
 }
 
 .health-score {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--primary-color);
+  margin-top: 40px;
+  text-align: center;
+}
+
+.health-chart {
+  margin: 20px auto;
+  width: 250px;
+  height: 250px;
+}
+
+.health-percentage {
+  margin-top: 10px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c836d;
 }
 
 .health-tips {
-    flex: 1;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.data-management {
+  margin-top: 40px;
+}
+
+.export-import {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.share-app {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.share-buttons button {
+  flex: 1;
+  margin: 5px;
+}
+
+.story-generation {
+  margin-top: 40px;
+}
+
+.financial-story {
+  white-space: pre-wrap;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.calculator-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: #2c836d;
+  color: white;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.calculator-icon:hover {
+  transform: scale(1.1);
+}
+
+.calculator-popup {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+  z-index: 2000;
+}
+
+.calculator-popup.active {
+  display: block;
+}
+
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calculator-header h3 {
+  margin: 0;
+}
+
+.close-btn {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.calculator-display {
+  height: 50px;
+  width: 100%;
+  background: #f8f9fa;
+  text-align: right;
+  padding: 10px;
+  font-size: 1.5rem;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.calculator-keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.calculator-keys button {
+  padding: 15px;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 5px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.calculator-keys button:hover {
+  background: #e0e0e0;
+}
+
+.operator {
+  background: #2c836d;
+  color: #fff;
+}
+
+.operator:hover {
+  background: #28a745;
+}
+
+.clear {
+  background: #dc3545;
+  color: #fff;
+}
+
+.clear:hover {
+  background: #a71d2a;
+}
+
+.equals {
+  background: #6c757d;
+  color: #fff;
+}
+
+.equals:hover {
+  background: #545b62;
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  overflow: auto;
+  padding-top: 100px;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: auto;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 600px;
+}
+
+.close-modal {
+  color: #666;
+  float: right;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #333;
+}
+
+.modal-header {
+  margin-bottom: 20px;
+}
+
+.modal-form input,
+.modal-form select {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.modal-form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background: #2c836d;
+  color: #fff;
+  cursor: pointer;
+}
+
+.modal-form button:hover {
+  background: #28a745;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
     padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
+  }
+
+  .clean-button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
+  .month-container {
+    padding: 5px;
+  }
+
+  .category-table-body {
+    max-height: 100px;
+  }
+
+  .category-row td {
+    padding: 5px;
+  }
+
+  .category-table th,
+  .category-table td {
+    font-size: 0.8rem;
+  }
+
+  .health-chart {
+    width: 200px;
+    height: 200px;
+  }
+
+  .calculator-icon {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .calculator-popup {
+    bottom: 80px;
+    right: 10px;
+  }
 }
 
-/* Category Select */
-.category-select {
-    display: flex;
-    gap: 5px;
-}
-
-/* Icons */
-.fas {
-    margin-right: 5px;
-}
+@media (max-width: 480px) {
+  .category-table,
+  .daily-table {
+    font-size: 0.7rem;
+  }
+    }
