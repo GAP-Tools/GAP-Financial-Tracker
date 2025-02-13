@@ -1,178 +1,97 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
 body {
-  background-color: #f5f7fb;
+  font-family: Arial, sans-serif;
+  background: #ecf9f5;
   color: #333;
-  line-height: 1.6;
-}
-
-header {
-  padding: 1rem;
-  background-color: #191919;
-  text-align: right;
-}
-
-.clean-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
-}
-
-.clean-button:hover {
-  background-color: #218838;
-}
-
-.danger-button {
-  background-color: #dc3545;
-}
-
-.danger-button:hover {
-  background-color: #a71d2a;
-}
-
-.green-button {
-  background-color: #28a745;
-}
-
-.green-button:hover {
-  background-color: #218838;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
 }
 
-.section-title {
-  color: #191919;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid #28a745;
-  padding-bottom: 0.5rem;
+.business-selector {
+  margin-bottom: 30px;
 }
 
-.clean-input {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
+h1, h2 {
+  color: #2c836d;
+}
+
+button {
+  background: #2c836d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.clean-block {
-  display: block;
-  width: 100%;
-  max-width: 400px;
+button:hover {
+  background: #235d51;
 }
 
-.clean-select {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.action-icon {
+  background: #2c836d;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.convert-pair {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.clean-para {
-  margin-top: 1rem;
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-.gridtable {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-}
-
-.gridtable th,
-.gridtable td {
-  border: 1px solid #000;
-  padding: 8px;
-  text-align: left;
-}
-
-.clean-table-header {
-  background-color: #c4e5d3;
-  color: #191919;
-}
-
-.totals {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.total-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-}
-
-.bold {
-  font-weight: 600;
-}
-
-.entry-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.health-score {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 20px auto;
-}
-
-.health-score-tip {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  font-weight: 600;
-  color: #191919;
-}
-
-.health-tip {
+.action-column {
+  background: #2c836d;
+  color: white;
+  padding: 5px;
   text-align: center;
-  margin-top: 20px;
-  font-size: 1.2rem;
-  color: #666;
 }
 
-.data-buttons {
-  display: flex;
-  gap: 20px;
+td.actions button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 16px;
 }
 
-.share-buttons {
-  display: flex;
-  gap: 20px;
+td.actions button:hover {
+  color: #235d51;
+}
+
+.calculator-icon {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  background: #2c836d;
+  color: white;
+  padding: 15px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.calculator-popup {
+  position: fixed;
+  bottom: 120px;
+  right: 40px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.calculator-buttons button {
+  width: 25%;
+  padding: 15px;
+  border: none;
+  background: #f5f5f5;
+  color: #333;
+  border-radius: 5px;
+}
+
+.calculator-buttons button:hover {
+  background: #ddd;
 }
 
 .circle-container {
@@ -180,316 +99,35 @@ header {
   width: 200px;
   height: 200px;
   margin: 0 auto;
-  background-color: #fff;
-  border-radius: 50%;
-  overflow: hidden;
 }
 
-/* Calculator Styles */
-.calculator-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: #28a745;
-  color: white;
-  font-size: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transition: transform 0.3s;
-}
-
-.calculator-icon:hover {
-  transform: scale(1.1);
-}
-
-.calculator-popup {
+#healthPercentage {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  display: none;
-  z-index: 1000;
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.calculator-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.close-btn {
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.calculator-display {
-  margin-bottom: 20px;
-  background-color: #eee;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: right;
-  font-size: 1.5rem;
-}
-
-.calculator-keys {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.calculator-keys button {
-  background-color: #f5f5f5;
-  border: none;
-  padding: 20px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.calculator-keys button:hover {
-  background-color: #ddd;
-}
-
-.calculator-keys button.operator {
-  background-color: #28a745;
-  color: white;
-}
-
-.calculator-keys button.operator:hover {
-  background-color: #218838;
-}
-
-.calculator-keys button.clear {
-  background-color: #dc3545;
-  color: white;
-}
-
-.calculator-keys button.clear:hover {
-  background-color: #a71d2a;
-}
-
-.calculator-keys button.equals {
-  background-color: #6c757d;
-  color: white;
-}
-
-.calculator-keys button.equals:hover {
-  background-color: #545b62;
-}
-
-.clean-pre {
-  background: #f8f9fa;
-  padding: 20px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.IncomeStatementContainer .monthly {
-  width: 33.33%;
-}
-
-.financial_columns {
-  width: 25%;
-}
-
-.income_expense_header {
-  display: flex;
-  justify-content: space-between;
-}
-
-.income_expense_header_daily {
-  display: flex;
-  justify-content: space-between;
-}
-
-.NetIncome {
-  width: 17%;
-}
-
-.action_column {
-  width: 25%;
-}
-
-.action-icon {
-  background-color: #28a745;
-  padding: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
+#healthTips {
   text-align: center;
-  margin-left: 10px;
+  padding: 15px;
+  background: #dffaf8;
+  margin-top: 20px;
 }
 
-.month_container,
-.category_container,
-.daily_container {
-  width: 100%;
-  margin-right: 5px;
-}
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
 
-.income_expense_header span {
-  width: 50%;
-}
+  button {
+    padding: 8px 15px;
+  }
 
-.income_expense_header_daily span {
-  width: 50%;
-}
-
-.categoryTable th {
-    text-align: center;
-}
-
-.categoryTable .income_expense_header {
-  display: flex;
-}
-
-.categoryTable .financial_columns {
-  width: 100%;
-}
-
-.categoryTable td.financial_columns {
-  padding: 8px;
-}
-
-.daily_financial_columns {
-  width: 100%;
-}
-
-.daily_action_column {
-  width: 100px;
-}
-
-.dailyTable th,
-.dailyTable td {
-  text-align: left;
-}
-
-.dailyTable .daily_financial_columns {
-  width: 25%;
-}
-
-.dailyTable .daily_action_column {
-  width: 25%;
-}
-
-.dailyTable td {
-  border: 1px solid #000;
-}
-
-.dailyTable th {
-  background-color: #c4e5d3;
-  color: #191919;
-}
-
-.month_container,
-.category_container,
-.daily_container {
-  margin-top: 10px;
-}
-
-.month_container {
-  float: left;
-  width: 33.33%;
-}
-
-.category_container {
-  float: left;
-  width: 33.33%;
-}
-
-.daily_container {
-  float: left;
-  width: 33.33%;
-}
-
-.collapse-icon {
-  cursor: pointer;
-}
-
-.collapsed > tbody {
-  display: none;
-}
-
-.income-statement .IncomeStatement {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.IncomeStatement .month_container,
-.IncomeStatement .category_container,
-.IncomeStatement .daily_container {
-  width: 100%;
-  margin-right: 10px;
-}
-
-.IncomeStatement .month_container {
-  width: 100%;
-}
-
-.IncomeStatement .category_container {
-  display: none;
-}
-
-.IncomeStatement .daily_container {
-  display: none;
-}
-
-.month_container .collapse-icon {
-  cursor: pointer;
-}
-
-.category_container .collapse-icon {
-  cursor: pointer;
-}
-
-.month_container .collapse-icon:after {
-  content: "\25BC"; /* Down arrow */
-}
-
-.category_container .collapse-icon:after {
-  content: "\25BC"; /* Down arrow */
-}
-
-.month_container.collapsed .collapse-icon:after {
-  content: "\25B6"; /* Right arrow */
-}
-
-.category_container.collapsed .collapse-icon:after {
-  content: "\25B6"; /* Right arrow */
-}
-
-.financial_columns .income,
-.financial_columns .expenses {
-  width: 50%;
-}
-
-.month_container .financial_columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.category_container .financial_columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.daily_financial_columns .income,
-.daily_financial_columns .expenses {
-  width: 50%;
-    }
+  .calculator-icon {
+    bottom: 20px;
+    right: 20px;
+  }
+  }
