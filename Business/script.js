@@ -52,7 +52,7 @@ const healthChart = new Chart(healthChartCanvas, {
 });
 
 // Fetch currency rates from the API
-fetch('https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD')
+fetch('https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD')
   .then(response => response.json())
   .then(data => {
     currencyRates = data.conversion_rates;
