@@ -1,15 +1,15 @@
 // Initialize variables
 let businesses = [];
 let currentBusinessIndex = -1;
-const currencyRates = { USD: 1 };
+const currencyRates = {};
 const appName = "Multi-Business Financial Tracker";
 
 // DOM Elements
 const businessList = document.getElementById('businessList');
 const businessNameInput = document.getElementById('businessName');
 const currencySelect = document.getElementById('currency');
-const fromCurrency = document.getElementById('fromCurrency');
-const toCurrency = document.getElementById('toCurrency');
+const conversionFrom = document.getElementById('fromCurrency');
+const conversionTo = document.getElementById('toCurrency');
 const conversionResult = document.getElementById('conversionResult');
 const monthlyTableBody = document.getElementById('monthlyTableBody');
 const categoryTableBody = document.getElementById('categoryTableBody');
@@ -20,7 +20,7 @@ const totalExpenses = document.getElementById('total-expenses');
 const cashflowDisplay = document.getElementById('cashflow');
 const totalAssets = document.getElementById('total-assets');
 const totalLiabilities = document.getElementById('total-liabilities');
-const netWorth = document.getElementById('net-worth');
+const netWorthDisplay = document.getElementById('net-worth');
 const healthChartCanvas = document.getElementById('healthChart').getContext('2d');
 const healthPercentage = document.getElementById('healthPercentage');
 const healthTips = document.getElementById('healthTips');
@@ -28,11 +28,6 @@ const financialStory = document.getElementById('financialStory');
 const calculatorPopup = document.getElementById('calculatorPopup');
 const calcDisplay = document.getElementById('calcDisplay');
 const saveFileName = document.getElementById('saveFileName');
-const addIncomeModal = document.getElementById('addIncomeModal');
-const addExpenseModal = document.getElementById('addExpenseModal');
-const addCategoryModal = document.getElementById('addCategoryModal');
-const addAssetModal = document.getElementById('addAssetModal');
-const addLiabilityModal = document.getElementById('addLiabilityModal');
 
 // Chart initialization
 const healthChart = new Chart(healthChartCanvas, {
@@ -62,25 +57,24 @@ fetch('https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD')
     console.error('Error fetching currency rates:', error);
   });
 
-// Function to populate currency dropdowns
 function populateCurrencyDropdowns() {
   const currencies = Object.keys(currencyRates);
   currencies.forEach(currency => {
     const option = document.createElement('option');
     option.value = currency;
     option.textContent = currency;
-    fromCurrency.appendChild(option.cloneNode(true));
-    toCurrency.appendChild(option.cloneNode(true));
-    currencySelect.appendChild(option.cloneNode(true));
+    conversionFrom.appendChild(option);
+    conversionTo.appendChild(option);
+    currencySelect.appendChild(option);
   });
 }
 
-// Function to save data to localStorage
+// Save data to localStorage
 function saveData() {
   localStorage.setItem('financialTracker', JSON.stringify(businesses));
 }
 
-// Function to load data from localStorage
+// Load data from localStorage
 function loadData() {
   const data = localStorage.getItem('financialTracker');
   if (data) {
@@ -90,7 +84,7 @@ function loadData() {
   }
 }
 
-// Function to update the business list dropdown
+// Update business list dropdown
 function updateBusinessList() {
   businessList.innerHTML = '';
   businesses.forEach((business, index) => {
@@ -101,7 +95,7 @@ function updateBusinessList() {
   });
 }
 
-// Function to add a new business
+// Add a new business
 function addBusiness() {
   const name = businessNameInput.value.trim();
   if (!name) return;
@@ -111,7 +105,9 @@ function addBusiness() {
     currency: 'USD',
     residualIncomeTarget: 0,
     incomeStatement: {},
-    balanceSheet: []
+    balanceSheet: [],
+    categories: [],
+    dailyEntries: []
   });
   saveData();
   updateBusinessList();
@@ -119,7 +115,7 @@ function addBusiness() {
   switchBusiness(businesses.length - 1);
 }
 
-// Function to switch between businesses
+// Switch to another business
 function switchBusiness(index) {
   currentBusinessIndex = index;
   if (currentBusinessIndex >= 0 && currentBusinessIndex < businesses.length) {
@@ -128,7 +124,7 @@ function switchBusiness(index) {
   }
 }
 
-// Function to update the user interface
+// Update the UI
 function updateUI() {
   updateProfileSection();
   updateTables();
@@ -136,110 +132,102 @@ function updateUI() {
   updateFinancialHealth();
 }
 
-// Function to update the profile section
+// Update profile section
 function updateProfileSection() {
-  document.getElementById('businessDescription').value = currentBusiness.description || '';
-  currencySelect.value = currentBusiness.currency || 'USD';
-  document.getElementById('residual-income-target').value = currentBusiness.residualIncomeTarget || 0;
+  const profile = currentBusiness;
+  document.getElementById('businessDescription').value = profile.description || '';
+  currencySelect.value = profile.currency || 'USD';
+  document.getElementById('residual-income-target').value = profile.residualIncomeTarget || 0;
+  populateIncomeCategories();
 }
 
-// Function to update tables
+// Update tables
 function updateTables() {
   monthlyTableBody.innerHTML = '';
   categoryTableBody.innerHTML = '';
   dailyTableBody.innerHTML = '';
+  balanceTableBody.innerHTML = '';
 
-  // Update monthly table
+  // Income Statement
   const months = Object.keys(currentBusiness.incomeStatement || {});
   months.forEach(month => {
-    const monthData = currentBusiness.incomeStatement[month];
+    const income = currentBusiness.incomeStatement[month].totals.income || 0;
+    const expenses = currentBusiness.incomeStatement[month].totals.expenses || 0;
+    const net = income - expenses;
     const row = `
       <tr>
         <td>${month}</td>
-        <td class="financial_columns">
-          <div class="income_expense_header">
-            <span>$${monthData.totals.income}</span>
-            <span>$${monthData.totals.expenses}</span>
-          </div>
-        </td>
-        <td>$${monthData.totals.net}</td>
+        <td class="financial_columns">$${income.toFixed(2)}</td>
+        <td class="financial_columns">$${expenses.toFixed(2)}</td>
+        <td class="net">${net.toFixed(2)}</td>
         <td class="action_column">
-          <button class="clean-button danger-button" onclick="toggleCategory('${month}')">▼</button>
+          <button class="clean-button collapse-icon" onclick="toggleCategory('${month}')">▼</button>
         </td>
       </tr>
     `;
     monthlyTableBody.insertAdjacentHTML('beforeend', row);
   });
 
-  // Update category table
-  const categories = Object.keys(currentBusiness.categories || {});
+  // Categories
+  const categories = currentBusiness.categories || [];
   categories.forEach(category => {
-    const categoryData = currentBusiness.categories[category];
+    const income = category.income || 0;
+    const expenses = category.expenses || 0;
     const row = `
       <tr>
-        <td>${category}</td>
-        <td class="financial_columns">
-          <div class="income_expense_header">
-            <span>$${categoryData.income}</span>
-            <span>$${categoryData.expenses}</span>
-          </div>
-        </td>
+        <td>${category.name}</td>
+        <td class="financial_columns">$${income.toFixed(2)}</td>
+        <td class="financial_columns">$${expenses.toFixed(2)}</td>
         <td class="action_column">
-          <button class="clean-button danger-button" onclick="toggleDailyEntries('${category}')">▼</button>
+          <button class="clean-button collapse-icon" onclick="toggleCategory('${category.name}')">▼</button>
         </td>
       </tr>
     `;
     categoryTableBody.insertAdjacentHTML('beforeend', row);
   });
 
-  // Update daily entries table
+  // Daily Entries
   const dailyEntries = currentBusiness.dailyEntries || [];
   dailyEntries.forEach(entry => {
     const row = `
       <tr>
         <td>${entry.date}</td>
         <td>${entry.description}</td>
-        <td class="daily_financial_columns">
-          <div class="income_expense_header_daily">
-            <span>${entry.type === 'income' ? '$' + entry.amount : ''}</span>
-            <span>${entry.type === 'expense' ? '-$' + entry.amount : ''}</span>
-          </div>
-        </td>
-        <td class="daily_action_column">
-          <button class="clean-button danger-button" onclick="editDailyEntry(${entry.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteDailyEntry(${entry.id})">🗑️</button>
+        <td class="daily_financial_columns">${entry.type === 'income' ? '$' + entry.amount : '-$' + entry.amount}</td>
+        <td class="action_column">
+          <button class="clean-button" onclick="editDailyEntry(${entry.id})">✏️</button>
+          <button class="clean-button" onclick="deleteDailyEntry(${entry.id})">🗑️</button>
         </td>
       </tr>
     `;
     dailyTableBody.insertAdjacentHTML('beforeend', row);
   });
 
-  // Update balance sheet
-  balanceTableBody.innerHTML = '';
-  currentBusiness.assets.forEach(asset => {
+  // Balance Sheet
+  currentBusiness.balanceSheet.forEach(asset => {
     const row = `
       <tr>
-        <td>${new Date(asset.date).toLocaleDateString()}</td>
+        <td>${asset.date}</td>
         <td>${asset.description}</td>
         <td>$${asset.amount}</td>
-        <td>
-          <button class="clean-button danger-button" onclick="editAsset(${asset.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteAsset(${asset.id})">🗑️</button>
+        <td class="action_column">
+          <button class="clean-button" onclick="editAsset(${asset.id})">✏️</button>
+          <button class="clean-button" onclick="deleteAsset(${asset.id})">🗑️</button>
         </td>
       </tr>
     `;
     balanceTableBody.insertAdjacentHTML('beforeend', row);
   });
 
-  currentBusiness.liabilities.forEach(liability => {
+  currentBusiness.balanceSheet.forEach(liability => {
     const row = `
       <tr>
-        <td>${new Date(liability.date).toLocaleDateString()}</td>
+        <td>${liability.date}</td>
         <td>${liability.description}</td>
         <td>-$${liability.amount}</td>
-        <td>
-          <button class="clean-button danger-button" onclick="editLiability(${liability.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteLiability(${liability.id})">🗑️</button>
+        <td class="action_column">
+          <button class="clean-button" onclick="editLiability(${liability.id})">✏️</button>
+          <button class="clean-button" onclick="deleteLiability(${liability.id})">🗑️</button>
         </td>
       </tr>
     `;
@@ -247,61 +235,58 @@ function updateTables() {
   });
 }
 
-// Function to update totals
+// Update totals
 function updateTotals() {
   let totalIncomeVal = 0;
   let totalExpensesVal = 0;
-  for (const month in currentBusiness.incomeStatement || {}) {
-    const monthData = currentBusiness.incomeStatement[month];
-    totalIncomeVal += monthData.totals.income;
-    totalExpensesVal += monthData.totals.expenses;
-  }
+  let totalAssetsVal = 0;
+  let totalLiabilitiesVal = 0;
+
+  Object.values(currentBusiness.incomeStatement || {}).forEach(month => {
+    totalIncomeVal += month.totals.income || 0;
+    totalExpensesVal += month.totals.expenses || 0;
+  });
+
+  currentBusiness.balanceSheet.forEach(item => {
+    if (item.type === 'asset') totalAssetsVal += item.amount;
+    if (item.type === 'liability') totalLiabilitiesVal += item.amount;
+  });
 
   totalIncome.textContent = `$${totalIncomeVal.toFixed(2)}`;
   totalExpenses.textContent = `$${totalExpensesVal.toFixed(2)}`;
   cashflowDisplay.textContent = `$${(totalIncomeVal - totalExpensesVal).toFixed(2)}`;
-
-  const assetTotal = calculateBalance(currentBusiness.assets, 'asset');
-  const liabilityTotal = calculateBalance(currentBusiness.liabilities, 'liability');
-  totalAssets.textContent = `$${assetTotal.toFixed(2)}`;
-  totalLiabilities.textContent = `$${liabilityTotal.toFixed(2)}`;
-  netWorth.textContent = `$${(assetTotal - liabilityTotal).toFixed(2)}`;
+  totalAssets.textContent = `$${totalAssetsVal.toFixed(2)}`;
+  totalLiabilities.textContent = `$${totalLiabilitiesVal.toFixed(2)}`;
+  netWorthDisplay.textContent = `$${(totalAssetsVal - totalLiabilitiesVal).toFixed(2)}`;
 }
 
-// Function to calculate totals
-function calculateTotal(categoryItems, type) {
-  return categoryItems.reduce((sum, item) => {
-    if (type === 'income' && item.type === 'income') {
-      return sum + parseFloat(item.amount);
-    } else if (type === 'expense' && item.type === 'expense') {
-      return sum + parseFloat(item.amount);
-    } else {
-      return sum;
-    }
-  }, 0);
-}
-
-function calculateBalance(balanceItems, type) {
-  return balanceItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-}
-
-// Function to update financial health
+// Update financial health
 function updateFinancialHealth() {
-  const cashflow = parseFloat(cashflowDisplay.textContent.replace('$', '').replace(',', '')).toFixed(2);
+  const averageCashflow = calculateAverageCashflow();
   const target = currentBusiness.residualIncomeTarget;
   let score = 0;
   if (target !== 0) {
-    score = Math.round((cashflow / target) * 100);
+    score = Math.round((averageCashflow / target) * 100);
+    if (score > 100) score = 100;
     if (score < 0) score = 0;
-    else if (score > 100) score = 100;
   }
   healthChart.data.datasets[0].data = [score];
   healthChart.update();
   healthPercentage.textContent = `${score}%`;
-  healthTips.textContent = getHealthTip(score, cashflow);
+  healthTips.textContent = getHealthTip(score);
 }
 
-function getHealthTip(score, cashflow) {
+function calculateAverageCashflow() {
+  const months = Object.keys(currentBusiness.incomeStatement || {});
+  if (months.length === 0) return 0;
+  const totalCashflow = months.reduce((sum, month) => {
+    const monthData = currentBusiness.incomeStatement[month];
+    return sum + (monthData.totals.income - monthData.totals.expenses);
+  }, 0);
+  return totalCashflow / months.length;
+}
+
+function getHealthTip(score) {
   const tips = {
     excellent: [
       "Your financial health is excellent! Keep up the great work.",
@@ -309,7 +294,12 @@ function getHealthTip(score, cashflow) {
       "Your cashflow exceeds your target by a significant margin.",
       "Your net worth is impressive. Look into philanthropy or legacy planning.",
       "Your financial success is an inspiration. Mentor others to achieve similar results.",
-      "Keep diversifying your investments to maintain steady growth."
+      "Keep diversifying your investments to maintain steady growth.",
+      "Monitor your expenses to ensure they remain stable or decrease.",
+      "Invest in high-growth stocks to further boost your portfolio.",
+      "Consider giving back through charitable donations or community initiatives.",
+      "Regularly review your financial statements to optimize your strategy.",
+      "You’re well-positioned to take calculated risks for higher returns."
     ],
     good: [
       "Your finances are stable but could improve. Aim to grow your passive income.",
@@ -317,17 +307,27 @@ function getHealthTip(score, cashflow) {
       "Diversify your income streams to build a solid financial foundation.",
       "Your net worth is growing. Keep up the good work and explore wealth-building strategies.",
       "Consider using a financial advisor to optimize your investments.",
-      "Save more each month to reach your financial goals faster."
+      "Save more each month to reach your financial goals faster.",
+      "Explore opportunities to automate your savings and investments.",
+      "Invest in yourself by learning new skills to increase your earning potential.",
+      "Regularly review your budget to identify areas for improvement.",
+      "Consider boosting your emergency fund for better financial security."
     ],
     warning: [
       "Your cashflow is below target. Focus on increasing income or reducing expenses.",
       "Consider investing in assets that generate passive income to bridge the gap.",
-      "Your financial freedom goal is within reach. Keep working towards it!"
+      "Your financial freedom goal is within reach. Keep working towards it!",
+      "Look for ways to cut down on unnecessary expenses and redirect funds to savings.",
+      "Explore part-time work or freelance opportunities to boost your income.",
+      "Track your expenses closely to identify areas where you can cut costs."
     ],
     critical: [
       "Your financial health is in critical condition. Immediate action required!",
       "Expenses are significantly higher than income. Reduce discretionary spending now!",
-      "Seek professional financial advice to avoid further financial risks."
+      "Seek professional financial advice to avoid further financial risks.",
+      "Focus on paying off high-interest debts as a priority.",
+      "Consider selling non-essential assets to generate immediate cash flow.",
+      "Avoid taking on new debt until your financial situation improves."
     ]
   };
 
@@ -337,23 +337,41 @@ function getHealthTip(score, cashflow) {
   return tips.critical[Math.floor(Math.random() * tips.critical.length)];
 }
 
-// Function to toggle category table
-function toggleCategory(month) {
-  const categoryContainer = document.getElementById(`category-${month}`);
-  if (categoryContainer) {
-    categoryContainer.classList.toggle('collapsed');
+function toggleCategory(key) {
+  const category = document.querySelector(`[data-key="${key}"]`);
+  if (category) {
+    category.classList.toggle('collapsed');
   }
 }
 
-// Function to toggle daily entries
-function toggleDailyEntries(category) {
-  const dailyEntriesContainer = document.getElementById(`daily-${category}`);
-  if (dailyEntriesContainer) {
-    dailyEntriesContainer.classList.toggle('collapsed');
+function addNewCategory() {
+  const name = prompt('Enter new category name:');
+  if (name) {
+    currentBusiness.categories.push({
+      name,
+      income: 0,
+      expenses: 0
+    });
+    saveData();
+    populateIncomeCategories();
+    updateTables();
   }
 }
 
-// Function to add daily entry
+function populateIncomeCategories() {
+  const categorySelect = document.getElementById('incomeCategory');
+  categorySelect.innerHTML = '';
+  const expenseSelect = document.getElementById('expenseCategory');
+  expenseSelect.innerHTML = '';
+  currentBusiness.categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category.name;
+    option.textContent = category.name;
+    categorySelect.appendChild(option);
+    expenseSelect.appendChild(option.cloneNode(true));
+  });
+}
+
 function addDailyEntry(type) {
   const amount = parseFloat(prompt(`Enter ${type} amount:`));
   const description = prompt(`Enter ${type} description:`);
@@ -365,13 +383,6 @@ function addDailyEntry(type) {
     const monthKey = date.slice(0, 7);
     if (!currentBusiness.incomeStatement[monthKey]) {
       currentBusiness.incomeStatement[monthKey] = {
-        categories: {},
-        totals: { income: 0, expenses: 0, net: 0 }
-      };
-    }
-
-    if (!currentBusiness.incomeStatement[monthKey].categories[category]) {
-      currentBusiness.incomeStatement[monthKey].categories[category] = {
         entries: [],
         totals: { income: 0, expenses: 0 }
       };
@@ -387,37 +398,52 @@ function addDailyEntry(type) {
     };
 
     if (type === 'income') {
-      currentBusiness.incomeStatement[monthKey].categories[category].totals.income += amount;
       currentBusiness.incomeStatement[monthKey].totals.income += amount;
     } else {
-      currentBusiness.incomeStatement[monthKey].categories[category].totals.expenses += amount;
       currentBusiness.incomeStatement[monthKey].totals.expenses += amount;
     }
 
-    currentBusiness.incomeStatement[monthKey].categories[category].entries.push(entry);
-    currentBusiness.incomeStatement[monthKey].totals.net = currentBusiness.incomeStatement[monthKey].totals.income - currentBusiness.incomeStatement[monthKey].totals.expenses;
-
+    currentBusiness.incomeStatement[monthKey].entries.push(entry);
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
-// Function to add new category
-function addNewCategory() {
-  const category = prompt('Enter new category name:');
-  if (category) {
-    if (!currentBusiness.categories) currentBusiness.categories = {};
-    currentBusiness.categories[category] = {
-      income: 0,
-      expenses: 0
-    };
+function addAssetEntry() {
+  const amount = parseFloat(prompt('Enter asset amount:'));
+  const description = prompt('Enter description:');
+  if (!isNaN(amount) && description) {
+    currentBusiness.balanceSheet.push({
+      id: Date.now(),
+      type: 'asset',
+      date: new Date().toISOString().slice(0, 10),
+      amount,
+      description
+    });
     saveData();
     updateTables();
+    updateTotals();
   }
 }
 
-// Function to edit business name
+function addLiabilityEntry() {
+  const amount = parseFloat(prompt('Enter liability amount:'));
+  const description = prompt('Enter description:');
+  if (!isNaN(amount) && description) {
+    currentBusiness.balanceSheet.push({
+      id: Date.now(),
+      type: 'liability',
+      date: new Date().toISOString().slice(0, 10),
+      amount,
+      description
+    });
+    saveData();
+    updateTables();
+    updateTotals();
+  }
+}
+
 function editBusinessName() {
   const newName = prompt('Enter new business name:', currentBusiness.name);
   if (newName) {
@@ -427,7 +453,6 @@ function editBusinessName() {
   }
 }
 
-// Function to delete business
 function deleteBusiness() {
   if (confirm('Are you sure you want to delete this business?')) {
     businesses.splice(currentBusinessIndex, 1);
@@ -437,7 +462,6 @@ function deleteBusiness() {
   }
 }
 
-// Function to edit item
 function editItem(type, id) {
   const items = currentBusiness[type];
   const itemIndex = items.findIndex(item => item.id === id);
@@ -455,7 +479,6 @@ function editItem(type, id) {
   }
 }
 
-// Function to delete item
 function deleteItem(type, id) {
   const items = currentBusiness[type];
   const itemIndex = items.findIndex(item => item.id === id);
@@ -467,20 +490,18 @@ function deleteItem(type, id) {
   }
 }
 
-// Function to convert currency
 function convertCurrency() {
   const amount = parseFloat(document.getElementById('convertAmount').value);
-  const from = fromCurrency.value;
-  const to = toCurrency.value;
-  if (from && to && amount) {
-    const rate = currencyRates[from] ? (amount / currencyRates[from]) * currencyRates[to] : 'Invalid';
-    conversionResult.textContent = rate !== 'Invalid' ? `${amount} ${from} = ${rate.toFixed(2)} ${to}` : 'Invalid currency';
+  const from = conversionFrom.value;
+  const to = conversionTo.value;
+  if (from && to && amount && currencyRates[from] && currencyRates[to]) {
+    const rate = (amount / currencyRates[from]) * currencyRates[to];
+    conversionResult.textContent = `${amount} ${from} = ${rate.toFixed(2)} ${to}`;
   } else {
     conversionResult.textContent = 'Invalid input';
   }
 }
 
-// Function to save business profile
 function saveBusinessProfile() {
   currentBusiness.description = document.getElementById('businessDescription').value;
   currentBusiness.currency = currencySelect.value;
@@ -488,14 +509,12 @@ function saveBusinessProfile() {
   updateUI();
 }
 
-// Function to update residual target
 function updateResidualTarget() {
   currentBusiness.residualIncomeTarget = parseFloat(document.getElementById('residual-income-target').value) || 0;
   saveData();
   updateFinancialHealth();
 }
 
-// Function to export data
 function exportData() {
   const fileName = saveFileName.value || 'financial-data';
   const blob = new Blob([JSON.stringify(currentBusiness)], { type: 'application/json' });
@@ -507,7 +526,6 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
-// Function to import data
 function importData() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -529,236 +547,96 @@ function importData() {
   input.click();
 }
 
-// Function to clear data
 function clearData() {
   if (confirm('Are you sure you want to clear all data?')) {
     currentBusiness.incomeStatement = {};
     currentBusiness.balanceSheet = [];
+    currentBusiness.categories = [];
+    currentBusiness.dailyEntries = [];
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
-// Function to share on WhatsApp
 function shareOnWhatsApp() {
   const href = encodeURIComponent(window.location.href);
   window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker:%20${href}`);
 }
 
-// Function to share on LinkedIn
 function shareOnLinkedIn() {
   const summary = encodeURIComponent('Check out this financial tracker to manage your finances efficiently.');
   const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${summary}`;
   window.open(url);
 }
 
-// Function to open app
 function openApp() {
   window.open('https://www.appcreator24.com/app3480869-q98157', '_blank');
 }
 
-// Function to generate story
 function generateStory() {
   const incomeTotal = parseFloat(totalIncome.textContent.replace('$', ''));
   const expenseTotal = parseFloat(totalExpenses.textContent.replace('$', ''));
   const cashflow = parseFloat(cashflowDisplay.textContent.replace('$', ''));
   const assetTotal = parseFloat(totalAssets.textContent.replace('$', ''));
   const liabilityTotal = parseFloat(totalLiabilities.textContent.replace('$', ''));
-  const netWorthValue = assetTotal - liabilityTotal;
+  const netWorth = assetTotal - liabilityTotal;
   const residualTarget = currentBusiness.residualIncomeTarget;
-  const remainingToTarget = residualTarget - cashflow;
+  const remaining = residualTarget - cashflow;
 
-  const timeStamp = new Date().toLocaleString();
   const story = `
-    ## Financial Snapshot (${timeStamp})
-
-    ### Income & Expenses
-    - **Total Income**: $${incomeTotal}
-    - **Total Expenses**: $${expenseTotal}
-    - **Cashflow**: $${cashflow}
-
-    ### Balance Sheet
-    - **Total Assets**: $${assetTotal}
-    - **Total Liabilities**: $${liabilityTotal}
-    - **Net Worth**: $${netWorthValue}
-
-    ### Financial Health
-    - **Health Score**: ${healthPercentage.textContent}%
-    - **Residual Income Target**: $${residualTarget}
-    - **Remaining to Target**: $${remainingToTarget}
-
-    ---
-    ### Highlights
-    1. Your business is generating a steady income stream of $${incomeTotal} this year.
-    2. Expenses are currently at $${expenseTotal}, ensure they remain under control to maintain profitability.
-    3. Your current cashflow of $${cashflow} is ${cashflow < residualTarget ? 'falling short' : 'exceeding'} your residual income target by $${Math.abs(remainingToTarget)}.
-
-    ### Actionable Insights
-    - If your cashflow is below target, look for opportunities to reduce variable expenses.
-    - Explore new revenue channels to boost your income.
-    - Consider reinvesting profits into assets that can generate passive income.
-
-    ### Recommendations
-    - If you are aiming to increase your net worth, focus on reducing liabilities and increasing assets systematically.
-    - Regularly review your financial statements to identify trends and adjust your strategy accordingly.
-
-    ---
-    *This report is generated by ${appName} – your ultimate financial management tool.*
+    *Financial Snapshot (${new Date().toLocaleString()})*\n
+    Income: *$${incomeTotal.toFixed(2)}* | Expenses: *$${expenseTotal.toFixed(2)}*\n
+    Cashflow: *$${cashflow.toFixed(2)}* | Target: *$${residualTarget.toFixed(2)}*\n
+    Remaining to Target: *$${remaining.toFixed(2)}*\n
+    Net Worth: *$${netWorth.toFixed(2)}*\n
+    \n*Recommendations:*\n
+    ${getHealthTip(calculateHealthScore())}
+    View full report at ${window.location.href}
   `;
-
   financialStory.textContent = story;
 }
 
-// Calculator functionality
-let calcExpression = '';
-function calcInput(value) {
-  calcExpression += value;
-  calcDisplay.textContent = calcExpression;
-}
-
-function calcEqual() {
-  try {
-    const result = eval(calcExpression);
-    calcExpression = result.toString();
-    calcDisplay.textContent = calcExpression;
-  } catch {
-    calcDisplay.textContent = 'Error';
-  }
-}
-
-function calcClear() {
-  calcExpression = '';
-  calcDisplay.textContent = '0';
+function calculateHealthScore() {
+  const averageCashflow = calculateAverageCashflow();
+  const target = currentBusiness.residualIncomeTarget;
+  return Math.ceil((averageCashflow / target) * 100);
 }
 
 function toggleCalculator() {
   calculatorPopup.style.display = calculatorPopup.style.display === 'block' ? 'none' : 'block';
 }
 
-// Event listener to hide calculator on outside click
 document.body.addEventListener('click', (event) => {
   if (!event.target.closest('.calculator-icon') && !event.target.closest('.calculator-popup')) {
     calculatorPopup.style.display = 'none';
   }
 });
 
+function calcInput(value) {
+  const display = calcDisplay.value || '0';
+  calcDisplay.value = (display === '0' ? '' : display) + value;
+}
+
+function calcDelete() {
+  calcDisplay.value = calcDisplay.value.slice(0, -1) || '0';
+}
+
+function calcClear() {
+  calcDisplay.value = '0';
+}
+
+function calcEqual() {
+  try {
+    calcDisplay.value = eval(calcDisplay.value).toString() || '0';
+  } catch {
+    calcDisplay.value = 'Error';
+  }
+}
+
+function calcOperator(operator) {
+  calcDisplay.value += operator;
+}
+
 // Load data on page load
 loadData();
-
-// Modal handling
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.style.display = 'block';
-    document.body.classList.add('modal-open');
-  }
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-  }
-}
-
-// Add income modal
-document.getElementById('addIncomeBtn').addEventListener('click', () => {
-  openModal('addIncomeModal');
-});
-
-document.getElementById('addIncomeForm').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const amount = parseFloat(document.getElementById('incomeAmount').value);
-  const description = document.getElementById('incomeDescription').value;
-  const category = document.getElementById('incomeCategory').value;
-  const date = new Date().toISOString().slice(0, 10);
-
-  if (!isNaN(amount) && description && category) {
-    if (!currentBusiness.incomeStatement) currentBusiness.incomeStatement = {};
-    const monthKey = date.slice(0, 7);
-    if (!currentBusiness.incomeStatement[monthKey]) {
-      currentBusiness.incomeStatement[monthKey] = {
-        categories: {},
-        totals: { income: 0, expenses: 0, net: 0 }
-      };
-    }
-
-    if (!currentBusiness.incomeStatement[monthKey].categories[category]) {
-      currentBusiness.incomeStatement[monthKey].categories[category] = {
-        entries: [],
-        totals: { income: 0, expenses: 0 }
-      };
-    }
-
-    const entry = {
-      id: Date.now(),
-      date,
-      type: 'income',
-      amount,
-      description,
-      category
-    };
-
-    currentBusiness.incomeStatement[monthKey].categories[category].totals.income += amount;
-    currentBusiness.incomeStatement[monthKey].totals.income += amount;
-    currentBusiness.incomeStatement[monthKey].categories[category].entries.push(entry);
-    currentBusiness.incomeStatement[monthKey].totals.net = currentBusiness.incomeStatement[monthKey].totals.income - currentBusiness.incomeStatement[monthKey].totals.expenses;
-
-    saveData();
-    updateTables();
-    updateTotals();
-    closeModal('addIncomeModal');
-  }
-});
-
-// Add expense modal
-document.getElementById('addExpenseBtn').addEventListener('click', () => {
-  openModal('addExpenseModal');
-});
-
-document.getElementById('addExpenseForm').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const amount = parseFloat(document.getElementById('expenseAmount').value);
-  const description = document.getElementById('expenseDescription').value;
-  const category = document.getElementById('expenseCategory').value;
-  const date = new Date().toISOString().slice(0, 10);
-
-  if (!isNaN(amount) && description && category) {
-    if (!currentBusiness.incomeStatement) currentBusiness.incomeStatement = {};
-    const monthKey = date.slice(0, 7);
-    if (!currentBusiness.incomeStatement[monthKey]) {
-      currentBusiness.incomeStatement[monthKey] = {
-        categories: {},
-        totals: { income: 0, expenses: 0, net: 0 }
-      };
-    }
-
-    if (!currentBusiness.incomeStatement[monthKey].categories[category]) {
-      currentBusiness.incomeStatement[monthKey].categories[category] = {
-        entries: [],
-        totals: { income: 0, expenses: 0 }
-      };
-    }
-
-    const entry = {
-      id: Date.now(),
-      date,
-      type: 'expense',
-      amount,
-      description,
-      category
-    };
-
-    currentBusiness.incomeStatement[monthKey].categories[category].totals.expenses += amount;
-    currentBusiness.incomeStatement[monthKey].totals.expenses += amount;
-    currentBusiness.incomeStatement[monthKey].categories[category].entries.push(entry);
-    currentBusiness.incomeStatement[monthKey].totals.net = currentBusiness.incomeStatement[monthKey].totals.income - currentBusiness.incomeStatement[monthKey].totals.expenses;
-
-    saveData();
-    updateTables();
-    updateTotals();
-    closeModal('addExpenseModal');
-  }
-});
