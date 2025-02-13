@@ -11,7 +11,9 @@ const currencySelect = document.getElementById('currency');
 const fromCurrency = document.getElementById('fromCurrency');
 const toCurrency = document.getElementById('toCurrency');
 const conversionResult = document.getElementById('conversionResult');
-const incomeTableBody = document.getElementById('income-statement-body');
+const monthlyTableBody = document.getElementById('monthlyTableBody');
+const categoryTableBody = document.getElementById('categoryTableBody');
+const dailyTableBody = document.getElementById('dailyTableBody');
 const balanceTableBody = document.getElementById('balance-sheet-body');
 const totalIncome = document.getElementById('total-income');
 const totalExpenses = document.getElementById('total-expenses');
@@ -25,6 +27,7 @@ const healthTips = document.getElementById('healthTips');
 const financialStory = document.getElementById('financialStory');
 const calculatorPopup = document.getElementById('calculatorPopup');
 const calcDisplay = document.getElementById('calcDisplay');
+const saveFileName = document.getElementById('saveFileName');
 
 // Chart initialization
 const healthChart = new Chart(healthChartCanvas, {
@@ -139,20 +142,83 @@ function updateProfileSection() {
 
 // Function to update tables
 function updateTables() {
-  incomeTableBody.innerHTML = '';
+  monthlyTableBody.innerHTML = '';
   currentBusiness.income.forEach(income => {
     const row = `
       <tr>
         <td>${new Date(income.date).toLocaleDateString()}</td>
+        <td class="financial_columns">
+          <div class="income_expense_header">
+            <span>$${income.amount}</span>
+            <span></span>
+          </div>
+        </td>
         <td>$${income.amount}</td>
-        <td>${income.description}</td>
-        <td>
-          <button class="clean-button danger-button" onclick="editItem('income', ${income.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteItem('income', ${income.id})">🗑️</button>
+        <td class="action_column">
+          <button class="clean-button danger-button collapse-icon" onclick="toggleCategory(this)">▼</button>
         </td>
       </tr>
     `;
-    incomeTableBody.insertAdjacentHTML('beforeend', row);
+    monthlyTableBody.insertAdjacentHTML('beforeend', row);
+  });
+
+  currentBusiness.expenses.forEach(expense => {
+    const row = `
+      <tr>
+        <td>${new Date(expense.date).toLocaleDateString()}</td>
+        <td class="financial_columns">
+          <div class="income_expense_header">
+            <span></span>
+            <span>-$${expense.amount}</span>
+          </div>
+        </td>
+        <td>-$${expense.amount}</td>
+        <td class="action_column">
+          <button class="clean-button danger-button collapse-icon" onclick="toggleCategory(this)">▼</button>
+        </td>
+      </tr>
+    `;
+    monthlyTableBody.insertAdjacentHTML('beforeend', row);
+  });
+
+  categoryTableBody.innerHTML = '';
+  currentBusiness.categories.forEach(category => {
+    const row = `
+      <tr>
+        <td>${category.name}</td>
+        <td class="financial_columns">
+          <div class="income_expense_header">
+            <span>$${category.income}</span>
+            <span>-$${category.expenses}</span>
+          </div>
+        </td>
+        <td class="action_column">
+          <button class="clean-button danger-button collapse-icon" onclick="toggleDailyEntries(this)">▼</button>
+        </td>
+      </tr>
+    `;
+    categoryTableBody.insertAdjacentHTML('beforeend', row);
+  });
+
+  dailyTableBody.innerHTML = '';
+  currentBusiness.dailyEntries.forEach(entry => {
+    const row = `
+      <tr>
+        <td>${new Date(entry.date).toLocaleDateString()}</td>
+        <td>${entry.description}</td>
+        <td class="daily_financial_columns">
+          <div class="income_expense_header_daily">
+            <span>${entry.type === 'income' ? '$' + entry.amount : ''}</span>
+            <span>${entry.type === 'expense' ? '-$' + entry.amount : ''}</span>
+          </div>
+        </td>
+        <td class="daily_action_column">
+          <button class="clean-button danger-button" onclick="editDailyEntry(${entry.id})">✏️</button>
+          <button class="clean-button danger-button" onclick="deleteDailyEntry(${entry.id})">🗑️</button>
+        </td>
+      </tr>
+    `;
+    dailyTableBody.insertAdjacentHTML('beforeend', row);
   });
 
   balanceTableBody.innerHTML = '';
@@ -160,11 +226,11 @@ function updateTables() {
     const row = `
       <tr>
         <td>${new Date(asset.date).toLocaleDateString()}</td>
-        <td>$${asset.amount}</td>
         <td>${asset.description}</td>
+        <td>$${asset.amount}</td>
         <td>
-          <button class="clean-button danger-button" onclick="editItem('assets', ${asset.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteItem('assets', ${asset.id})">🗑️</button>
+          <button class="clean-button danger-button" onclick="editAsset(${asset.id})">✏️</button>
+          <button class="clean-button danger-button" onclick="deleteAsset(${asset.id})">🗑️</button>
         </td>
       </tr>
     `;
@@ -175,11 +241,11 @@ function updateTables() {
     const row = `
       <tr>
         <td>${new Date(liability.date).toLocaleDateString()}</td>
-        <td>$${liability.amount}</td>
         <td>${liability.description}</td>
+        <td>-$${liability.amount}</td>
         <td>
-          <button class="clean-button danger-button" onclick="editItem('liabilities', ${liability.id})">✏️</button>
-          <button class="clean-button danger-button" onclick="deleteItem('liabilities', ${liability.id})">🗑️</button>
+          <button class="clean-button danger-button" onclick="editLiability(${liability.id})">✏️</button>
+          <button class="clean-button danger-button" onclick="deleteLiability(${liability.id})">🗑️</button>
         </td>
       </tr>
     `;
@@ -189,28 +255,39 @@ function updateTables() {
 
 // Function to update totals
 function updateTotals() {
-  const incomeTotal = calculateTotal(currentBusiness.income);
-  const expensesTotal = calculateTotal(currentBusiness.expenses);
-  const cashflow = incomeTotal - expensesTotal;
-  const assetsTotal = calculateTotal(currentBusiness.assets);
-  const liabilitiesTotal = calculateTotal(currentBusiness.liabilities);
+  const incomeTotal = calculateTotal(currentBusiness.income, 'income');
+  const expenseTotal = calculateTotal(currentBusiness.expenses, 'expense');
+  const cashflow = incomeTotal - expenseTotal;
+  const assetTotal = calculateBalance(currentBusiness.assets, 'asset');
+  const liabilityTotal = calculateBalance(currentBusiness.liabilities, 'liability');
 
   totalIncome.textContent = `$${incomeTotal.toFixed(2)}`;
-  totalExpenses.textContent = `$${expensesTotal.toFixed(2)}`;
+  totalExpenses.textContent = `$${expenseTotal.toFixed(2)}`;
   cashflowDisplay.textContent = `$${cashflow.toFixed(2)}`;
-  totalAssets.textContent = `$${assetsTotal.toFixed(2)}`;
-  totalLiabilities.textContent = `$${liabilitiesTotal.toFixed(2)}`;
-  netWorth.textContent = `$${(assetsTotal - liabilitiesTotal).toFixed(2)}`;
+  totalAssets.textContent = `$${assetTotal.toFixed(2)}`;
+  totalLiabilities.textContent = `$${liabilityTotal.toFixed(2)}`;
+  netWorth.textContent = `$${(assetTotal - liabilityTotal).toFixed(2)}`;
 
-  updateAverages(incomeTotal, expensesTotal, cashflow);
+  updateAverages(incomeTotal, expenseTotal, cashflow);
 }
 
-// Function to calculate the total for a category
-function calculateTotal(categoryItems) {
-  return categoryItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+// Function to calculate totals
+function calculateTotal(categoryItems, type) {
+  return categoryItems.reduce((sum, item) => {
+    if (type === 'income' && item.type === 'income') {
+      return sum + parseFloat(item.amount);
+    } else if (type === 'expense' && item.type === 'expense') {
+      return sum + parseFloat(item.amount);
+    } else {
+      return sum;
+    }
+  }, 0);
 }
 
-// Function to update averages
+function calculateBalance(balanceItems, type) {
+  return balanceItems.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+}
+
 function updateAverages(income, expenses, cashflow) {
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const avgIncome = income / months.length;
@@ -233,7 +310,6 @@ function updateFinancialHealth() {
   healthTips.textContent = getHealthTip(score, cashflow);
 }
 
-// Function to get a financial health tip
 function getHealthTip(score, cashflow) {
   if (score < 50) {
     return [
@@ -265,55 +341,105 @@ function getHealthTip(score, cashflow) {
   }
 }
 
-// Function to add a new category
-function addNewCategory(type) {
-  const description = prompt(`Enter new ${type} category description:`);
-  if (description) {
+function toggleMonthlyEntries(row) {
+  const categoryContainer = row.parentNode.nextElementSibling;
+  if (categoryContainer) {
+    categoryContainer.classList.toggle('collapsed');
+  }
+}
+
+function toggleCategory(row) {
+  const categoryRow = row.closest('tr');
+  const category = categoryRow.querySelector('.category');
+  category.classList.toggle('collapsed');
+}
+
+function toggleDailyEntries() {
+  // Daily entries toggle logic
+}
+
+function addDailyEntry(type) {
+  const amount = type === 'income' ? parseFloat(prompt('Enter income amount:')) : -parseFloat(prompt('Enter expense amount:'));
+  const description = prompt('Enter description:');
+  if (!isNaN(amount) && description) {
+    const newEntry = {
+      id: Date.now(),
+      date: new Date(),
+      amount: Math.abs(amount),
+      type: type,
+      description: description
+    };
     if (type === 'income') {
-      currentBusiness.income.push({ id: Date.now(), date: new Date(), amount: 0, description });
+      currentBusiness.income.push(newEntry);
     } else {
-      currentBusiness[type].push({ id: Date.now(), date: new Date(), amount: 0, description });
+      currentBusiness.expenses.push(newEntry);
     }
     saveData();
     updateTables();
+    updateTotals();
   }
 }
 
-// Function to add an income entry
-function addIncomeEntry() {
-  const amount = parseFloat(prompt('Enter income amount:'));
-  const description = prompt('Enter income description:');
+function addAssetEntry() {
+  const amount = parseFloat(prompt('Enter asset amount:'));
+  const description = prompt('Enter description:');
   if (!isNaN(amount) && description) {
-    currentBusiness.income.push({ id: Date.now(), date: new Date(), amount, description });
+    currentBusiness.assets.push({
+      id: Date.now(),
+      date: new Date(),
+      amount: amount,
+      description: description
+    });
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
-// Function to add an expense entry
-function addExpenseEntry() {
-  const amount = parseFloat(prompt('Enter expense amount:'));
-  const description = prompt('Enter expense description:');
+function addLiabilityEntry() {
+  const amount = parseFloat(prompt('Enter liability amount:'));
+  const description = prompt('Enter description:');
   if (!isNaN(amount) && description) {
-    currentBusiness.expenses.push({ id: Date.now(), date: new Date(), amount, description });
+    currentBusiness.liabilities.push({
+      id: Date.now(),
+      date: new Date(),
+      amount: amount,
+      description: description
+    });
     saveData();
     updateTables();
     updateTotals();
   }
 }
 
-// Function to edit an item
+function editBusinessName() {
+  const newName = prompt('Enter new business name:', currentBusiness.name);
+  if (newName) {
+    currentBusiness.name = newName;
+    saveData();
+    updateBusinessList();
+  }
+}
+
+function deleteBusiness() {
+  if (confirm('Are you sure you want to delete this business?')) {
+    businesses.splice(currentBusinessIndex, 1);
+    saveData();
+    updateBusinessList();
+    switchBusiness(0);
+  }
+}
+
 function editItem(type, id) {
   const items = currentBusiness[type];
   const itemIndex = items.findIndex(item => item.id === id);
   if (itemIndex !== -1) {
-    const newItem = items[itemIndex];
-    const newAmount = parseFloat(prompt('Enter new amount:', newItem.amount));
-    const newDescription = prompt('Enter new description:', newItem.description);
+    const item = items[itemIndex];
+    const newAmount = parseFloat(prompt('Enter new amount:', item.amount));
+    const newDescription = prompt('Enter new description:', item.description);
     if (!isNaN(newAmount) && newDescription) {
-      newItem.amount = newAmount;
-      newItem.description = newDescription;
+      item.amount = newAmount;
+      item.description = newDescription;
       saveData();
       updateTables();
       updateTotals();
@@ -321,7 +447,6 @@ function editItem(type, id) {
   }
 }
 
-// Function to delete an item
 function deleteItem(type, id) {
   const items = currentBusiness[type];
   const itemIndex = items.findIndex(item => item.id === id);
@@ -333,7 +458,6 @@ function deleteItem(type, id) {
   }
 }
 
-// Function to convert currency
 function convertCurrency() {
   const amount = parseFloat(document.getElementById('convertAmount').value);
   const from = fromCurrency.value;
@@ -346,24 +470,21 @@ function convertCurrency() {
   }
 }
 
-// Function to save profile
 function saveBusinessProfile() {
   currentBusiness.description = document.getElementById('businessDescription').value;
   currentBusiness.currency = currencySelect.value;
   saveData();
-  updateProfileSection();
+  updateUI();
 }
 
-// Function to update residual income target
 function updateResidualTarget() {
   currentBusiness.residualIncomeTarget = parseFloat(document.getElementById('residual-income-target').value) || 0;
   saveData();
   updateFinancialHealth();
 }
 
-// Function to export data
 function exportData() {
-  const fileName = document.getElementById('saveFileName').value || 'financial-data';
+  const fileName = saveFileName.value || 'financial-data';
   const blob = new Blob([JSON.stringify(currentBusiness)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -373,7 +494,6 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
-// Function to import data
 function importData() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -395,7 +515,6 @@ function importData() {
   input.click();
 }
 
-// Function to clear data
 function clearData() {
   if (confirm('Are you sure you want to clear all data?')) {
     currentBusiness.income = [];
@@ -408,32 +527,28 @@ function clearData() {
   }
 }
 
-// Function to share on WhatsApp
 function shareOnWhatsApp() {
   const href = encodeURIComponent(window.location.href);
   window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker:%20${href}`);
 }
 
-// Function to share on LinkedIn
 function shareOnLinkedIn() {
   const summary = encodeURIComponent('Check out this financial tracker to manage your finances efficiently.');
   const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${summary}`;
   window.open(url);
 }
 
-// Function to open the app
 function openApp() {
   window.open('https://www.appcreator24.com/app3480869-q98157', '_blank');
 }
 
-// Function to generate financial story
 function generateStory() {
   const incomeTotal = parseFloat(totalIncome.textContent.replace('$', ''));
-  const expensesTotal = parseFloat(totalExpenses.textContent.replace('$', ''));
+  const expenseTotal = parseFloat(totalExpenses.textContent.replace('$', ''));
   const cashflow = parseFloat(cashflowDisplay.textContent.replace('$', ''));
-  const assetsTotal = parseFloat(totalAssets.textContent.replace('$', ''));
-  const liabilitiesTotal = parseFloat(totalLiabilities.textContent.replace('$', ''));
-  const netWorthValue = assetsTotal - liabilitiesTotal;
+  const assetTotal = parseFloat(totalAssets.textContent.replace('$', ''));
+  const liabilityTotal = parseFloat(totalLiabilities.textContent.replace('$', ''));
+  const netWorthValue = assetTotal - liabilityTotal;
   const residualTarget = currentBusiness.residualIncomeTarget;
   const remainingToTarget = residualTarget - cashflow;
 
@@ -443,12 +558,12 @@ function generateStory() {
 
     ### Income & Expenses
     - **Total Income**: $${incomeTotal}
-    - **Total Expenses**: $${expensesTotal}
+    - **Total Expenses**: $${expenseTotal}
     - **Cashflow**: $${cashflow}
 
     ### Balance Sheet
-    - **Total Assets**: $${assetsTotal}
-    - **Total Liabilities**: $${liabilitiesTotal}
+    - **Total Assets**: $${assetTotal}
+    - **Total Liabilities**: $${liabilityTotal}
     - **Net Worth**: $${netWorthValue}
 
     ### Financial Health
@@ -459,7 +574,7 @@ function generateStory() {
     ---
     ### Highlights
     1. Your business is generating a steady income stream of $${incomeTotal} this year.
-    2. Expenses are currently at $${expensesTotal}, ensure they remain under control to maintain profitability.
+    2. Expenses are currently at $${expenseTotal}, ensure they remain under control to maintain profitability.
     3. Your current cashflow of $${cashflow} is ${cashflow < residualTarget ? 'falling short' : 'exceeding'} your residual income target by $${Math.abs(remainingToTarget)}.
 
     ### Actionable Insights
@@ -513,9 +628,3 @@ document.body.addEventListener('click', (event) => {
 
 // Load data on page load
 loadData();
-
-// Set background colors for balance sheet and income statement
-const balanceSheet = document.querySelector('.balance-sheet table');
-const incomeStatement = document.querySelector('.income-statement table');
-balanceSheet.style.background = '#c8e6c9';
-incomeStatement.style.background = '#fff3e0';
