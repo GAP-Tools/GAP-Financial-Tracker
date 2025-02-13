@@ -55,36 +55,78 @@
 
     <!-- Income Statement Section -->
     <section class="income-statement">
-      <h2 class="section-title">Income Statement <button class="clean-button green-button" onclick="addNewCategory('income')">+ Add Category</button></h2>
-      <table class="gridtable">
-        <thead>
-          <tr class="clean-table-header">
-            <th>Month</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Net Income</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="income-statement-body"></tbody>
-      </table>
-      <div class="totals">
-        <div class="total-line"><span class="bold">Total Income:</span> <span id="total-income">$0</span></div>
-        <div class="total-line"><span class="bold">Total Expenses:</span> <span id="total-expenses">$0</span></div>
-        <div class="total-line"><span class="bold">Cashflow:</span> <span id="cashflow">$0</span></div>
-        <div class="total-line"><span class="bold">Average Income:</span> <span id="average-income">$0</span></div>
-        <div class="total-line"><span class="bold">Average Expenses:</span> <span id="average-expenses">$0</span></div>
-        <div class="total-line"><span class="bold">Average Cashflow:</span> <span id="average-cashflow">$0</span></div>
-      </div>
-      <div class="entry-buttons">
-        <button class="clean-button green-button" onclick="addIncomeEntry()">+ Add Income</button>
-        <button class="clean-button green-button" onclick="addExpenseEntry()">+ Add Expense</button>
+      <h2 class="section-title">Income Statement</h2>
+      <button class="clean-button green-button" onclick="addDailyEntry('income')">+ Add Income/Expenses</button>
+      <div class="IncomeStatementContainer">     
+        <div class="IncomeStatement">
+          <div class="month_container">
+            <table class="gridtable">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th class="financial_columns">
+                    <div class="income_expense_header">
+                      <span>Income</span>
+                      <span>Expenses</span>
+                    </div>
+                  </th>
+                  <th class="NetIncome">Net Income</th>
+                  <th class="action_column">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyTableBody">
+                <!-- Monthly rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="category_container" style="width: 100%">
+            <table class="gridtable categoryTable">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th class="financial_columns">
+                    <div class="income_expense_header">
+                      <span>Income</span>
+                      <span>Expenses</span>
+                    </div>
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="categoryTableBody">
+                <!-- Category rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="daily_container">
+            <table class="gridtable dailyTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th class="daily_financial_columns">
+                    <div class="income_expense_header_daily">
+                      <span>Income</span>
+                      <span>Expenses</span>
+                    </div>
+                  </th>
+                  <th class="daily_action_column">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTableBody">
+                <!-- Daily Entry rows -->
+              </tbody>
+            </table>            
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Balance Sheet Section -->
     <section class="balance-sheet">
-      <h2 class="section-title">Balance Sheet <button class="clean-button green-button" onclick="addNewCategory('balance')">+ Add Category</button></h2>
+      <h2 class="section-title">Balance Sheet</h2>
+      <button class="clean-button green-button" onclick="addAssetEntry()">+ Add Asset</button>
+      <button class="clean-button green-button" onclick="addLiabilityEntry()">+ Add Liability</button>
       <table class="gridtable">
         <thead>
           <tr class="clean-table-header">
@@ -180,4 +222,4 @@
 
   <script src="script.js"></script>
 </body>
-  </html>
+                                                     </html>
