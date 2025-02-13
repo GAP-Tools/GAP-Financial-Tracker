@@ -320,11 +320,14 @@ header {
 }
 
 .action_column {
-  width: 25%;
+  background-color: #2c836d;
+  color: white;
+  padding: 5px;
+  text-align: center;
 }
 
 .action-icon {
-  background-color: #28a745;
+  background-color: #2c836d;
   padding: 10px;
   border-radius: 50%;
   display: inline-block;
@@ -492,4 +495,4 @@ header {
 .daily_financial_columns .income,
 .daily_financial_columns .expenses {
   width: 50%;
-}
+  }
