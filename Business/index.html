@@ -8,6 +8,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <header>
+    <button class="clean-button" onclick="window.location.href='https://gap-tools.github.io/GAP-Financial-Tracker/'">Switch to Personal</button>
+  </header>
+
   <div class="container">
     <!-- Business Selector -->
     <div class="business-selector">
@@ -31,7 +35,7 @@
       <div class="profile-data">
         <textarea id="businessDescription" class="clean-input" rows="3" placeholder="Business Description"></textarea>
         <div class="currency-select">
-          <label>Currency:</label>
+          Currency:
           <select id="currency"></select>
         </div>
         <div class="residual-target">
@@ -58,12 +62,10 @@
     <div class="income-statement">
       <h2 class="section-title">Income Statement</h2>
       <div class="income-controls">
-        <button class="clean-button" id="addIncomeBtn">+ Add Income</button>
-        <button class="clean-button" id="addExpenseBtn">+ Add Expense</button>
+        <button class="clean-button" id="addIncomeBtn" onclick="addDailyEntry('income')">+ Add Income</button>
+        <button class="clean-button" id="addExpenseBtn" onclick="addDailyEntry('expense')">+ Add Expense</button>
       </div>
-      <div class="INCOME-table-container">
-        <!-- Monthly Table -->
-        <h3>Monthly Summary</h3>
+      <div class="income-table-container">
         <table class="category-table" id="monthlyTable">
           <thead>
             <tr>
@@ -74,13 +76,8 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="monthlyTableBody">
-            <!-- Monthly rows will be populated here -->
-          </tbody>
+          <tbody id="monthlyTableBody"></tbody>
         </table>
-
-        <!-- Category Table -->
-        <h3>Category Summary</h3>
         <table class="category-table" id="categoryTable">
           <thead>
             <tr>
@@ -90,13 +87,8 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="categoryTableBody">
-            <!-- Category rows will be populated here -->
-          </tbody>
+          <tbody id="categoryTableBody"></tbody>
         </table>
-
-        <!-- Daily Entries Table -->
-        <h3>Daily Entries</h3>
         <table class="category-table" id="dailyTable">
           <thead>
             <tr>
@@ -107,9 +99,7 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody id="dailyTableBody">
-            <!-- Daily entry rows will be populated here -->
-          </tbody>
+          <tbody id="dailyTableBody"></tbody>
         </table>
       </div>
       <div class="totals">
@@ -123,8 +113,8 @@
     <div class="balance-sheet">
       <h2 class="section-title">Balance Sheet</h2>
       <div class="balance-controls">
-        <button class="clean-button" onclick="addNewAsset()">+ Add Asset</button>
-        <button class="clean-button" onclick="addNewLiability()">+ Add Liability</button>
+        <button class="clean-button" onclick="addAssetEntry()">+ Add Asset</button>
+        <button class="clean-button" onclick="addLiabilityEntry()">+ Add Liability</button>
       </div>
       <table class="balance-table">
         <thead>
@@ -135,9 +125,7 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="balance-sheet-body">
-          <!-- Balance sheet rows will be populated here -->
-        </tbody>
+        <tbody id="balance-sheet-body"></tbody>
       </table>
       <div class="balance-totals">
         <div class="total-assets">Total Assets: <span id="total-assets">$0</span></div>
@@ -201,23 +189,24 @@
     </div>
     <div class="calculator-pad">
       <div class="calculator-keys">
-        <button onclick="calcInput('1')">1</button>
-        <button onclick="calcInput('2')">2</button>
-        <button onclick="calcInput('3')">3</button>
-        <button onclick="calcInput('+')">+</button>
-        <button onclick="calcInput('4')">4</button>
-        <button onclick="calcInput('5')">5</button>
-        <button onclick="calcInput('6')">6</button>
-        <button onclick="calcInput('-')">-</button>
+        <button onclick="calcDelete()">DEL</button>
+        <button onclick="calcClear()">C</button>
+        <button onclick="calcOperator('/')">÷</button>
         <button onclick="calcInput('7')">7</button>
         <button onclick="calcInput('8')">8</button>
         <button onclick="calcInput('9')">9</button>
-        <button onclick="calcInput('*')">*</button>
+        <button onclick="calcOperator('*')">×</button>
+        <button onclick="calcInput('4')">4</button>
+        <button onclick="calcInput('5')">5</button>
+        <button onclick="calcInput('6')">6</button>
+        <button onclick="calcOperator('-')">-</button>
+        <button onclick="calcInput('1')">1</button>
+        <button onclick="calcInput('2')">2</button>
+        <button onclick="calcInput('3')">3</button>
+        <button onclick="calcOperator('+')">+</button>
         <button onclick="calcInput('.')">.</button>
         <button onclick="calcInput('0')">0</button>
-        <button onclick="calcClear()">C</button>
         <button onclick="calcEqual()">=</button>
-        <button onclick="calcInput('/')">/</button>
       </div>
     </div>
   </div>
@@ -225,30 +214,26 @@
   <!-- Modals -->
   <div id="addIncomeModal" class="modal">
     <div class="modal-content">
-      <span class="close-modal" onclick="closeModal('addIncomeModal')">×</span>
+      <span class="close-modal" onclick="toggleModal('addIncomeModal')">×</span>
       <h3 class="modal-header">Add Income</h3>
       <form id="addIncomeForm">
         <input type="text" id="incomeDescription" placeholder="Description">
         <input type="number" id="incomeAmount" placeholder="Amount">
-        <select id="incomeCategory">
-          <!-- Category options will be populated dynamically -->
-        </select>
-        <button type="submit">Add</button>
+        <select id="incomeCategory"></select>
+        <button type="button" onclick="addDailyEntry('income')">Add</button>
       </form>
     </div>
   </div>
 
   <div id="addExpenseModal" class="modal">
     <div class="modal-content">
-      <span class="close-modal" onclick="closeModal('addExpenseModal')">×</span>
+      <span class="close-modal" onclick="toggleModal('addExpenseModal')">×</span>
       <h3 class="modal-header">Add Expense</h3>
       <form id="addExpenseForm">
         <input type="text" id="expenseDescription" placeholder="Description">
         <input type="number" id="expenseAmount" placeholder="Amount">
-        <select id="expenseCategory">
-          <!-- Category options will be populated dynamically -->
-        </select>
-        <button type="submit">Add</button>
+        <select id="expenseCategory"></select>
+        <button type="button" onclick="addDailyEntry('expense')">Add</button>
       </form>
     </div>
   </div>
