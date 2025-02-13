@@ -358,22 +358,36 @@ function toggleDailyEntries() {
   // Daily entries toggle logic
 }
 
-function addDailyEntry(type) {
-  const amount = type === 'income' ? parseFloat(prompt('Enter income amount:')) : -parseFloat(prompt('Enter expense amount:'));
+function addIncomeEntry() {
+  const amount = parseFloat(prompt('Enter income amount:'));
   const description = prompt('Enter description:');
-  if (!isNaN(amount) && description) {
-    const newEntry = {
+  const category = prompt('Enter category:');
+  if (!isNaN(amount) && description && category) {
+    currentBusiness.income.push({
       id: Date.now(),
       date: new Date(),
-      amount: Math.abs(amount),
-      type: type,
-      description: description
-    };
-    if (type === 'income') {
-      currentBusiness.income.push(newEntry);
-    } else {
-      currentBusiness.expenses.push(newEntry);
-    }
+      amount,
+      description,
+      category
+    });
+    saveData();
+    updateTables();
+    updateTotals();
+  }
+}
+
+function addExpenseEntry() {
+  const amount = parseFloat(prompt('Enter expense amount:'));
+  const description = prompt('Enter description:');
+  const category = prompt('Enter category:');
+  if (!isNaN(amount) && description && category) {
+    currentBusiness.expenses.push({
+      id: Date.now(),
+      date: new Date(),
+      amount,
+      description,
+      category
+    });
     saveData();
     updateTables();
     updateTotals();
@@ -387,8 +401,8 @@ function addAssetEntry() {
     currentBusiness.assets.push({
       id: Date.now(),
       date: new Date(),
-      amount: amount,
-      description: description
+      amount,
+      description
     });
     saveData();
     updateTables();
@@ -403,8 +417,8 @@ function addLiabilityEntry() {
     currentBusiness.liabilities.push({
       id: Date.now(),
       date: new Date(),
-      amount: amount,
-      description: description
+      amount,
+      description
     });
     saveData();
     updateTables();
