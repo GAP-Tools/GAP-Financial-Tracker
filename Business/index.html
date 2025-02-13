@@ -5,53 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <header>
+    <button class="clean-button" onclick="window.location.href='https://gap-tools.github.io/GAP-Financial-Tracker/'">Switch to Personal</button>
+  </header>
+
   <div class="container">
     <!-- Business Selector -->
     <section class="business-selector">
-      <h2><span class="switch-link" onclick="window.open('https://your-personal-website.com')">Switch to Personal</span></h2>
-      <h3>BUSINESS FINANCIAL TRACKER</h3>
+      <h2 class="section-title">BUSINESS FINANCIAL TRACKER</h2>
       <div class="business-controls">
-        <input type="text" id="businessName" placeholder="Enter Business Name">
-        <button onclick="addBusiness()">Add Business</button>
+        <input type="text" id="businessName" class="clean-input" placeholder="Enter Business Name">
+        <button class="clean-button green-button" onclick="addBusiness()">Add Business</button>
       </div>
-      <select id="businessList" onchange="switchBusiness()"></select>
-      <div class="button-row">
-        <button onclick="editBusinessName()">✏️</button>
-        <button onclick="duplicateBusiness()">⎘</button>
-        <button onclick="deleteBusiness()">🗑️</button>
+      <select id="businessList" class="clean-select" onchange="switchBusiness()"></select>
+      <div class="action-buttons">
+        <button class="clean-button danger-button" onclick="editBusinessName()">✏️ Edit</button>
+        <button class="clean-button danger-button" onclick="deleteBusiness()">🗑️ Delete</button>
       </div>
-      <div class="profile-section">
-        <h2>Business Profile</h2>
-        <input type="text" id="businessDescription" placeholder="Business Description">
-        <label for="currency">Currency:</label>
-        <select id="currency"></select>
+    </section>
+
+    <!-- Business Profile Section -->
+    <section class="profile-section">
+      <h2 class="section-title">Business Profile</h2>
+      <input type="text" id="businessDescription" class="clean-input clean-block" placeholder="Business Description">
+      <div class="profile-data">
+        <label class="clean-label" for="currency">Currency:</label>
+        <select id="currency" class="clean-select"></select>
         <div class="residual-target">
-          <input type="number" id="residual-income-target" placeholder="Residual Income Target">
-          <button onclick="updateResidualTarget()">Set</button>
+          <input type="number" id="residual-income-target" class="clean-input" placeholder="Residual Income Target">
+          <button class="clean-button green-button" onclick="updateResidualTarget()">Set Target</button>
         </div>
-        <button onclick="saveBusinessProfile()">Save Profile</button>
       </div>
+      <button class="clean-button green-button" id="saveProfileBtn" onclick="saveBusinessProfile()">Save Profile</button>
     </section>
 
     <!-- Currency Converter -->
     <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="convertAmount" placeholder="Enter Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
+      <h2 class="section-title">Currency Converter</h2>
+      <input type="number" id="convertAmount" class="clean-input" placeholder="Enter Amount">
+      <div class="convert-pair">
+        <select id="fromCurrency" class="clean-select"></select>
+        <select id="toCurrency" class="clean-select"></select>
+      </div>
+      <button class="clean-button green-button" onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult" class="clean-para"></p>
     </section>
 
     <!-- Income Statement Section -->
     <section class="income-statement">
-      <h2>Income Statement <button onclick="addNewCategory()" class="action-icon">+</button></h2>
-      <table>
+      <h2 class="section-title">Income Statement <button class="clean-button green-button" onclick="addNewCategory('income')">+ Add Category</button></h2>
+      <table class="gridtable">
         <thead>
-          <tr>
+          <tr class="clean-table-header">
             <th>Month</th>
             <th>Income</th>
             <th>Expenses</th>
@@ -62,25 +69,25 @@
         <tbody id="income-statement-body"></tbody>
       </table>
       <div class="totals">
-        <p>Total Income: <span id="total-income">0</span></p>
-        <p>Total Expenses: <span id="total-expenses">0</span></p>
-        <p>Cashflow: <span id="cashflow">0</span></p>
-        <p>Average Monthly Income: <span id="average-income">0</span></p>
-        <p>Average Monthly Expenses: <span id="average-expenses">0</span></p>
-        <p>Average Cashflow: <span id="average-cashflow">0</span></p>
+        <div class="total-line"><span class="bold">Total Income:</span> <span id="total-income">$0</span></div>
+        <div class="total-line"><span class="bold">Total Expenses:</span> <span id="total-expenses">$0</span></div>
+        <div class="total-line"><span class="bold">Cashflow:</span> <span id="cashflow">$0</span></div>
+        <div class="total-line"><span class="bold">Average Income:</span> <span id="average-income">$0</span></div>
+        <div class="total-line"><span class="bold">Average Expenses:</span> <span id="average-expenses">$0</span></div>
+        <div class="total-line"><span class="bold">Average Cashflow:</span> <span id="average-cashflow">$0</span></div>
       </div>
-      <div class="entry-controls">
-        <button onclick="addIncomeOrExpense('income')">Add Income</button>
-        <button onclick="addIncomeOrExpense('expense')">Add Expense</button>
+      <div class="entry-buttons">
+        <button class="clean-button green-button" onclick="addIncomeEntry()">+ Add Income</button>
+        <button class="clean-button green-button" onclick="addExpenseEntry()">+ Add Expense</button>
       </div>
     </section>
 
     <!-- Balance Sheet Section -->
     <section class="balance-sheet">
-      <h2>Balance Sheet <button onclick="addNewBalanceEntry()" class="action-icon">+</button></h2>
-      <table>
+      <h2 class="section-title">Balance Sheet <button class="clean-button green-button" onclick="addNewCategory('balance')">+ Add Category</button></h2>
+      <table class="gridtable">
         <thead>
-          <tr>
+          <tr class="clean-table-header">
             <th>Date</th>
             <th>Description</th>
             <th>Assets</th>
@@ -91,61 +98,86 @@
         <tbody id="balance-sheet-body"></tbody>
       </table>
       <div class="totals">
-        <p>Total Assets: <span id="total-assets">0</span></p>
-        <p>Total Liabilities: <span id="total-liabilities">0</span></p>
-        <p>Net Worth: <span id="net-worth">0</span></p>
+        <div class="total-line"><span class="bold">Total Assets:</span> <span id="total-assets">$0</span></div>
+        <div class="total-line"><span class="bold">Total Liabilities:</span> <span id="total-liabilities">$0</span></div>
+        <div class="total-line"><span class="bold">Net Worth:</span> <span id="net-worth">$0</span></div>
       </div>
     </section>
 
     <!-- Financial Health Score -->
     <section class="health-score">
-      <h2>Financial Health Score</h2>
+      <h2 class="section-title">Financial Health Score</h2>
       <div class="circle-container">
         <canvas id="healthChart"></canvas>
-        <p id="healthPercentage">0%</p>
+        <p id="healthPercentage" class="health-score-tip">0%</p>
       </div>
-      <p id="healthTips"></p>
+      <p id="healthTips" class="health-tip"></p>
     </section>
 
     <!-- Data Management -->
     <section class="data-management">
-      <h2>Data Management</h2>
-      <input type="text" id="saveFileName" placeholder="Enter file name">
-      <button onclick="exportBusinessData()">Export File</button>
-      <button onclick="importBusinessData()">Import File</button>
-      <button onclick="clearBusinessData()">Clear All Data</button>
-      <button onclick="shareOnWhatsApp()">Export to WhatsApp</button>
-      <button onclick="shareOnGoogleDrive()">Export to Google Drive</button>
+      <h2 class="section-title">Data Management</h2>
+      <input type="text" id="saveFileName" class="clean-input" placeholder="Enter file name">
+      <div class="data-buttons">
+        <button class="clean-button green-button" onclick="exportData()">Export CSV</button>
+        <button class="clean-button green-button" onclick="importData()">Import CSV</button>
+        <button class="clean-button danger-button" onclick="clearData()">Clear Data</button>
+      </div>
     </section>
 
     <!-- Share App -->
     <section class="share-app">
-      <h2>Share Tool/Invite</h2>
-      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
-      <button onclick="shareOnFacebook()">Share on Facebook</button>
-      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
-      <button onclick="downloadApp()">Download App</button>
+      <h2 class="section-title">Share App</h2>
+      <div class="share-buttons">
+        <button class="clean-button green-button" onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+        <button class="clean-button green-button" onclick="shareOnLinkedIn()">Share on LinkedIn</button>
+        <button class="clean-button green-button" onclick="openApp()">View App</button>
+      </div>
     </section>
 
     <!-- Story Generation -->
     <section class="story-generation">
-      <h2>Business Financial Story</h2>
-      <button onclick="generateBusinessStory()">Generate Report</button>
-      <pre id="businessFinancialStory"></pre>
+      <h2 class="section-title">Financial Story</h2>
+      <button class="clean-button green-button" onclick="generateStory()">Generate Report</button>
+      <pre id="financialStory" class="clean-pre"></pre>
     </section>
   </div>
 
   <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
+  <div class="calculator-icon" onclick="toggleCalculator()">
+    <i class="bx bx-calculator"></i>
+  </div>
   <div id="calculatorPopup" class="calculator-popup">
-    <div class="calculator-content">
-      <input type="text" id="calculatorInput" readonly>
-      <div class="calculator-buttons">
-        <!-- Calculator buttons dynamically generated -->
+    <div class="calculator-header">
+      <h3 class="clean-heading">Calculator</h3>
+      <span class="close-btn" onclick="toggleCalculator()">×</span>
+    </div>
+    <div class="calculator-display">
+      <div id="calcDisplay">0</div>
+    </div>
+    <div class="calculator-pad">
+      <div class="calculator-keys">
+        <button onclick="calcInput('1')">1</button>
+        <button onclick="calcInput('2')">2</button>
+        <button onclick="calcInput('3')">3</button>
+        <button onclick="calcInput('+')">+</button>
+        <button onclick="calcInput('4')">4</button>
+        <button onclick="calcInput('5')">5</button>
+        <button onclick="calcInput('6')">6</button>
+        <button onclick="calcInput('-')">-</button>
+        <button onclick="calcInput('7')">7</button>
+        <button onclick="calcInput('8')">8</button>
+        <button onclick="calcInput('9')">9</button>
+        <button onclick="calcInput('*')">*</button>
+        <button onclick="calcInput('.')">.</button>
+        <button onclick="calcInput('0')">0</button>
+        <button onclick="calcClear()">C</button>
+        <button onclick="calcEqual()">=</button>
+        <button onclick="calcInput('/')">/</button>
       </div>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
-            </html>
+  </html>
