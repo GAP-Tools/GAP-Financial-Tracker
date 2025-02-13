@@ -57,38 +57,6 @@
     <!-- Income Statement Section -->
     <div class="income-statement">
       <h2 class="section-title">Income Statement</h2>
-
-        <!-- Modals -->
-  <div id="addIncomeModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeModal('addIncomeModal')">×</span>
-      <h3 class="modal-header">Add Income</h3>
-      <form id="addIncomeForm">
-        <input type="text" id="incomeDescription" placeholder="Description">
-        <input type="number" id="incomeAmount" placeholder="Amount">
-        <select id="incomeCategory">
-          <!-- Category options will be populated dynamically -->
-        </select>
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="addExpenseModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeModal('addExpenseModal')">×</span>
-      <h3 class="modal-header">Add Expense</h3>
-      <form id="addExpenseForm">
-        <input type="text" id="expenseDescription" placeholder="Description">
-        <input type="number" id="expenseAmount" placeholder="Amount">
-        <select id="expenseCategory">
-          <!-- Category options will be populated dynamically -->
-        </select>
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  </div>
-
       <div class="income-controls">
         <button class="clean-button" id="addIncomeBtn">+ Add Income</button>
         <button class="clean-button" id="addExpenseBtn">+ Add Expense</button>
@@ -254,6 +222,37 @@
     </div>
   </div>
 
+  <!-- Modals -->
+  <div id="addIncomeModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('addIncomeModal')">×</span>
+      <h3 class="modal-header">Add Income</h3>
+      <form id="addIncomeForm">
+        <input type="text" id="incomeDescription" placeholder="Description">
+        <input type="number" id="incomeAmount" placeholder="Amount">
+        <select id="incomeCategory">
+          <!-- Category options will be populated dynamically -->
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="addExpenseModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('addExpenseModal')">×</span>
+      <h3 class="modal-header">Add Expense</h3>
+      <form id="addExpenseForm">
+        <input type="text" id="expenseDescription" placeholder="Description">
+        <input type="number" id="expenseAmount" placeholder="Amount">
+        <select id="expenseCategory">
+          <!-- Category options will be populated dynamically -->
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
-    </html>
+            </html>
