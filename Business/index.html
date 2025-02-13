@@ -1,147 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Financial Tracker</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Business Financial Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Business Selector -->
-        <div class="section">
-            <div class="business-header">
-                <input type="text" id="businessName" placeholder="New Business Name">
-                <button onclick="addBusiness()"><i class="fas fa-plus"></i> Add Business</button>
-                <select id="businessList" onchange="switchBusiness()"></select>
-                <button onclick="deleteBusiness()"><i class="fas fa-trash"></i> Delete</button>
-                <button onclick="window.location.href='https://gap-tools.github.io/GAP-Financial-Tracker/'">
-                    <i class="fas fa-exchange-alt"></i> Switch to Personal
-                </button>
-            </div>
-        </div>
-
-        <!-- Business Profile -->
-        <div class="section">
-            <h2><i class="fas fa-building"></i> Business Profile</h2>
-            <input type="text" id="businessDesc" placeholder="Business Description">
-            <div class="input-group">
-                <label>Target Monthly Income:</label>
-                <input type="number" id="revenueTarget" placeholder="Enter target amount">
-            </div>
-            <div class="input-group">
-                <label>Currency:</label>
-                <select id="currencySelect"></select>
-            </div>
-        </div>
-
-        <!-- Income Statement -->
-        <div class="section">
-            <div class="section-header">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Income Statement</h2>
-                <div>
-                    <button class="btn-primary" onclick="showEntryModal('income')">
-                        <i class="fas fa-plus-circle"></i> Add Income
-                    </button>
-                    <button class="btn-secondary" onclick="showEntryModal('expense')">
-                        <i class="fas fa-minus-circle"></i> Add Expense
-                    </button>
-                </div>
-            </div>
-            
-            <table class="financial-table" id="monthlyTable">
-                <thead>
-                    <tr>
-                        <th style="width: 20%">Month</th>
-                        <th style="width: 25%">Income</th>
-                        <th style="width: 25%">Expenses</th>
-                        <th style="width: 20%">Net</th>
-                        <th style="width: 10%">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="monthlyBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Balance Sheet -->
-        <div class="section">
-            <div class="section-header">
-                <h2><i class="fas fa-balance-scale"></i> Balance Sheet</h2>
-                <div>
-                    <button class="btn-primary" onclick="showAssetModal()">
-                        <i class="fas fa-plus-circle"></i> Add Asset
-                    </button>
-                    <button class="btn-secondary" onclick="showLiabilityModal()">
-                        <i class="fas fa-plus-circle"></i> Add Liability
-                    </button>
-                </div>
-            </div>
-            <table class="financial-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="balanceBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Financial Health -->
-        <div class="section">
-            <h2><i class="fas fa-heartbeat"></i> Financial Health</h2>
-            <div class="health-container">
-                <div class="health-chart">
-                    <canvas id="healthChart"></canvas>
-                    <div class="health-score" id="healthPercentage">0%</div>
-                </div>
-                <div class="health-tips" id="healthTips"></div>
-            </div>
-        </div>
-
-        <!-- Modals -->
-        <div id="entryModal" class="modal">
-            <div class="modal-content">
-                <h3><i class="fas fa-edit"></i> Add Transaction</h3>
-                <div class="modal-body">
-                    <div class="input-group">
-                        <label>Type:</label>
-                        <select id="entryType" class="form-control">
-                            <option value="income">Income</option>
-                            <option value="expense">Expense</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Amount:</label>
-                        <input type="number" id="entryAmount" class="form-control" placeholder="Enter amount">
-                    </div>
-                    <div class="input-group">
-                        <label>Description:</label>
-                        <input type="text" id="entryDesc" class="form-control" placeholder="Transaction description">
-                    </div>
-                    <div class="input-group">
-                        <label>Category:</label>
-                        <div class="category-select">
-                            <select id="categorySelect" class="form-control"></select>
-                            <button class="btn-small" onclick="addCategory()">
-                                <i class="fas fa-plus"></i> New
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-primary" onclick="saveEntry()">Save</button>
-                    <button class="btn-secondary" onclick="closeModals()">Cancel</button>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <!-- Business Selector -->
+    <div class="business-selector">
+      <h2 class="section-title">BUSINESS FINANCIAL TRACKER</h2>
+      <div class="business-controls">
+        <input type="text" id="businessName" class="clean-input" placeholder="Enter Business Name">
+        <button class="clean-button" onclick="addBusiness()">Add Business</button>
+      </div>
+      <div class="business-list-wrapper">
+        <select id="businessList" class="business-list" onchange="switchBusiness()"></select>
+      </div>
+      <div class="action-controls">
+        <button class="clean-button danger-button" onclick="editBusinessName()">✏️ Edit</button>
+        <button class="clean-button danger-button" onclick="deleteBusiness()">🗑️ Delete</button>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Business Profile Section -->
+    <div class="profile-section">
+      <h2 class="section-title">Business Profile</h2>
+      <div class="profile-data">
+        <textarea id="businessDescription" class="clean-input" rows="3" placeholder="Business Description"></textarea>
+        <div class="currency-select">
+          <label>Currency:</label>
+          <select id="currency"></select>
+        </div>
+        <div class="residual-target">
+          <input type="number" id="residual-income-target" class="clean-input" placeholder="Residual Income Target">
+          <button class="clean-button" onclick="updateResidualTarget()">Set Target</button>
+        </div>
+      </div>
+      <button class="clean-button" onclick="saveBusinessProfile()">Save Profile</button>
+    </div>
+
+    <!-- Currency Converter -->
+    <div class="currency-converter">
+      <h2 class="section-title">Currency Converter</h2>
+      <input type="number" id="convertAmount" placeholder="Enter Amount">
+      <div class="convert-pair">
+        <select id="fromCurrency"></select>
+        <select id="toCurrency"></select>
+      </div>
+      <button class="clean-button" onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult" class="conversion-result"></p>
+    </div>
+
+    <!-- Income Statement Section -->
+    <div class="income-statement">
+      <h2 class="section-title">Income Statement</h2>
+
+        <!-- Modals -->
+  <div id="addIncomeModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('addIncomeModal')">×</span>
+      <h3 class="modal-header">Add Income</h3>
+      <form id="addIncomeForm">
+        <input type="text" id="incomeDescription" placeholder="Description">
+        <input type="number" id="incomeAmount" placeholder="Amount">
+        <select id="incomeCategory">
+          <!-- Category options will be populated dynamically -->
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="addExpenseModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('addExpenseModal')">×</span>
+      <h3 class="modal-header">Add Expense</h3>
+      <form id="addExpenseForm">
+        <input type="text" id="expenseDescription" placeholder="Description">
+        <input type="number" id="expenseAmount" placeholder="Amount">
+        <select id="expenseCategory">
+          <!-- Category options will be populated dynamically -->
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </div>
+
+      <div class="income-controls">
+        <button class="clean-button" id="addIncomeBtn">+ Add Income</button>
+        <button class="clean-button" id="addExpenseBtn">+ Add Expense</button>
+      </div>
+      <div class="INCOME-table-container">
+        <!-- Monthly Table -->
+        <h3>Monthly Summary</h3>
+        <table class="category-table" id="monthlyTable">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Net Income</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyTableBody">
+            <!-- Monthly rows will be populated here -->
+          </tbody>
+        </table>
+
+        <!-- Category Table -->
+        <h3>Category Summary</h3>
+        <table class="category-table" id="categoryTable">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="categoryTableBody">
+            <!-- Category rows will be populated here -->
+          </tbody>
+        </table>
+
+        <!-- Daily Entries Table -->
+        <h3>Daily Entries</h3>
+        <table class="category-table" id="dailyTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="dailyTableBody">
+            <!-- Daily entry rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
+      <div class="totals">
+        <div class="total-income">Total Income: <span id="total-income">$0</span></div>
+        <div class="total-expenses">Total Expenses: <span id="total-expenses">$0</span></div>
+        <div class="total-cashflow">Cashflow: <span id="cashflow">$0</span></div>
+      </div>
+    </div>
+
+    <!-- Balance Sheet Section -->
+    <div class="balance-sheet">
+      <h2 class="section-title">Balance Sheet</h2>
+      <div class="balance-controls">
+        <button class="clean-button" onclick="addNewAsset()">+ Add Asset</button>
+        <button class="clean-button" onclick="addNewLiability()">+ Add Liability</button>
+      </div>
+      <table class="balance-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="balance-sheet-body">
+          <!-- Balance sheet rows will be populated here -->
+        </tbody>
+      </table>
+      <div class="balance-totals">
+        <div class="total-assets">Total Assets: <span id="total-assets">$0</span></div>
+        <div class="total-liabilities">Total Liabilities: <span id="total-liabilities">$0</span></div>
+        <div class="net-worth">Net Worth: <span id="net-worth">$0</span></div>
+      </div>
+    </div>
+
+    <!-- Financial Health Score -->
+    <div class="health-score">
+      <h2 class="section-title">Financial Health Score</h2>
+      <div class="health-chart">
+        <canvas id="healthChart"></canvas>
+      </div>
+      <p id="healthPercentage" class="health-percentage"></p>
+      <p id="healthTips" class="health-tips"></p>
+    </div>
+
+    <!-- Data Management -->
+    <div class="data-management">
+      <h2 class="section-title">Data Management</h2>
+      <div class="export-import">
+        <input type="text" id="saveFileName" placeholder="Enter file name">
+        <div>
+          <button class="clean-button" onclick="exportData()">Export</button>
+          <button class="clean-button" onclick="importData()">Import</button>
+          <button class="clean-button danger-button" onclick="clearData()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share App -->
+    <div class="share-app">
+      <h2 class="section-title">Share App</h2>
+      <div class="share-buttons">
+        <button class="clean-button" onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+        <button class="clean-button" onclick="shareOnLinkedIn()">Share on LinkedIn</button>
+        <button class="clean-button" onclick="openApp()">View App</button>
+      </div>
+    </div>
+
+    <!-- Story Generation -->
+    <div class="story-generation">
+      <h2 class="section-title">Financial Story</h2>
+      <button class="clean-button" onclick="generateStory()">Generate Story</button>
+      <pre id="financialStory" class="financial-story"></pre>
+    </div>
+  </div>
+
+  <!-- Floating Calculator Icon -->
+  <div class="calculator-icon" onclick="toggleCalculator()">
+    <i class="fas fa-calculator"></i>
+  </div>
+  <div id="calculatorPopup" class="calculator-popup">
+    <div class="calculator-header">
+      <h3>Calculator</h3>
+      <span class="close-btn" onclick="toggleCalculator()">×</span>
+    </div>
+    <div class="calculator-display">
+      <input type="text" id="calcDisplay" readonly>
+    </div>
+    <div class="calculator-pad">
+      <div class="calculator-keys">
+        <button onclick="calcInput('1')">1</button>
+        <button onclick="calcInput('2')">2</button>
+        <button onclick="calcInput('3')">3</button>
+        <button onclick="calcInput('+')">+</button>
+        <button onclick="calcInput('4')">4</button>
+        <button onclick="calcInput('5')">5</button>
+        <button onclick="calcInput('6')">6</button>
+        <button onclick="calcInput('-')">-</button>
+        <button onclick="calcInput('7')">7</button>
+        <button onclick="calcInput('8')">8</button>
+        <button onclick="calcInput('9')">9</button>
+        <button onclick="calcInput('*')">*</button>
+        <button onclick="calcInput('.')">.</button>
+        <button onclick="calcInput('0')">0</button>
+        <button onclick="calcClear()">C</button>
+        <button onclick="calcEqual()">=</button>
+        <button onclick="calcInput('/')">/</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
-                          </html>
+    </html>
