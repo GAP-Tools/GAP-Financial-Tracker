@@ -19,7 +19,7 @@ header {
   text-align: right;
 }
 
-.clean-button {
+button {
   background-color: #28a745;
   color: white;
   border: none;
@@ -30,7 +30,7 @@ header {
   transition: background-color 0.3s;
 }
 
-.clean-button:hover {
+button:hover {
   background-color: #218838;
 }
 
@@ -297,202 +297,51 @@ header {
   word-wrap: break-word;
 }
 
-.IncomeStatementContainer .monthly {
-  width: 33.33%;
-}
-
-.financial_columns {
-  width: 25%;
-}
-
-.income_expense_header {
-  display: flex;
-  justify-content: space-between;
-}
-
-.income_expense_header_daily {
-  display: flex;
-  justify-content: space-between;
-}
-
-.NetIncome {
-  width: 17%;
-}
-
-.action_column {
-  background-color: #2c836d;
-  color: white;
-  padding: 5px;
-  text-align: center;
-}
-
-.action-icon {
-  background-color: #2c836d;
-  padding: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  text-align: center;
-  margin-left: 10px;
-}
-
-.month_container,
-.category_container,
-.daily_container {
-  width: 100%;
-  margin-right: 5px;
-}
-
-.income_expense_header span {
-  width: 50%;
-}
-
-.income_expense_header_daily span {
-  width: 50%;
-}
-
-.categoryTable th {
-    text-align: center;
-}
-
-.categoryTable .income_expense_header {
-  display: flex;
-}
-
-.categoryTable .financial_columns {
-  width: 100%;
-}
-
-.categoryTable td.financial_columns {
-  padding: 8px;
-}
-
-.daily_financial_columns {
-  width: 100%;
-}
-
-.daily_action_column {
-  width: 100px;
-}
-
-.dailyTable th,
-.dailyTable td {
-  text-align: left;
-}
-
-.dailyTable .daily_financial_columns {
-  width: 25%;
-}
-
-.dailyTable .daily_action_column {
-  width: 25%;
-}
-
-.dailyTable td {
-  border: 1px solid #000;
-}
-
-.dailyTable th {
-  background-color: #c4e5d3;
-  color: #191919;
-}
-
-.month_container,
-.category_container,
-.daily_container {
-  margin-top: 10px;
-}
-
-.month_container {
-  float: left;
-  width: 33.33%;
-}
-
-.category_container {
-  float: left;
-  width: 33.33%;
-}
-
-.daily_container {
-  float: left;
-  width: 33.33%;
-}
-
-.collapse-icon {
-  cursor: pointer;
-}
-
-.collapsed > tbody {
-  display: none;
-}
-
-.income-statement .IncomeStatement {
+/* Layout Adjustments */
+.IncomeStatementContainer {
   display: flex;
   flex-wrap: wrap;
 }
 
-.IncomeStatement .month_container,
-.IncomeStatement .category_container,
-.IncomeStatement .daily_container {
-  width: 100%;
-  margin-right: 10px;
+.month_container,
+.category_container,
+.daily_container {
+  flex: 1 1 30%;
+  margin: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
 }
 
-.IncomeStatement .month_container {
-  width: 100%;
-}
-
-.IncomeStatement .category_container {
-  display: none;
-}
-
-.IncomeStatement .daily_container {
-  display: none;
-}
-
-.month_container .collapse-icon {
+/* Collapsible Sections */
+.collab-container button {
+  background-color: #2c836d;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
 }
 
-.category_container .collapse-icon {
-  cursor: pointer;
+.collab-box {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
 }
 
-.month_container .collapse-icon:after {
-  content: "\25BC"; /* Down arrow */
+.collab-container.collapsed .collab-box {
+  max-height: 1000px;
 }
 
-.category_container .collapse-icon:after {
-  content: "\25BC"; /* Down arrow */
-}
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .month_container,
+  .category_container,
+  .daily_container {
+    flex: 100%;
+  }
 
-.month_container.collapsed .collapse-icon:after {
-  content: "\25B6"; /* Right arrow */
-}
-
-.category_container.collapsed .collapse-icon:after {
-  content: "\25B6"; /* Right arrow */
-}
-
-.financial_columns .income,
-.financial_columns .expenses {
-  width: 50%;
-}
-
-.month_container .financial_columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.category_container .financial_columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.daily_financial_columns .income,
-.daily_financial_columns .expenses {
-  width: 50%;
+  .calculator-icon {
+    bottom: 10px;
+    right: 10px;
+  }
   }
