@@ -58,6 +58,7 @@
       <h2 class="section-title">Income Statement</h2>
       <button class="clean-button green-button" onclick="addIncomeEntry()">Add Income</button>
       <button class="clean-button green-button" onclick="addExpenseEntry()">Add Expense</button>
+      
       <div class="IncomeStatementContainer">     
         <div class="IncomeStatement">
           <div class="month_container">
@@ -65,14 +66,10 @@
               <thead>
                 <tr>
                   <th>Month</th>
-                  <th class="financial_columns">
-                    <div class="income_expense_header">
-                      <span>Income</span>
-                      <span>Expenses</span>
-                    </div>
-                  </th>
-                  <th class="NetIncome">Net Income</th>
-                  <th class="action_column">Actions</th>
+                  <th>Income</th>
+                  <th>Expenses</th>
+                  <th>Net Income</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="monthlyTableBody">
@@ -80,17 +77,13 @@
               </tbody>
             </table>
           </div>
-          <div class="category_container" style="width: 100%">
+          <div class="category_container">
             <table class="gridtable categoryTable">
               <thead>
                 <tr>
                   <th>Category</th>
-                  <th class="financial_columns">
-                    <div class="income_expense_header">
-                      <span>Income</span>
-                      <span>Expenses</span>
-                    </div>
-                  </th>
+                  <th>Income</th>
+                  <th>Expenses</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -105,13 +98,9 @@
                 <tr>
                   <th>Date</th>
                   <th>Description</th>
-                  <th class="daily_financial_columns">
-                    <div class="income_expense_header_daily">
-                      <span>Income</span>
-                      <span>Expenses</span>
-                    </div>
-                  </th>
-                  <th class="daily_action_column">Actions</th>
+                  <th>Income</th>
+                  <th>Expenses</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="dailyTableBody">
@@ -120,6 +109,11 @@
             </table>            
           </div>
         </div>
+      </div>
+      <div class="totals">
+        <div class="total-line"><span class="bold">Average Income:</span> <span id="average-income">$0</span></div>
+        <div class="total-line"><span class="bold">Average Expenses:</span> <span id="average-expenses">$0</span></div>
+        <div class="total-line"><span class="bold">Average Cashflow:</span> <span id="average-cashflow">$0</span></div>
       </div>
     </section>
 
@@ -162,8 +156,8 @@
       <h2 class="section-title">Data Management</h2>
       <input type="text" id="saveFileName" class="clean-input" placeholder="Enter file name">
       <div class="data-buttons">
-        <button class="clean-button green-button" onclick="exportData()">Export CSV</button>
-        <button class="clean-button green-button" onclick="importData()">Import CSV</button>
+        <button class="clean-button green-button" onclick="exportData()">Export Data</button>
+        <button class="clean-button green-button" onclick="importData()">Import Data</button>
         <button class="clean-button danger-button" onclick="clearData()">Clear Data</button>
       </div>
     </section>
@@ -223,4 +217,4 @@
 
   <script src="script.js"></script>
 </body>
-        </html>
+          </html>
