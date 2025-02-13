@@ -1,86 +1,73 @@
-// Initialize variables
 let businesses = [];
-let currentBusinessIndex = -1;
+let currentBusiness = null;
 let currencyRates = {};
-const CURRENCY_API_KEY = 'YOUR_API_KEY';
-
-// DOM Elements
-const elements = {
-    businessName: document.getElementById('businessName'),
-    businessList: document.getElementById('businessList'),
-    currency: document.getElementById('currency'),
-    fromCurrency: document.getElementById('fromCurrency'),
-    toCurrency: document.getElementById('toCurrency'),
-    conversionResult: document.getElementById('conversionResult'),
-    monthlyTableBody: document.getElementById('monthlyTableBody'),
-    balanceSheetBody: document.getElementById('balance-sheet-body'),
-    totalAssets: document.getElementById('total-assets'),
-    totalLiabilities: document.getElementById('total-liabilities'),
-    netWorth: document.getElementById('net-worth'),
-    healthChart: new Chart(document.getElementById('healthChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Health'],
-            datasets: [{
-                data: [0],
-                backgroundColor: ['#2c836d']
-            }]
-        },
-        options: {
-            cutout: '70%',
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    }),
-    healthPercentage: document.getElementById('healthPercentage'),
-    healthTips: document.getElementById('healthTips'),
-    financialStory: document.getElementById('financialStory')
+const healthTips = {
+    low: [
+        "Consider reducing discretionary spending",
+        "Review recurring expenses for potential savings",
+        "Explore additional income streams",
+        "Delay non-essential purchases",
+        "Negotiate better rates with suppliers",
+        "Optimize inventory management",
+        "Renegotiate debt terms",
+        "Implement strict budget controls",
+        "Offer promotions to boost sales",
+        "Diversify revenue sources"
+    ],
+    medium: [
+        "Maintain current financial discipline",
+        "Invest in marketing to grow revenue",
+        "Consider strategic partnerships",
+        "Review pricing strategy",
+        "Explore export opportunities",
+        "Invest in employee training",
+        "Upgrade operational efficiency",
+        "Build emergency cash reserves",
+        "Refinance high-interest debt",
+        "Expand to new markets"
+    ],
+    high: [
+        "Reinvest profits for growth",
+        "Explore acquisition opportunities",
+        "Implement profit-sharing programs",
+        "Upgrade business technology",
+        "Expand product lines",
+        "Invest in research & development",
+        "Consider franchising model",
+        "Build long-term investments",
+        "Enhance customer experience",
+        "Develop sustainability initiatives"
+    ]
 };
 
-// Initialize application
-init();
-
-async function init() {
-    await fetchCurrencyRates();
-    loadData();
-    if (businesses.length > 0) switchBusiness(0);
-}
-
-// Currency functions
-async function fetchCurrencyRates() {
-    try {
-        const response = await fetch(`https://v6.exchangerate-api.com/v6/${CURRENCY_API_KEY}/latest/USD`);
-        const data = await response.json();
-        currencyRates = data.conversion_rates;
-        populateCurrencyDropdowns();
-    } catch (error) {
-        console.error('Error fetching currency rates:', error);
+// Initialize Chart
+const ctx = document.getElementById('healthChart').getContext('2d');
+const healthChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Achieved', 'Remaining'],
+        datasets: [{
+            data: [0, 100],
+            backgroundColor: ['#4CAF50', '#E0E0E0']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
     }
-}
+});
 
-function populateCurrencyDropdowns() {
-    const currencies = Object.keys(currencyRates);
-    currencies.forEach(currency => {
-        const option = document.createElement('option');
-        option.value = currency;
-        option.textContent = currency;
-        elements.currency.appendChild(option.cloneNode(true));
-        elements.fromCurrency.appendChild(option.cloneNode(true));
-        elements.toCurrency.appendChild(option.cloneNode(true));
-    });
-}
-
-// Business functions
+// Business Functions
 function addBusiness() {
-    const name = elements.businessName.value.trim();
+    const name = document.getElementById('businessName').value.trim();
     if (!name) return;
     
     const newBusiness = {
         name,
-        description: '',
         currency: 'USD',
-        residualIncomeTarget: 0,
-        transactions: [],
+        target: 0,
+        months: {},
+        categories: [],
         assets: [],
         liabilities: []
     };
@@ -89,117 +76,162 @@ function addBusiness() {
     saveData();
     updateBusinessList();
     switchBusiness(businesses.length - 1);
-    elements.businessName.value = '';
-}
-
-function updateBusinessList() {
-    elements.businessList.innerHTML = businesses
-        .map((business, index) => `<option value="${index}">${business.name}</option>`)
-        .join('');
 }
 
 function switchBusiness(index) {
-    currentBusinessIndex = index;
+    currentBusiness = businesses[index];
     updateUI();
 }
 
-// Transaction functions
-function addIncomeEntry() {
-    addTransaction('income');
+function updateBusinessList() {
+    const select = document.getElementById('businessList');
+    select.innerHTML = businesses.map((b, i) => 
+        `<option value="${i}">${b.name}</option>`
+    ).join('');
 }
 
-function addExpenseEntry() {
-    addTransaction('expense');
+// Financial Functions
+function showEntryModal(type) {
+    const modal = document.getElementById('entryModal');
+    document.getElementById('modalTitle').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    document.getElementById('entryType').value = type;
+    populateCategories();
+    modal.style.display = 'block';
 }
 
-function addTransaction(type) {
-    const amount = parseFloat(prompt(`Enter ${type} amount:`));
-    if (isNaN(amount)) return;
-    
-    const description = prompt(`Enter ${type} description:`);
-    if (!description) return;
-    
-    const transaction = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type,
-        amount: type === 'income' ? amount : -amount,
-        description
+function saveEntry() {
+    const entry = {
+        date: document.getElementById('entryDate').value || new Date().toISOString().slice(0,10),
+        description: document.getElementById('entryDesc').value,
+        amount: parseFloat(document.getElementById('entryAmount').value),
+        type: document.getElementById('entryType').value,
+        category: document.getElementById('entryCategory').value || 
+                 document.getElementById('newCategory').value
     };
+
+    if (!entry.category || isNaN(entry.amount)) return;
+
+    // Update business data
+    const monthKey = entry.date.slice(0,7);
+    if (!currentBusiness.months[monthKey]) {
+        currentBusiness.months[monthKey] = {
+            income: 0,
+            expenses: 0,
+            categories: {}
+        };
+    }
     
-    businesses[currentBusinessIndex].transactions.push(transaction);
+    if (!currentBusiness.categories.includes(entry.category)) {
+        currentBusiness.categories.push(entry.category);
+    }
+
+    const month = currentBusiness.months[monthKey];
+    if (entry.type === 'income') {
+        month.income += entry.amount;
+    } else {
+        month.expenses += entry.amount;
+    }
+
+    if (!month.categories[entry.category]) {
+        month.categories[entry.category] = {
+            income: 0,
+            expenses: 0,
+            entries: []
+        };
+    }
+
+    const category = month.categories[entry.category];
+    category[entry.type + 's'] += entry.amount;
+    category.entries.push(entry);
+
+    closeModal();
     saveData();
     updateUI();
 }
 
-// Update UI
+// UI Update Functions
 function updateUI() {
-    const business = businesses[currentBusinessIndex];
-    updateMonthlyTable(business);
-    updateBalanceSheet(business);
-    updateFinancialHealth(business);
-    updateAverages(business);
+    updateMonthlyTable();
+    updateBalanceSheet();
+    updateFinancialHealth();
+    populateCurrencyDropdowns();
 }
 
-function updateMonthlyTable(business) {
-    const monthlyData = groupByMonth(business.transactions);
-    elements.monthlyTableBody.innerHTML = Object.entries(monthlyData)
-        .map(([month, data]) => `
-            <tr>
-                <td>${formatMonth(month)}</td>
-                <td>$${data.income.toFixed(2)}</td>
-                <td>$${Math.abs(data.expenses).toFixed(2)}</td>
-                <td>$${(data.income + data.expenses).toFixed(2)}</td>
+function updateMonthlyTable() {
+    const tbody = document.getElementById('monthlyBody');
+    tbody.innerHTML = Object.entries(currentBusiness.months).map(([month, data]) => `
+        <tr data-month="${month}">
+            <td>${formatMonth(month)}</td>
+            <td>${formatCurrency(data.income)}</td>
+            <td>${formatCurrency(data.expenses)}</td>
+            <td>${formatCurrency(data.income - data.expenses)}</td>
+            <td>
+                <button onclick="toggleCategory('${month}')" class="action-btn">▼</button>
+                <button onclick="deleteMonth('${month}')" class="action-btn">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function toggleCategory(monthKey) {
+    const row = document.querySelector(`tr[data-month="${monthKey}"]`);
+    row.classList.toggle('collapsed');
+    
+    const categoryTable = document.getElementById('categoryBody');
+    categoryTable.innerHTML = Object.entries(currentBusiness.months[monthKey].categories)
+        .map(([category, data]) => `
+            <tr data-category="${category}">
+                <td>${category}</td>
+                <td>${formatCurrency(data.income)}</td>
+                <td>${formatCurrency(data.expenses)}</td>
                 <td>
-                    <button class="btn-secondary" onclick="deleteTransaction('${month}')">🗑️</button>
+                    <button onclick="toggleDaily('${monthKey}','${category}')" class="action-btn">▼</button>
+                    <button onclick="deleteCategory('${monthKey}','${category}')" class="action-btn">🗑️</button>
                 </td>
             </tr>
         `).join('');
 }
 
-function updateAverages(business) {
-    const monthlyData = groupByMonth(business.transactions);
-    const months = Object.keys(monthlyData).length || 1;
-    
-    const totalIncome = Object.values(monthlyData).reduce((sum, data) => sum + data.income, 0);
-    const totalExpenses = Object.values(monthlyData).reduce((sum, data) => sum + data.expenses, 0);
-    
-    // Add this section to your Income Statement HTML
-    document.getElementById('average-income').textContent = `$${(totalIncome / months).toFixed(2)}`;
-    document.getElementById('average-expenses').textContent = `$${(Math.abs(totalExpenses) / months).toFixed(2)}`;
-    document.getElementById('average-cashflow').textContent = `$${((totalIncome + totalExpenses) / months).toFixed(2)}`;
+// Helper Functions
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currentBusiness.currency
+    }).format(amount);
 }
 
-// Helper functions
-function groupByMonth(transactions) {
-    return transactions.reduce((acc, transaction) => {
-        const month = new Date(transaction.date).toISOString().slice(0, 7);
-        if (!acc[month]) {
-            acc[month] = { income: 0, expenses: 0 };
+function formatMonth(monthString) {
+    const [year, month] = monthString.split('-');
+    return new Date(year, month-1).toLocaleString('default', {month: 'long'}) + ' ' + year;
+}
+
+function saveData() {
+    localStorage.setItem('businessData', JSON.stringify(businesses));
+}
+
+function loadData() {
+    const data = localStorage.getItem('businessData');
+    if (data) businesses = JSON.parse(data);
+    if (businesses.length) switchBusiness(0);
+}
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    document.querySelector('.modal .close').addEventListener('click', closeModal);
+    window.addEventListener('click', e => {
+        if (e.target.classList.contains('modal')) closeModal();
+    });
+});
+
+function closeModal() {
+    document.getElementById('entryModal').style.display = 'none';
+    document.getElementById('newCategory').value = '';
+}
+
+function populateCategories() {
+    const select = document.getElementById('entryCategory');
+    select.innerHTML = currentBusiness.categories
+        .map(c => `<option value="${c}">${c}</option>`)
+        .concat('<option value="">-- New Category --</option>');
         }
-        if (transaction.amount > 0) {
-            acc[month].income += transaction.amount;
-        } else {
-            acc[month].expenses += transaction.amount;
-        }
-        return acc;
-    }, {});
-}
-
-function formatMonth(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
-}
-
-// Add this to your Income Statement HTML section:
-<div class="totals">
-    <div class="total-line">
-        <span>Average Income:</span> <span id="average-income">$0</span>
-    </div>
-    <div class="total-line">
-        <span>Average Expenses:</span> <span id="average-expenses">$0</span>
-    </div>
-    <div class="total-line">
-        <span>Average Cash Flow:</span> <span id="average-cashflow">$0</span>
-    </div>
-</div>
