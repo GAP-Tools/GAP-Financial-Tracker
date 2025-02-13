@@ -1,127 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Business Financial Tracker</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Financial Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container">
-    <!-- Business Selector -->
-    <section class="business-selector">
-      <h2>BUSINESS FINANCIAL TRACKER</h2>
-      <div class="business-controls">
-        <input type="text" id="businessName" placeholder="Enter Business Name">
-        <button onclick="addBusiness()">Add Business</button>
-      </div>
-      <select id="businessList" onchange="switchBusiness()"></select>
-      <div class="action-controls">
-        <button onclick="editBusinessName()">✏️</button>
-        <button onclick="duplicateBusiness()">⎘</button>
-        <button onclick="deleteBusiness()">🗑️</button>
-      </div>
-    </section>
+    <div class="container">
+        <!-- Business Selector -->
+        <div class="section">
+            <div class="business-header">
+                <input type="text" id="businessName" placeholder="New Business Name">
+                <button onclick="addBusiness()"><i class="fas fa-plus"></i> Add Business</button>
+                <select id="businessList" onchange="switchBusiness()"></select>
+                <button onclick="deleteBusiness()"><i class="fas fa-trash"></i> Delete</button>
+                <button onclick="window.location.href='https://gap-tools.github.io/GAP-Financial-Tracker/'">
+                    <i class="fas fa-exchange-alt"></i> Switch to Personal
+                </button>
+            </div>
+        </div>
 
-    <!-- Business Profile Section -->
-    <section class="profile-section">
-      <h2>Business Profile <button onclick="toggleProfileEdit()" class="action-icon">⚙️</button></h2>
-      <input type="text" id="businessDescription" placeholder="Business Description">
-      <select id="currency"></select>
-      <div class="residual-target">
-        <input type="number" id="residual-income-target" placeholder="Residual Income Target">
-        <button onclick="updateResidualTarget()">Set</button>
-      </div>
-      <button onclick="saveBusinessProfile()">Save Profile</button>
-    </section>
+        <!-- Business Profile -->
+        <div class="section">
+            <h2><i class="fas fa-building"></i> Business Profile</h2>
+            <input type="text" id="businessDesc" placeholder="Business Description">
+            <div class="input-group">
+                <label>Target Monthly Income:</label>
+                <input type="number" id="revenueTarget" placeholder="Enter target amount">
+            </div>
+            <div class="input-group">
+                <label>Currency:</label>
+                <select id="currencySelect"></select>
+            </div>
+        </div>
 
-    <!-- Income Statement Section -->
-    <section class="income-statement">
-      <h2>Income Statement <button onclick="addNewCategory('income')" class="action-icon">+</button></h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Net Income</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="income-statement-body"></tbody>
-      </table>
-      <div class="totals">
-        <p>Total Income: <span id="total-income">0</span></p>
-        <p>Total Expenses: <span id="total-expenses">0</span></p>
-        <p>Cashflow: <span id="cashflow">0</span></p>
-      </div>
-      <div class="entry-controls">
-        <button onclick="addIncomeOrExpense('income')">Add Income</button>
-        <button onclick="addIncomeOrExpense('expense')">Add Expense</button>
-      </div>
-    </section>
+        <!-- Income Statement -->
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Income Statement</h2>
+                <div>
+                    <button class="btn-primary" onclick="showEntryModal('income')">
+                        <i class="fas fa-plus-circle"></i> Add Income
+                    </button>
+                    <button class="btn-secondary" onclick="showEntryModal('expense')">
+                        <i class="fas fa-minus-circle"></i> Add Expense
+                    </button>
+                </div>
+            </div>
+            
+            <table class="financial-table" id="monthlyTable">
+                <thead>
+                    <tr>
+                        <th style="width: 20%">Month</th>
+                        <th style="width: 25%">Income</th>
+                        <th style="width: 25%">Expenses</th>
+                        <th style="width: 20%">Net</th>
+                        <th style="width: 10%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlyBody"></tbody>
+            </table>
+        </div>
 
-    <!-- Balance Sheet Section -->
-    <section class="balance-sheet">
-      <h2>Balance Sheet</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Assets</th>
-            <th>Liabilities</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="balance-sheet-body"></tbody>
-      </table>
-      <div class="totals">
-        <p>Total Assets: <span id="total-assets">0</span></p>
-        <p>Total Liabilities: <span id="total-liabilities">0</span></p>
-        <p>Net Worth: <span id="net-worth">0</span></p>
-      </div>
-    </section>
+        <!-- Balance Sheet -->
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-balance-scale"></i> Balance Sheet</h2>
+                <div>
+                    <button class="btn-primary" onclick="showAssetModal()">
+                        <i class="fas fa-plus-circle"></i> Add Asset
+                    </button>
+                    <button class="btn-secondary" onclick="showLiabilityModal()">
+                        <i class="fas fa-plus-circle"></i> Add Liability
+                    </button>
+                </div>
+            </div>
+            <table class="financial-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="balanceBody"></tbody>
+            </table>
+        </div>
 
-    <!-- Financial Health Score -->
-    <section class="health-score">
-      <h2>Financial Health Score</h2>
-      <div class="circle-container">
-        <canvas id="healthChart"></canvas>
-        <p id="healthPercentage">0%</p>
-      </div>
-      <p id="healthTips"></p>
-    </section>
+        <!-- Financial Health -->
+        <div class="section">
+            <h2><i class="fas fa-heartbeat"></i> Financial Health</h2>
+            <div class="health-container">
+                <div class="health-chart">
+                    <canvas id="healthChart"></canvas>
+                    <div class="health-score" id="healthPercentage">0%</div>
+                </div>
+                <div class="health-tips" id="healthTips"></div>
+            </div>
+        </div>
 
-    <!-- Data Management -->
-    <section class="data-management">
-      <h2>Data Management</h2>
-      <input type="text" id="saveFileName" placeholder="Enter file name">
-      <button onclick="exportBusinessData()">Export</button>
-      <button onclick="importBusinessData()">Import</button>
-      <button onclick="clearBusinessData()">Clear</button>
-    </section>
-
-    <!-- Story Generation -->
-    <section class="story-generation">
-      <h2>Business Financial Story</h2>
-      <button onclick="generateBusinessStory()">Generate Report</button>
-      <pre id="businessFinancialStory"></pre>
-    </section>
-  </div>
-
-  <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
-  <div id="calculatorPopup" class="calculator-popup">
-    <div class="calculator-content">
-      <input type="text" id="calculatorInput" readonly>
-      <div class="calculator-buttons">
-        <!-- Calculator buttons dynamically generated -->
-      </div>
+        <!-- Modals -->
+        <div id="entryModal" class="modal">
+            <div class="modal-content">
+                <h3><i class="fas fa-edit"></i> Add Transaction</h3>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>Type:</label>
+                        <select id="entryType" class="form-control">
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Amount:</label>
+                        <input type="number" id="entryAmount" class="form-control" placeholder="Enter amount">
+                    </div>
+                    <div class="input-group">
+                        <label>Description:</label>
+                        <input type="text" id="entryDesc" class="form-control" placeholder="Transaction description">
+                    </div>
+                    <div class="input-group">
+                        <label>Category:</label>
+                        <div class="category-select">
+                            <select id="categorySelect" class="form-control"></select>
+                            <button class="btn-small" onclick="addCategory()">
+                                <i class="fas fa-plus"></i> New
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="saveEntry()">Save</button>
+                    <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
-  </html>
+                          </html>
