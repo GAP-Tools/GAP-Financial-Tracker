@@ -927,10 +927,10 @@ function loadSavedData() {
   }
 }
 
-// Initialization
-loadSavedData();
-
 // Switch to Personal Page
 document.getElementById("switchLink").addEventListener("click", () => {
   window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/";
 });
+  
+// Initialization
+loadSavedData();
