@@ -1,14 +1,22 @@
 // Initialize variables
-let profile = { name: "", age: "", occupation: "", dream: "", currency: "USD", passiveIncomeTarget: 0 };
-let incomeStatement = [];
+let profile = {
+  name: "",
+  age: "",
+  occupation: "",
+  dream: "",
+  currency: "USD",
+  passiveIncomeTarget: 0,
+  incomeStatement: {
+    months: [],
+    categories: [],
+  },
+};
 let balanceSheet = [];
 let currencyRates = {};
 
 // DOM Elements
 const incomeStatementBody = document.getElementById("income-statement-body");
 const balanceSheetBody = document.getElementById("balance-sheet-body");
-const totalIncome = document.getElementById("total-income");
-const totalExpenses = document.getElementById("total-expenses");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
 const netWorthDisplay = document.getElementById("net-worth");
@@ -25,19 +33,10 @@ const cashflowDisplay = document.getElementById("cashflow");
 const saveFileNameInput = document.getElementById("saveFileName");
 const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
-
-// Switch to Personal
-document.addEventListener('DOMContentLoaded', function() {
-    var switchLink = document.getElementById('switchLink');
-    if (switchLink) {
-        switchLink.addEventListener('click', function() {
-            window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/Business';
-        });
-    }
-});
+const monthlyBody = document.getElementById("monthly-body");
 
 // Chart Initialization
-const healthChart = new Chart(healthChartCtx, {
+let healthChart = new Chart(healthChartCtx, {
   type: "doughnut",
   data: {
     labels: ["Health"],
@@ -54,39 +53,40 @@ const healthChart = new Chart(healthChartCtx, {
 });
 
 // Fetch Currency Rates
-fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
-  .then((response) => response.json())
-  .then((data) => {
-    currencyRates = data.conversion_rates;
-    populateCurrencyDropdowns();
-    loadSavedData(); // Load saved data after currencies are fetched
-  });
+async function fetchCurrencyRates() {
+  const apiUrl = "https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD";
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    if (data.result === "success") {
+      currencyRates = data.conversion_rates;
+      populateCurrencyDropdowns();
+      loadSavedData();
+    }
+  } catch (error) {
+    console.error("Error fetching currency rates:", error);
+  }
+}
+
+fetchCurrencyRates();
 
 // Populate Currency Dropdowns
 function populateCurrencyDropdowns() {
   for (const currency in currencyRates) {
-    const option1 = document.createElement("option");
-    option1.value = currency;
-    option1.text = `${currency} (${getCurrencySymbol(currency)})`;
-    fromCurrency.appendChild(option1);
-
-    const option2 = document.createElement("option");
-    option2.value = currency;
-    option2.text = `${currency} (${getCurrencySymbol(currency)})`;
-    toCurrency.appendChild(option2);
-
-    const option3 = document.createElement("option");
-    option3.value = currency;
-    option3.text = `${currency} (${getCurrencySymbol(currency)})`;
-    currencySelect.appendChild(option3);
+    const newOption = document.createElement("option");
+    newOption.value = currency;
+    newOption.text = `${currency} (${getCurrencySymbol(currency)})`;
+    fromCurrency.add(newOption);
+    toCurrency.add(newOption);
+    currencySelect.add(newOption);
   }
 }
 
 // Get Currency Symbol
 function getCurrencySymbol(currency) {
   const symbols = {
-    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$", CHF: "CHF", CNY: "¥",
-    // Add more currency symbols as needed
+    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$",
+    CHF: "CHF", CNY: "¥", // Add more symbols as needed
   };
   return symbols[currency] || currency;
 }
@@ -116,13 +116,23 @@ function editPassiveIncomeTarget() {
   }
 }
 
+// Switch to Business
+document.addEventListener('DOMContentLoaded', function() {
+  var switchLink = document.getElementById('switchLink');
+  if (switchLink) {
+    switchLink.addEventListener('click', function() {
+      window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/Business';
+    });
+  }
+});
+
 // Add Income
 function addIncome() {
   const date = prompt("Enter Date (YYYY-MM-DD):");
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Income Amount:"));
   if (date && description && amount) {
-    incomeStatement.push({ date, description, type: "Income", amount });
+    profile.incomeStatement.push({ date, description, type: "Income", amount });
     updateIncomeStatement();
     updateFinancialHealth();
     saveDataToLocalStorage();
@@ -137,7 +147,7 @@ function addExpense() {
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Expense Amount:"));
   if (date && description && amount) {
-    incomeStatement.push({ date, description, type: "Expense", amount });
+    profile.incomeStatement.push({ date, description, type: "Expense", amount });
     updateIncomeStatement();
     updateFinancialHealth();
     saveDataToLocalStorage();
@@ -182,7 +192,7 @@ function updateIncomeStatement() {
   let totalIncomeAmount = 0;
   let totalExpensesAmount = 0;
 
-  incomeStatement.forEach((entry, index) => {
+  profile.incomeStatement.forEach((entry, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${entry.date}</td>
@@ -220,7 +230,7 @@ function updateBalanceSheet() {
       <td>${entry.type === "Asset" ? `${profile.currency} ${entry.amount}` : ""}</td>
       <td>${entry.type === "Liability" ? `${profile.currency} ${entry.amount}` : ""}</td>
       <td class="actions">
-        <button onclick="editEntry('balance', ${index})">✏️</button>
+        <button onclick="editEntry('balance', ${index})">✎</button>
         <button onclick="deleteEntry('balance', ${index})">🗑️</button>
       </td>
     `;
@@ -238,7 +248,7 @@ function updateBalanceSheet() {
 
 // Edit Entry
 function editEntry(type, index) {
-  const entry = type === "income" ? incomeStatement[index] : balanceSheet[index];
+  const entry = type === "income" ? profile.incomeStatement[index] : balanceSheet[index];
   const newDescription = prompt("Edit Description:", entry.description);
   const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
   if (newDescription && !isNaN(newAmount)) {
@@ -256,7 +266,7 @@ function editEntry(type, index) {
 // Delete Entry
 function deleteEntry(type, index) {
   if (confirm("Are you sure you want to delete this entry?")) {
-    if (type === "income") incomeStatement.splice(index, 1);
+    if (type === "income") profile.incomeStatement.splice(index, 1);
     else balanceSheet.splice(index, 1);
     if (type === "income") updateIncomeStatement();
     else updateBalanceSheet();
@@ -264,6 +274,7 @@ function deleteEntry(type, index) {
     saveDataToLocalStorage();
   }
 }
+
 // Update Financial Health
 function updateFinancialHealth() {
   const totalIncomeAmount = parseFloat(totalIncome.textContent.replace(profile.currency, ""));
@@ -286,17 +297,13 @@ function updateFinancialHealth() {
 
 // Get Health Color
 function getHealthColor(score) {
-  if (score <= 39) return "#ff6384"; // Red
-  if (score <= 59) return "#ffcd56"; // Yellow
-  if (score <= 79) return "#4bc0c0"; // Green
-  return "#36a2eb"; // Deeper Green
-      }
+  return score <= 39 ? "#ff6384" : score <= 59 ? "#ffcd56" : score <= 79 ? "#4bc0c0" : "#36a2eb";
+}
 
 // Generate Health Tip
 function generateHealthTip(score, income, expenses, assets, liabilities, cashflow, passiveIncomeTarget) {
-  const tips = [];
-  if (score <= 39) {
-    tips.push(
+  const tips = {
+    low: [
       "Your expenses are higher than your income. Consider cutting down on unnecessary spending.",
       "Focus on reducing liabilities and increasing assets to improve your financial health.",
       "You're spending more than you earn. Try to find ways to increase your income or reduce expenses.",
@@ -307,9 +314,8 @@ function generateHealthTip(score, income, expenses, assets, liabilities, cashflo
       "Your financial health is in danger. Take immediate steps to reduce liabilities.",
       "Consider consulting a financial advisor to improve your financial situation.",
       "Track your spending habits to identify areas where you can cut costs."
-    );
-  } else if (score <= 59) {
-    tips.push(
+    ],
+    moderate: [
       "Your financial health is improving, but there's still room for growth. Consider investing in assets.",
       "You're doing okay, but try to reduce your liabilities to improve your net worth.",
       "Your savings rate is low. Consider increasing your income or reducing expenses.",
@@ -320,9 +326,8 @@ function generateHealthTip(score, income, expenses, assets, liabilities, cashflo
       "Your financial health is stable, but you need to focus on long-term goals.",
       "Invest in education or skills that can increase your earning potential.",
       "Create a financial plan to achieve your dreams and goals."
-    );
-  } else if (score <= 79) {
-    tips.push(
+    ],
+    good: [
       "Great job! Your income is higher than your expenses. Keep building your assets.",
       "You're on the right track. Consider investing in assets to generate passive income.",
       "Your financial health is good. Keep saving and investing to reach your goals.",
@@ -333,43 +338,44 @@ function generateHealthTip(score, income, expenses, assets, liabilities, cashflo
       "Your financial health is strong. Focus on long-term wealth-building strategies.",
       "Consider creating multiple income streams to further improve your financial health.",
       "You're on the path to financial freedom. Keep making smart financial decisions."
-    );
-  } else {
-    tips.push(
+    ],
+    excellent: [
       "Excellent! Your financial health is in great shape. Keep up the good work!",
       "You're doing amazing! Consider diversifying your investments to further grow your wealth.",
       "Your net worth is impressive. Keep focusing on building assets and reducing liabilities.",
       "You've achieved financial stability. Focus on giving back and helping others.",
-      "Your financial health is exceptional. Consider mentoring others on financial management.",
       "You're a financial role model. Keep inspiring others with your success.",
       "Your wealth is growing steadily. Focus on legacy planning and philanthropy.",
       "You've mastered financial management. Consider exploring new investment opportunities.",
       "Your financial health is outstanding. Keep setting and achieving new goals.",
-      "You're financially free. Enjoy the fruits of your hard work and smart decisions."
-    );
-  }
+      "You're financially free. Enjoy the fruits of your hard work and smart decisions.",
+      "You're a financial wizard. Keep making wise investment choices."
+    ]
+  };
 
-  // Add tips based on cashflow and passive income target
+  const section = score <= 39 ? 'low' : score <= 59 ? 'moderate' : score <= 79 ? 'good' : 'excellent';
+  const additionalTips = [];
+
   if (cashflow < passiveIncomeTarget) {
-    tips.push(
+    additionalTips.push(
       "Your cashflow is below your passive income target. Focus on increasing income or reducing expenses.",
       "Consider investing in assets that generate passive income to bridge the gap.",
       "Your financial freedom goal is within reach. Keep working towards it!"
     );
   } else {
-    tips.push(
+    additionalTips.push(
       "Congratulations! Your cashflow exceeds your passive income target. You're financially free!",
       "You've achieved financial freedom. Consider reinvesting your surplus income to grow your wealth further.",
       "Your financial health is excellent. Focus on maintaining your freedom and exploring new opportunities."
     );
   }
 
-  return tips[Math.floor(Math.random() * tips.length)];
+  return `${tips[section][Math.floor(Math.random() * tips[section].length)]} ${additionalTips.join(" ")}`;
 }
 
 // Save Data to LocalStorage
 function saveDataToLocalStorage() {
-  const data = { profile, incomeStatement, balanceSheet };
+  const data = { profile, balanceSheet };
   localStorage.setItem("financialData", JSON.stringify(data));
 }
 
@@ -379,7 +385,6 @@ function loadSavedData() {
   if (savedData) {
     const data = JSON.parse(savedData);
     profile = data.profile;
-    incomeStatement = data.incomeStatement;
     balanceSheet = data.balanceSheet;
     document.getElementById("name").value = profile.name;
     document.getElementById("age").value = profile.age;
@@ -396,7 +401,7 @@ function loadSavedData() {
 // Export Data
 function exportData() {
   const fileName = saveFileNameInput.value.trim() || "financial_data";
-  const data = { profile, incomeStatement, balanceSheet };
+  const data = { profile, balanceSheet };
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -416,7 +421,6 @@ function importData() {
     reader.onload = (e) => {
       const data = JSON.parse(e.target.result);
       profile = data.profile;
-      incomeStatement = data.incomeStatement;
       balanceSheet = data.balanceSheet;
       document.getElementById("name").value = profile.name;
       document.getElementById("age").value = profile.age;
@@ -438,8 +442,15 @@ function importData() {
 // Clear Data
 function clearData() {
   if (confirm("Are you sure you want to clear all data?")) {
-    profile = { name: "", age: "", occupation: "", dream: "", currency: "USD", passiveIncomeTarget: 0 };
-    incomeStatement = [];
+    profile = { 
+      name: "", 
+      age: "", 
+      occupation: "", 
+      dream: "", 
+      currency: "USD", 
+      passiveIncomeTarget: 0, 
+      incomeStatement: { months: [], categories: [] }
+    };
     balanceSheet = [];
     document.getElementById("name").value = "";
     document.getElementById("age").value = "";
@@ -573,4 +584,329 @@ function convertCurrency() {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
+}
+
+// Show Entry Modal
+function showEntryModal(type) {
+  document.getElementById('entryModal').style.display = 'block';
+  document.getElementById('entryType').value = type;
+  populateCategories();
+  document.getElementById('newCategory').value = '';
+  document.getElementById('entryAmount').value = '';
+  document.getElementById('entryDescription').value = '';
+}
+
+// Close Modal
+function closeModal() {
+  document.getElementById('entryModal').style.display = 'none';
+}
+
+// Populate Categories in Entry Modal
+function populateCategories() {
+  const categorySelect = document.getElementById('entryCategory');
+  categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+  profile.incomeStatement.categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category.name;
+    option.textContent = category.name;
+    categorySelect.appendChild(option);
+  });
+}
+
+// Save Entry
+function saveEntry() {
+  const type = document.getElementById('entryType').value;
+  const amount = parseFloat(document.getElementById('entryAmount').value);
+  const description = document.getElementById('entryDescription').value.trim();
+  const category = document.getElementById('entryCategory').value || document.getElementById('newCategory').value.trim();
+
+  if (!category || isNaN(amount) || amount <= 0 || !description) {
+    alert('Please fill all fields correctly');
+    return;
   }
+
+  const currentMonth = getCurrentMonth();
+  const monthExists = profile.incomeStatement.months.some(m => m.month === currentMonth);
+
+  if (!monthExists) {
+    profile.incomeStatement.months.push({
+      month: currentMonth,
+      categories: [],
+    });
+  }
+
+  const monthIndex = profile.incomeStatement.months.findIndex(m => m.month === currentMonth);
+  const categoryExists = profile.incomeStatement.months[monthIndex].categories.some(c => c.name === category);
+
+  if (!categoryExists) {
+    profile.incomeStatement.months[monthIndex].categories.push({
+      name: category,
+      totalIncome: 0,
+      totalExpenses: 0,
+      entries: [],
+    });
+  }
+
+  const catIndex = profile.incomeStatement.months[monthIndex].categories.findIndex(c => c.name === category);
+  const entry = {
+    date: new Date().toISOString().split("T")[0],
+    description,
+    amount,
+    type,
+  };
+
+  if (type === 'income') {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += amount;
+  } else {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += amount;
+  }
+
+  profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(entry);
+
+  updateMonthlyTable();
+  closeModal();
+  saveDataToLocalStorage();
+}
+
+// Get Current Month
+function getCurrentMonth() {
+  const date = new Date();
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  month = month < 10 ? `0${month}` : month;
+  return `${year}-${month}`;
+}
+
+// Update Monthly Table
+function updateMonthlyTable() {
+  const monthlyBody = document.getElementById('monthly-body');
+  monthlyBody.innerHTML = '';
+
+  profile.incomeStatement.months.forEach((monthData, monthIndex) => {
+    const totalIncome = monthData.categories.reduce((sum, category) => {
+      return sum + category.totalIncome;
+    }, 0);
+    const totalExpenses = monthData.categories.reduce((sum, category) => {
+      return sum + category.totalExpenses;
+    }, 0);
+    const netIncome = totalIncome - totalExpenses;
+
+    const row = document.createElement('tr');
+    row.classList.add('expandable');
+    row.innerHTML = `
+      <td class="editable-date" onclick="editMonth(${monthIndex})">${monthData.month}</td>
+      <td>${profile.currency} ${totalIncome}</td>
+      <td>${profile.currency} ${totalExpenses}</td>
+      <td>${profile.currency} ${netIncome}</td>
+      <td>
+        <button class="expand-button" onclick="expandCollapseRow(this.parentElement)">
+          <svg class="expand-icon" viewBox="0 0 24 24">
+            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+          </svg>
+        </button>
+      </td>
+    `;
+    monthlyBody.appendChild(row);
+
+    const categoryContainer = document.createElement('tr');
+    categoryContainer.classList.add('nested');
+    categoryContainer.innerHTML = `
+      <td colspan="5">
+        <table class="category-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="category-body-${monthIndex}"></tbody>
+        </table>
+      </td>
+    `;
+    monthlyBody.appendChild(categoryContainer);
+
+    monthData.categories.forEach((category, catIndex) => {
+      const categoryRow = document.createElement('tr');
+      categoryRow.classList.add('expandable');
+      categoryRow.innerHTML = `
+        <td class="editable-date" onclick="editCategory(${monthIndex}, ${catIndex})">${category.name}</td>
+        <td>${profile.currency} ${category.totalIncome}</td>
+        <td>${profile.currency} ${category.totalExpenses}</td>
+        <td>
+          <button class="expand-button" onclick="expandCollapseRow(this.parentElement)">
+            <svg class="expand-icon" viewBox="0 0 24 24">
+              <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+            </svg>
+          </button>
+          <button onclick="editCategoryName(${monthIndex}, ${catIndex})">✎</button>
+          <button onclick="duplicateCategory(${monthIndex}, ${catIndex})">♻️</button>
+          <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
+        </td>
+      `;
+      document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
+
+      const dailyContainer = document.createElement('tr');
+      dailyContainer.classList.add('nested');
+      dailyContainer.innerHTML = `
+        <td colspan="4">
+          <table class="daily-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="daily-body-${monthIndex}-${catIndex}"></tbody>
+          </table>
+        </td>
+      `;
+      document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
+
+      category.entries.forEach((entry, entryIndex) => {
+        const dailyRow = document.createElement('tr');
+        dailyRow.innerHTML = `
+          <td class="editable-date" onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">
+            ${entry.date}
+          </td>
+          <td>${entry.description}</td>
+          <td>${profile.currency} ${entry.amount}</td>
+          <td>${entry.type === 'income' ? 'Income' : 'Expense'}</td>
+          <td>
+            <button onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">✎</button>
+            <button onclick="duplicateEntry(${monthIndex}, ${catIndex}, ${entryIndex})">♻️</button>
+            <button onclick="deleteEntry(${monthIndex}, ${catIndex}, ${entryIndex})">🗑️</button>
+          </td>
+        `;
+        document.getElementById(`daily-body-${monthIndex}-${catIndex}`).appendChild(dailyRow);
+      });
+    });
+  });
+
+  updateAverages();
+}
+
+// Expand/Collapse Row
+function expandCollapseRow(rowElement) {
+  rowElement.classList.toggle('expanded');
+  const nextRow = rowElement.nextElementSibling;
+  if (nextRow?.classList.contains('nested')) {
+    nextRow.style.display = nextRow.style.display === 'table-row' ? 'none' : 'table-row';
+  }
+}
+
+// Edit Month
+function editMonth(monthIndex) {
+  const newMonth = prompt("Edit Month:", profile.incomeStatement.months[monthIndex].month);
+  if (newMonth) {
+    profile.incomeStatement.months[monthIndex].month = newMonth;
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Edit Category
+function editCategory(monthIndex, catIndex) {
+  const newCategory = prompt("Edit Category:", profile.incomeStatement.months[monthIndex].categories[catIndex].name);
+  if (newCategory) {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].name = newCategory;
+    populateCategories();
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Edit Category Name
+function editCategoryName(monthIndex, catIndex) {
+  const newCategory = prompt("Edit Category Name:", profile.incomeStatement.months[monthIndex].categories[catIndex].name);
+  if (newCategory) {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].name = newCategory;
+    populateCategories();
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Duplicate Category
+function duplicateCategory(monthIndex, catIndex) {
+  const newCategory = {
+    name: `${profile.incomeStatement.months[monthIndex].categories[catIndex].name} - Copy`,
+    totalIncome: 0,
+    totalExpenses: 0,
+    entries: [],
+  };
+  profile.incomeStatement.months[monthIndex].categories.push(newCategory);
+  populateCategories();
+  updateMonthlyTable();
+  saveDataToLocalStorage();
+}
+
+// Delete Category
+function deleteCategory(monthIndex, catIndex) {
+  if (confirm("Are you sure you want to delete this category?")) {
+    profile.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
+    populateCategories();
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Edit Entry
+function editEntry(monthIndex, catIndex, entryIndex) {
+  const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  if (newDescription !== null && !isNaN(newAmount)) {
+    entry.description = newDescription;
+    entry.amount = newAmount;
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Duplicate Entry
+function duplicateEntry(monthIndex, catIndex, entryIndex) {
+  const newEntry = {
+    date: new Date().toISOString().split("T")[0],
+    description: `Copy of ${profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex].description}`,
+    amount: 0,
+    type: profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex].type,
+  };
+  profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
+  updateMonthlyTable();
+  saveDataToLocalStorage();
+}
+
+// Delete Entry
+function deleteEntry(monthIndex, catIndex, entryIndex) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Update Averages
+function updateAverages() {
+  const totalMonths = profile.incomeStatement.months.length || 1;
+  const totalIncome = profile.incomeStatement.months.reduce((sum, month) => {
+    return sum + month.categories.reduce((sumCat, category) => sumCat + category.totalIncome, 0);
+  }, 0);
+  const totalExpenses = profile.incomeStatement.months.reduce((sum, month) => {
+    return sum + month.categories.reduce((sumCat, category) => sumCat + category.totalExpenses, 0);
+  }, 0);
+  const avgIncome = totalIncome / totalMonths;
+  const avgExpenses = totalExpenses / totalMonths;
+  const avgCashflow = avgIncome - avgExpenses;
+
+  document.getElementById('average-income').textContent = `${profile.currency} ${avgIncome.toFixed(2)}`;
+  document.getElementById('average-expenses').textContent = `${profile.currency} ${avgExpenses.toFixed(2)}`;
+  document.getElementById('average-cashflow').textContent = `${profile.currency} ${avgCashflow.toFixed(2)}`;
+
+  updateFinancialHealth();
+    }
