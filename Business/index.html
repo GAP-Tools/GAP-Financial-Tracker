@@ -6,7 +6,7 @@
   <title>GAP Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/deepseek-ai"></script> <!-- DeepSeek AI Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/deepseek-ai"></script>
 </head>
 <body>
   <div class="container">
@@ -19,21 +19,20 @@
         <button onclick="addBusiness()">Add Business</button>
       </div>
       <select id="businessList" onchange="switchBusiness()"></select>
-        <button onclick="editBusinessName()">✏️</button> <!-- Edit Button -->
-        <button onclick="deleteBusiness()">🗑️</button> <!-- Delete Button -->
+      <button onclick="editBusinessName()">✏️</button>
+      <button onclick="deleteBusiness()">🗑️</button>
     </section>
 
     <!-- Business Profile Section -->
     <section class="profile-section">
       <h2>Business Profile</h2>
-        <input type="text" id="businessDescription" placeholder="Business Description">
-          <br>
-         <label for="currency">Preferred Currency:</label>
-        <select id="currency"></select>
-          <br>
-          <br>
-         <label for="revenue-target">Revenue/Residual Income Target:</label>
-        <div class="target-input">
+      <input type="text" id="businessDescription" placeholder="Business Description">
+      <br>
+      <label for="currency">Preferred Currency:</label>
+      <select id="currency"></select>
+      <br><br>
+      <label for="revenue-target">Revenue/Residual Income Target:</label>
+      <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
         <button onclick="editRevenueTarget()">✏️</button>
       </div>
@@ -45,37 +44,35 @@
       <h2>Currency Converter</h2>
       <input type="number" id="amount" placeholder="Amount">
       <select id="fromCurrency"></select>
-      
       <select id="toCurrency"></select>
       <button onclick="convertCurrency()">Convert</button>
       <p id="conversionResult"></p>
     </section>
 
-    <!-- Income Statement Section -->
-    <!-- Income Statement Section -->
+    <!-- Updated Income Statement Section -->
     <section class="income-statement">
       <h2>Income Statement</h2>
       <div class="table-container">
-        <table>
+        <table class="monthly-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Income</th>
-              <th>Expenses</th>
+              <th>Month</th>
+              <th>Total Income</th>
+              <th>Total Expenses</th>
+              <th>Net Income</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="income-statement-body"></tbody>
+          <tbody id="monthly-body"></tbody>
         </table>
-        <div class="totals">
-          <p>Total Income: <span id="total-income">0</span> <span class="tooltip">💰 Money earned</span></p>
-          <p>Total Expenses: <span id="total-expenses">0</span> <span class="tooltip">💸 Money spent</span></p>
-          <p>Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
+        <div class="averages">
+          <p>Average Income: <span id="average-income">0</span></p>
+          <p>Average Expenses: <span id="average-expenses">0</span></p>
+          <p>Average Cashflow: <span id="average-cashflow">0</span></p>
         </div>
       </div>
-      <button onclick="addIncome()">Add Income</button>
-      <button onclick="addExpense()">Add Expense</button>
+      <button onclick="showEntryModal('income')">Add Income</button>
+      <button onclick="showEntryModal('expense')">Add Expense</button>
     </section>
 
     <!-- Balance Sheet Section -->
@@ -170,6 +167,25 @@
     </div>
   </div>
 
+  <!-- Entry Modal -->
+  <div id="entryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>Add New Entry</h3>
+      <select id="entryType">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <input type="number" id="entryAmount" placeholder="Amount">
+      <input type="text" id="entryDescription" placeholder="Description">
+      <div class="category-select">
+        <select id="entryCategory"></select>
+        <input type="text" id="newCategory" placeholder="New Category">
+      </div>
+      <button onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
-          </html>
+      </html>
