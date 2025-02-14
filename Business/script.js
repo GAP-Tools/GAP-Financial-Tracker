@@ -91,11 +91,9 @@ function addBusiness() {
       name,
       description: "",
       currency: "USD",
-      currencyList: [],
       revenueTarget: 0,
       incomeStatement: {
         months: [],
-        categories: [],
       },
       balanceSheet: [],
     };
@@ -197,12 +195,17 @@ function deleteBusiness() {
 // Add Balance Sheet Entry
 function addBalanceSheetEntry(type) {
   const business = businesses[currentBusinessIndex];
-  const date = new Date().toISOString().split("T")[0];
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Amount:"));
+  const date = new Date().toISOString().split("T")[0];
 
-  if (date && description && amount) {
-    business.balanceSheet.push({ date, description, amount, type });
+  if (description && !isNaN(amount)) {
+    business.balanceSheet.push({
+      date,
+      description,
+      amount,
+      type,
+    });
     updateBalanceSheet();
     saveDataToLocalStorage();
   } else {
@@ -225,7 +228,7 @@ function updateBalanceSheet() {
       <td>${entry.type === "asset" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td>${entry.type === "liability" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td class="actions">
-        <button onclick="editBalanceSheetEntry(${index})">✏️</button>
+        <button onclick="editBalanceSheetEntry(${index})">✎</button>
         <button onclick="duplicateBalanceSheetEntry(${index})">♻️</button>
         <button onclick="deleteBalanceSheetEntry(${index})">🗑️</button>
       </td>
@@ -246,8 +249,13 @@ function editBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
   const entry = business.balanceSheet[index];
   const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-  if (!isNaN(newAmount)) {
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newDate = prompt("Edit Date:", entry.date);
+
+  if (!isNaN(newAmount) && newDescription && newDate) {
     entry.amount = newAmount;
+    entry.description = newDescription;
+    entry.date = new Date(newDate).toISOString().split("T")[0];
     updateBalanceSheet();
     saveDataToLocalStorage();
   } else {
@@ -258,9 +266,14 @@ function editBalanceSheetEntry(index) {
 // Duplicate Balance Sheet Entry
 function duplicateBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
-  const entryToDuplicate = business.balanceSheet[index];
-  const newEntry = { ...entryToDuplicate };
-  newEntry.date = entryToDuplicate.date.split("-").map((part, idx) => part + (idx === 2 ? 1 : 0)).join("-");
+  const entry = business.balanceSheet[index];
+  const newEntry = {
+    date: entry.date,
+    description: entry.description,
+    amount: entry.amount,
+    type: entry.type,
+  };
+  newEntry.date = new Date(entry.date).setDate(new Date(entry.date).getDate() + 1);
   business.balanceSheet.push(newEntry);
   updateBalanceSheet();
   saveDataToLocalStorage();
@@ -297,7 +310,11 @@ function populateCategories() {
   const categorySelect = document.getElementById('entryCategory');
   categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-  business.incomeStatement.categories.forEach(category => {
+  const allCategories = business.incomeStatement.months.reduce((acc, month) => {
+    return acc.concat(month.categories);
+  }, []);
+
+  allCategories.forEach(category => {
     const option = document.createElement('option');
     option.value = category.name;
     option.textContent = category.name;
@@ -312,13 +329,25 @@ function updateMonthlyTable() {
   monthlyBody.innerHTML = '';
 
   (business.incomeStatement.months || []).forEach((monthData, monthIndex) => {
+    // Compute month's totals from entries
+    const totalIncome = monthData.categories.reduce((sum, category) => {
+      return sum + category.entries.reduce((s, entry) => {
+        return (entry.type === 'income') ? s + entry.amount : s;
+      }, 0);
+    }, 0);
+    const totalExpenses = monthData.categories.reduce((sum, category) => {
+      return sum + category.entries.reduce((s, entry) => {
+        return (entry.type === 'expense') ? s + entry.amount : s;
+      }, 0);
+    }, 0);
+
     const row = document.createElement('tr');
     row.classList.add('expandable');
     row.innerHTML = `
       <td class="editable-date" onclick="editDate('month', ${monthIndex})">${monthData.month}</td>
-      <td>${business.currency} ${monthData.totalIncome}</td>
-      <td>${business.currency} ${monthData.totalExpenses}</td>
-      <td>${business.currency} ${monthData.totalIncome - monthData.totalExpenses}</td>
+      <td>${business.currency} ${totalIncome}</td>
+      <td>${business.currency} ${totalExpenses}</td>
+      <td>${business.currency} ${totalIncome - totalExpenses}</td>
       <td>
         <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
           <svg class="expand-icon" viewBox="0 0 24 24">
@@ -349,12 +378,20 @@ function updateMonthlyTable() {
     monthlyBody.appendChild(categoryContainer);
 
     (monthData.categories || []).forEach((category, catIndex) => {
+      // Compute category totals from entries
+      const categoryTotalIncome = category.entries.reduce((sum, entry) => {
+        return (entry.type === 'income') ? sum + entry.amount : sum;
+      }, 0);
+      const categoryTotalExpenses = category.entries.reduce((sum, entry) => {
+        return (entry.type === 'expense') ? sum + entry.amount : sum;
+      }, 0);
+
       const categoryRow = document.createElement('tr');
       categoryRow.classList.add('expandable');
       categoryRow.innerHTML = `
-        <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${category.name}</td>
-        <td>${business.currency} ${category.totalIncome}</td>
-        <td>${business.currency} ${category.totalExpenses}</td>
+        <td class="editable-date" onclick="editCategory(${monthIndex}, ${catIndex})">${category.name}</td>
+        <td>${business.currency} ${categoryTotalIncome}</td>
+        <td>${business.currency} ${categoryTotalExpenses}</td>
         <td>
           <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
             <svg class="expand-icon" viewBox="0 0 24 24">
@@ -391,7 +428,7 @@ function updateMonthlyTable() {
       (category.entries || []).forEach((entry, entryIndex) => {
         const dailyRow = document.createElement('tr');
         dailyRow.innerHTML = `
-          <td class="editable-date" onclick="editEntryDate(${monthIndex}, ${catIndex}, ${entryIndex})">
+          <td class="editable-date" onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">
             ${entry.date}
           </td>
           <td>${entry.description}</td>
@@ -411,7 +448,6 @@ function updateMonthlyTable() {
   updateAverages();
 }
 
-// Expand/Collapse Row
 function expandCollapseRow(rowElement) {
   rowElement.classList.toggle('expanded');
   const nextRow = rowElement.nextElementSibling;
@@ -420,7 +456,6 @@ function expandCollapseRow(rowElement) {
   }
 }
 
-// Save New Entry
 function saveEntry() {
   const type = document.getElementById('entryType').value;
   const amount = parseFloat(document.getElementById('entryAmount').value);
@@ -442,8 +477,6 @@ function saveEntry() {
     business.incomeStatement.months.push({
       month: currentMonth,
       categories: [],
-      totalIncome: 0,
-      totalExpenses: 0,
     });
   }
 
@@ -453,8 +486,6 @@ function saveEntry() {
   if (!monthObject.categories.some(cat => cat.name === category)) {
     monthObject.categories.push({
       name: category,
-      totalIncome: 0,
-      totalExpenses: 0,
       entries: [],
     });
   }
@@ -469,21 +500,11 @@ function saveEntry() {
     type: type,
   });
 
-  // Update Totals
-  if (type === 'income') {
-    categoryObject.totalIncome += amount;
-    monthObject.totalIncome += amount;
-  } else if (type === 'expense') {
-    categoryObject.totalExpenses += amount;
-    monthObject.totalExpenses += amount;
-  }
-
   updateMonthlyTable();
   closeModal();
   saveDataToLocalStorage();
 }
 
-// Generate Current Month
 function getCurrentMonth() {
   const date = new Date();
   const year = date.getFullYear();
@@ -534,7 +555,6 @@ function clearBusinessData() {
       revenueTarget: 0,
       incomeStatement: {
         months: [],
-        categories: [],
       },
       balanceSheet: [],
     };
@@ -610,10 +630,28 @@ function toggleCalculator() {
 function updateAverages() {
   const business = businesses[currentBusinessIndex];
   const months = business.incomeStatement.months || [];
-  
   const totalMonths = months.length || 1;
-  const avgIncome = months.reduce((sum, m) => sum + m.totalIncome, 0) / totalMonths;
-  const avgExpenses = months.reduce((sum, m) => sum + m.totalExpenses, 0) / totalMonths;
+
+  const avgIncome = months.reduce((sum) => {
+    return sum + months.reduce((s, month) => {
+      return s + month.categories.reduce((ss, category) => {
+        return ss + category.entries.reduce((sss, entry) => {
+          return (entry.type === 'income') ? sss + entry.amount : sss;
+        }, 0);
+      }, 0);
+    }, 0);
+  }, 0) / totalMonths;
+
+  const avgExpenses = months.reduce((sum) => {
+    return sum + months.reduce((s, month) => {
+      return s + month.categories.reduce((ss, category) => {
+        return ss + category.entries.reduce((sss, entry) => {
+          return (entry.type === 'expense') ? sss + entry.amount : sss;
+        }, 0);
+      }, 0);
+    }, 0);
+  }, 0) / totalMonths;
+
   const avgCashflow = avgIncome - avgExpenses;
 
   document.getElementById('average-income').textContent = `${business.currency} ${avgIncome.toFixed(2)}`;
@@ -675,21 +713,22 @@ function generateHealthTip(score, cashflow, target) {
 // Generate Business Financial Story
 function generateBusinessStory() {
   const business = businesses[currentBusinessIndex];
-  const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(business.currency, "").trim());
-  const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(business.currency, "").trim());
-  const avgCashflow = parseFloat(document.getElementById("average-cashflow").textContent.replace(business.currency, "").trim());
   const avgIncome = parseFloat(document.getElementById("average-income").textContent.replace(business.currency, "").trim());
   const avgExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(business.currency, "").trim());
+  const avgCashflow = parseFloat(document.getElementById("average-cashflow").textContent.replace(business.currency, "").trim());
+  const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(business.currency, "").trim());
+  const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(business.currency, "").trim());
 
   const story = `
-    ${business.name} is a thriving ${business.description} business. 
-    Their average monthly income stands at ${business.currency} ${avgIncome}, 
-    with average expenses totaling ${business.currency} ${avgExpenses}. This results in a monthly net profit of ${business.currency} ${avgCashflow}. 
-    The business owns assets worth ${business.currency} ${totalAssets}, 
-    and maintains a manageable level of liabilities at ${business.currency} ${totalLiabilities}, 
-    leading to a robust net worth of ${business.currency} ${totalAssets - totalLiabilities}.
-    Financial tip: ${generateHealthTip(healthChart.data.datasets[0].data[0], avgCashflow, business.revenueTarget)}
-    `;
+    ${business.name}, a business specialized in ${business.description}, 
+    recorded an average monthly income of ${business.currency} ${avgIncome}, 
+    with average expenses at ${business.currency} ${avgExpenses}, 
+    resulting in a net cashflow of ${business.currency} ${avgCashflow}. 
+    Currently, the business holds assets worth ${business.currency} ${totalAssets} 
+    and liabilities amounting to ${business.currency} ${totalLiabilities}, 
+    yielding a net worth of ${business.currency} ${totalAssets - totalLiabilities}.
+    ${generateHealthTip(healthChart.data.datasets[0].data[0], avgCashflow, business.revenueTarget)}
+  `;
 
   businessFinancialStory.textContent = story;
 }
@@ -718,7 +757,7 @@ function editDate(tableType, index) {
       saveDataToLocalStorage();
     }
   } else if (tableType === 'entry') {
-    // Handle entry date edit if needed
+    // Handle entry date edit
   }
 }
 
@@ -750,14 +789,18 @@ function editEntry(monthIndex, catIndex, entryIndex) {
 function duplicateCategory(monthIndex, catIndex) {
   const business = businesses[currentBusinessIndex];
   const categoryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex];
-  const newCategory = { ...categoryToDuplicate };
-  newCategory.name += " - Copy";
-  newCategory.totalIncome = 0;
-  newCategory.totalExpenses = 0;
-  newCategory.entries = [];
+  const newCategory = { 
+    name: `${categoryToDuplicate.name} - Copy`,
+    entries: categoryToDuplicate.entries.map(entry => ({
+      ...entry,
+      amount: 0,
+      date: new Date(entry.date).setDate(new Date(entry.date).getDate() + 1)
+    }))
+  };
   business.incomeStatement.months[monthIndex].categories.push(newCategory);
   populateCategories();
   updateMonthlyTable();
+  saveDataToLocalStorage();
 }
 
 function deleteCategory(monthIndex, catIndex) {
@@ -773,11 +816,16 @@ function deleteCategory(monthIndex, catIndex) {
 function duplicateEntry(monthIndex, catIndex, entryIndex) {
   const business = businesses[currentBusinessIndex];
   const entryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const newEntry = { ...entryToDuplicate };
-  newEntry.date = new Date(entryToDuplicate.date).toLocaleDateString();
-  newEntry.amount = 0; // Reset amount for copy
+  const newEntry = {
+    date: entryToDuplicate.date,
+    description: entryToDuplicate.description,
+    amount: 0,
+    type: entryToDuplicate.type
+  };
+  newEntry.date = new Date(entryToDuplicate.date).setDate(new Date(entryToDuplicate.date).getDate() + 1);
   business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
   updateMonthlyTable();
+  saveDataToLocalStorage();
 }
 
 function deleteEntry(monthIndex, catIndex, entryIndex) {
