@@ -6,27 +6,22 @@
   <title>GAP Personal Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/deepseek-ai"></script> <!-- DeepSeek AI Integration -->
 </head>
 <body>
   <div class="container">
     <!-- Personal Profile Section -->
+    <section class="profile-section">
       <h3><span id="switchLink">Switch to Business</span></h3>
-    <section class="profile-section>
-      <h3><span id="
-      >
-      
       <h2>PERSONAL FINANCIAL TRACKER</h2>
-      
       <h2>Personal Profile</h2>
       <input type="text" id="name" placeholder="Name">
       <input type="number" id="age" placeholder="Age">
       <input type="text" id="occupation" placeholder="Occupation">
       <input type="text" id="dream" placeholder="Dream">
-       <br>
+      <br>
       <label for="currency">Preferred Currency:</label>
       <select id="currency"></select>
-       <br>
+      <br>
       <label for="passive-income-target">Passive Income Target:</label>
       <div class="target-input">
         <input type="number" id="passive-income-target" placeholder="Target">
@@ -49,26 +44,29 @@
     <section class="income-statement">
       <h2>Income Statement</h2>
       <div class="table-container">
-        <table>
+        <div class="search-bar">
+          <input type="text" id="incomeSearch" placeholder="Search Rows...">
+        </div>
+        <table class="monthly-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Income</th>
-              <th>Expenses</th>
+              <th>Month</th>
+              <th>Total Income</th>
+              <th>Total Expenses</th>
+              <th>Cashflow</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="income-statement-body"></tbody>
+          <tbody id="monthly-body"></tbody>
         </table>
-        <div class="totals">
-          <p>Total Income: <span id="total-income">0</span> <span class="tooltip">💰 Money you earn</span></p>
-          <p>Total Expenses: <span id="total-expenses">0</span> <span class="tooltip">💸 Money you spend</span></p>
-          <p>Cashflow: <span id="cashflow">0</span> <span class="tooltip">💵 Income - Expenses</span></p>
+        <div class="averages">
+          <p>Average Total Income: <span id="average-income">0</span></p>
+          <p>Average Total Expenses: <span id="average-expenses">0</span></p>
+          <p>Average Cashflow: <span id="average-cashflow">0</span></p>
         </div>
+        <button onclick="showEntryModal('income')">Add Income</button>
+        <button onclick="showEntryModal('expense')">Add Expense</button>
       </div>
-      <button onclick="addIncome()">Add Income</button>
-      <button onclick="addExpense()">Add Expense</button>
     </section>
 
     <!-- Balance Sheet Section -->
@@ -88,13 +86,13 @@
           <tbody id="balance-sheet-body"></tbody>
         </table>
         <div class="totals">
-          <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things you own that makes money</span></p>
-          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Things you own/owe that takes money</span></p>
-          <p>Net Worth: <span id="net-worth">0</span> <span class="tooltip">💼 Assets - Liabilities</span></p>
+          <p>Total Assets: <span id="total-assets">0</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span></p>
+          <p>Net Worth: <span id="net-worth">0</span></p>
         </div>
       </div>
-      <button onclick="addAsset()">Add Asset</button>
-      <button onclick="addLiability()">Add Liability</button>
+      <button onclick="addBalanceSheetEntry('asset')">Add Asset</button>
+      <button onclick="addBalanceSheetEntry('liability')">Add Liability</button>
     </section>
 
     <!-- Financial Health Score -->
@@ -127,7 +125,7 @@
 
     <!-- Story Generation -->
     <section class="story-generation">
-      <h2>Financial Story</h2>
+      <h2>Personal Financial Story</h2>
       <button onclick="generateStory()">Generate Story</button>
       <p id="financialStory"></p>
     </section>
@@ -163,6 +161,25 @@
     </div>
   </div>
 
+  <!-- Entry Modal -->
+  <div id="entryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>Add New Entry</h3>
+      <select id="entryType">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <input type="number" id="entryAmount" placeholder="Amount">
+      <input type="text" id="entryDescription" placeholder="Description">
+      <div class="category-select">
+        <select id="entryCategory"></select>
+        <input type="text" id="newCategory" placeholder="New Category">
+      </div>
+      <button onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
-        </html
+                             </html>
