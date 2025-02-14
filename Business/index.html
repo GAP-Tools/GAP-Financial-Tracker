@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GAP Multi-Business Financial Tracker</title>
+  <title>Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -17,10 +17,11 @@
         <input type="text" id="businessName" placeholder="Enter Business Name">
         <button onclick="addBusiness()">Add Business</button>
       </div>
-      <select id="businessList" onchange="switchBusiness()">
-        <button onclick="editBusinessName()">✏️</button>
+      <div class="business-list-controls">
+        <select id="businessList" onchange="switchBusiness()"></select>
+        <button onclick="editBusinessName()">✎</button>
         <button onclick="deleteBusiness()">🗑️</button>
-      </select>
+      </div>
     </section>
 
     <!-- Business Profile Section -->
@@ -35,7 +36,7 @@
       <label for="revenue-target">Revenue/Residual Income Target:</label>
       <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
-        <button onclick="editRevenueTarget()">✏️</button>
+        <button onclick="editRevenueTarget()">✎</button>
       </div>
       <button onclick="saveBusinessProfile()">Save Business Profile</button>
     </section>
@@ -189,4 +190,4 @@
 
   <script src="script.js"></script>
 </body>
-        </html>
+      </html>
