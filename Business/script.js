@@ -163,16 +163,6 @@ function editRevenueTarget() {
   }
 }
 
-// Save Revenue Target
-function saveRevenueTargetValue() {
-  const business = businesses[currentBusinessIndex];
-  const revenueTargetValue = parseFloat(revenueTargetInput.value);
-  if (!isNaN(revenueTargetValue)) {
-    business.revenueTarget = revenueTargetValue;
-    saveDataToLocalStorage();
-  }
-}
-
 // Edit Business Name
 function editBusinessName() {
   const currentBusiness = businesses[currentBusinessIndex];
@@ -207,7 +197,7 @@ function deleteBusiness() {
 // Add Balance Sheet Entry
 function addBalanceSheetEntry(type) {
   const business = businesses[currentBusinessIndex];
-  const date = document.getElementById("balanceSheetDate").value || new Date().toISOString().split("T")[0];
+  const date = new Date().toISOString().split("T")[0];
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Amount:"));
 
@@ -785,8 +775,18 @@ function duplicateEntry(monthIndex, catIndex, entryIndex) {
   const entryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
   const newEntry = { ...entryToDuplicate };
   newEntry.date = new Date(entryToDuplicate.date).toLocaleDateString();
+  newEntry.amount = 0; // Reset amount for copy
   business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
   updateMonthlyTable();
+}
+
+function deleteEntry(monthIndex, catIndex, entryIndex) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    const business = businesses[currentBusinessIndex];
+    business.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
 }
 
 // Financial Health Event Listeners
