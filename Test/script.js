@@ -1,6 +1,10 @@
 // Initialize variables
 let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
+let currencyRates = {}; // Currency exchange rate data
+let localStorageBackup = 0;
+
+const monthsData = {};
 
 // DOM Elements
 const businessList = document.getElementById("businessList");
@@ -8,7 +12,6 @@ const businessNameInput = document.getElementById("businessName");
 const businessDescriptionInput = document.getElementById("businessDescription");
 const currencySelect = document.getElementById("currency");
 const revenueTargetInput = document.getElementById("revenue-target");
-const incomeStatementBody = document.getElementById("income-statement-body");
 const balanceSheetBody = document.getElementById("balance-sheet-body");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
@@ -25,7 +28,7 @@ const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
 
 // Chart Initialization
-const healthChart = new Chart(healthChartCtx, {
+let healthChart = new Chart(healthChartCtx, {
   type: "doughnut",
   data: {
     labels: ["Health"],
@@ -42,38 +45,40 @@ const healthChart = new Chart(healthChartCtx, {
 });
 
 // Fetch Currency Rates
-fetch("https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD")
-  .then((response) => response.json())
-  .then((data) => {
-    currencyRates = data.conversion_rates;
-    populateCurrencyDropdowns();
-    loadSavedData(); // Load saved data after currencies are fetched
-  });
+async function fetchCurrencyRates() {
+  const apiUrl = "https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD";
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    if (data.result === "success") {
+      currencyRates = data.conversion_rates;
+      populateCurrencyDropdowns();
+      if (businesses.length > 0) loadSavedData();
+    }
+  } catch (error) {
+    console.error("Error fetching currency rates:", error);
+  }
+}
+
+fetchCurrencyRates();
 
 // Populate Currency Dropdowns
 function populateCurrencyDropdowns() {
   for (const currency in currencyRates) {
-    const option1 = document.createElement("option");
-    option1.value = currency;
-    option1.text = `${currency} (${getCurrencySymbol(currency)})`;
-    fromCurrency.appendChild(option1);
-
-    const option2 = document.createElement("option");
-    option2.value = currency;
-    option2.text = `${currency} (${getCurrencySymbol(currency)})`;
-    toCurrency.appendChild(option2);
-
-    const option3 = document.createElement("option");
-    option3.value = currency;
-    option3.text = `${currency} (${getCurrencySymbol(currency)})`;
-    currencySelect.appendChild(option3);
+    const newOption = document.createElement("option");
+    newOption.value = currency;
+    newOption.text = `${currency} (${getCurrencySymbol(currency)})`;
+    fromCurrency.add(newOption);
+    toCurrency.add(newOption);
+    currencySelect.add(newOption);
   }
 }
 
 // Get Currency Symbol
 function getCurrencySymbol(currency) {
   const symbols = {
-    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$", CHF: "CHF", CNY: "¥",
+    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$",
+    CHF: "CHF", CNY: "¥",
   };
   return symbols[currency] || currency;
 }
@@ -86,6 +91,7 @@ function addBusiness() {
       name,
       description: "",
       currency: "USD",
+      currencyList: [],
       revenueTarget: 0,
       incomeStatement: {
         months: [],
@@ -110,13 +116,13 @@ function updateBusinessList() {
     const option = document.createElement("option");
     option.value = index;
     option.text = business.name;
-    businessList.appendChild(option);
+    businessList.add(option);
   });
 }
 
 // Switch Business
 function switchBusiness() {
-  currentBusinessIndex = parseInt(businessList.value) || currentBusinessIndex;
+  currentBusinessIndex = +businessList.value;
   const business = businesses[currentBusinessIndex];
   businessDescriptionInput.value = business.description;
   currencySelect.value = business.currency;
@@ -137,33 +143,42 @@ function saveBusinessProfile() {
 }
 
 // Switch to Personal
-document.addEventListener('DOMContentLoaded', function() {
-    var switchLink = document.getElementById('switchLink');
-    if (switchLink) {
-        switchLink.addEventListener('click', function() {
-            window.location.href = 'https://gap-tools.github.io/GAP-Financial-Tracker/';
-        });
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  const switchLink = document.getElementById('switchLink');
+  switchLink.addEventListener('click', () => {
+    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/";
+  });
 });
 
 // Edit Revenue Target
 function editRevenueTarget() {
-  const newTarget = prompt("Enter New Revenue/Residual Income Target:", businesses[currentBusinessIndex].revenueTarget);
+  const business = businesses[currentBusinessIndex];
+  const newTarget = prompt("Enter New Revenue/Residual Income Target:", business.revenueTarget);
   if (newTarget && !isNaN(newTarget)) {
-    businesses[currentBusinessIndex].revenueTarget = parseFloat(newTarget);
-    revenueTargetInput.value = businesses[currentBusinessIndex].revenueTarget;
+    business.revenueTarget = parseFloat(newTarget);
+    saveBusinessProfile();
     updateFinancialHealth();
-    saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
 }
 
+// Save Revenue Target
+function saveRevenueTargetValue() {
+  const business = businesses[currentBusinessIndex];
+  const revenueTargetValue = parseFloat(revenueTargetInput.value);
+  if (!isNaN(revenueTargetValue)) {
+    business.revenueTarget = revenueTargetValue;
+    saveDataToLocalStorage();
+  }
+}
+
 // Edit Business Name
 function editBusinessName() {
-  const newName = prompt("Enter New Business Name:", businesses[currentBusinessIndex].name);
+  const currentBusiness = businesses[currentBusinessIndex];
+  const newName = prompt("Enter New Business Name:", currentBusiness.name);
   if (newName && newName.trim()) {
-    businesses[currentBusinessIndex].name = newName.trim();
+    currentBusiness.name = newName.trim();
     updateBusinessList();
     saveDataToLocalStorage();
     alert("Business Name Updated!");
@@ -175,25 +190,13 @@ function editBusinessName() {
 // Delete Business
 function deleteBusiness() {
   if (confirm("Are you sure you want to delete this business? This action cannot be undone.")) {
-    businesses.splice(currentBusinessIndex, 1); // Remove the business from the array
+    businesses.splice(currentBusinessIndex, 1);
     if (businesses.length > 0) {
-      currentBusinessIndex = 0; // Switch to the first business
+      currentBusinessIndex = 0;
       switchBusiness();
     } else {
-      // If no businesses are left, reset the UI
       currentBusinessIndex = -1;
-      businessDescriptionInput.value = "";
-      currencySelect.value = "USD";
-      revenueTargetInput.value = "";
-      document.getElementById('monthly-body').innerHTML = "";
-      balanceSheetBody.innerHTML = "";
-      totalAssets.textContent = "0";
-      totalLiabilities.textContent = "0";
-      netWorthDisplay.textContent = "0";
-      healthChart.data.datasets[0].data = [0];
-      healthChart.update();
-      healthPercentage.textContent = "0%";
-      healthTips.textContent = "";
+      clearAllData();
     }
     updateBusinessList();
     saveDataToLocalStorage();
@@ -201,32 +204,35 @@ function deleteBusiness() {
   }
 }
 
-// Add Asset
-function addAsset() {
-  const business = businesses[currentBusinessIndex];
-  const date = prompt("Enter Date (YYYY-MM-DD):");
-  const description = prompt("Enter Description:");
-  const amount = parseFloat(prompt("Enter Asset Value:"));
-  if (date && description && amount) {
-    business.balanceSheet.push({ date, description, type: "Asset", amount });
-    updateBalanceSheet();
-    updateFinancialHealth();
-    saveDataToLocalStorage();
-  } else {
-    alert("Invalid Input!");
-  }
+// Clear UI Data
+function clearAllData() {
+  businessList.innerHTML = "";
+  businessDescriptionInput.value = "";
+  currencySelect.value = "USD";
+  revenueTargetInput.value = "";
+  updateMonthlyTable();
+  updateBalanceSheet();
+  clearFinancialHealth();
 }
 
-// Add Liability
-function addLiability() {
+// Clear Financial Health UI
+function clearFinancialHealth() {
+  healthChart.data.datasets[0].data = [0];
+  healthChart.update();
+  healthPercentage.textContent = "0%";
+  healthTips.textContent = "";
+}
+
+// Add Balance Sheet Entry
+function addBalanceSheetEntry(type) {
   const business = businesses[currentBusinessIndex];
-  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const date = document.getElementById("balanceSheetDate").value || new Date().toISOString().split("T")[0];
   const description = prompt("Enter Description:");
-  const amount = parseFloat(prompt("Enter Liability Amount:"));
+  const amount = parseFloat(prompt("Enter Amount:"));
+
   if (date && description && amount) {
-    business.balanceSheet.push({ date, description, type: "Liability", amount });
+    business.balanceSheet.push({ date, description, amount, type });
     updateBalanceSheet();
-    updateFinancialHealth();
     saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
@@ -245,51 +251,68 @@ function updateBalanceSheet() {
     row.innerHTML = `
       <td>${entry.date}</td>
       <td>${entry.description}</td>
-      <td>${entry.type === "Asset" ? `${business.currency} ${entry.amount}` : ""}</td>
-      <td>${entry.type === "Liability" ? `${business.currency} ${entry.amount}` : ""}</td>
+      <td>${entry.type === "asset" ? `${business.currency} ${entry.amount}` : ""}</td>
+      <td>${entry.type === "liability" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td class="actions">
-        <button onclick="editEntryBalance('balance', ${index})">✏️</button>
-        <button onclick="deleteEntryBalance('balance', ${index})">🗑️</button>
+        <button onclick="editBalanceSheetEntry(${index})">✏️</button>
+        <button onclick="duplicateBalanceSheetEntry(${index})">♻️</button>
+        <button onclick="deleteBalanceSheetEntry(${index})">🗑️</button>
       </td>
     `;
     balanceSheetBody.appendChild(row);
 
-    if (entry.type === "Asset") totalAssetsAmount += entry.amount;
-    if (entry.type === "Liability") totalLiabilitiesAmount += entry.amount;
+    if (entry.type === "asset") totalAssetsAmount += entry.amount;
+    if (entry.type === "liability") totalLiabilitiesAmount += entry.amount;
   });
 
   totalAssets.textContent = `${business.currency} ${totalAssetsAmount}`;
   totalLiabilities.textContent = `${business.currency} ${totalLiabilitiesAmount}`;
-  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
-  netWorthDisplay.textContent = `${business.currency} ${netWorth}`;
+  netWorthDisplay.textContent = `${business.currency} ${totalAssetsAmount - totalLiabilitiesAmount}`;
 }
 
-// Edit Entry Balance
-function editEntryBalance(type, index) {
+// Edit Balance Sheet Entry
+function editBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
   const entry = business.balanceSheet[index];
-  const newDescription = prompt("Edit Description:", entry.description);
   const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-  if (newDescription && !isNaN(newAmount)) {
-    entry.description = newDescription;
+  if (!isNaN(newAmount)) {
     entry.amount = newAmount;
     updateBalanceSheet();
-    updateFinancialHealth();
     saveDataToLocalStorage();
   } else {
     alert("Invalid Input!");
   }
 }
 
-// Delete Entry Balance
-function deleteEntryBalance(type, index) {
+// Duplicate Balance Sheet Entry
+function duplicateBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
+  const entryToDuplicate = business.balanceSheet[index];
+  const newEntry = { ...entryToDuplicate };
+  newEntry.date = entryToDuplicate.date.split("-").map((part, idx) => part + (idx === 2 ? 1 : 0)).join("-");
+  business.balanceSheet.push(newEntry);
+  updateBalanceSheet();
+  saveDataToLocalStorage();
+}
+
+// Delete Balance Sheet Entry
+function deleteBalanceSheetEntry(index) {
   if (confirm("Are you sure you want to delete this entry?")) {
+    const business = businesses[currentBusinessIndex];
     business.balanceSheet.splice(index, 1);
     updateBalanceSheet();
-    updateFinancialHealth();
     saveDataToLocalStorage();
   }
+}
+
+// Show Entry Modal
+function showEntryModal(type) {
+  const modalContent = document.getElementById('entryModal').style.display = 'block';
+  document.getElementById('entryType').value = type;
+  populateCategories();
+  document.getElementById('newCategory').value = '';
+  document.getElementById('entryAmount').value = '';
+  document.getElementById('entryDescription').value = '';
 }
 
 // Close Modal
@@ -297,98 +320,221 @@ function closeModal() {
   document.getElementById('entryModal').style.display = 'none';
 }
 
-// Update Financial Health
-function updateFinancialHealth() {
+// Populate Categories in Entry Modal
+function populateCategories() {
   const business = businesses[currentBusinessIndex];
-  const totalAssetsAmount = parseFloat(totalAssets.textContent.replace(business.currency, ""));
-  const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(business.currency, ""));
-  
-  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
+  const categorySelect = document.getElementById('entryCategory');
+  categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-  const healthScore = Math.round((netWorth / business.revenueTarget) * 100);
-  
-  healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
-  healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
-  healthChart.update();
-
-  healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
-  healthTips.textContent = generateHealthTip(healthScore, netWorth, business.revenueTarget);
+  business.incomeStatement.categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category.name;
+    option.textContent = category.name;
+    categorySelect.appendChild(option);
+  });
 }
 
-// Get Health Color
-function getHealthColor(score) {
-  if (score <= 39) return "#ff6384"; // Red
-  if (score <= 59) return "#ffcd56"; // Yellow
-  if (score <= 79) return "#4bc0c0"; // Green
-  return "#36a2eb"; // Deeper Green
-}
+// Update Monthly Table
+function updateMonthlyTable() {
+  const business = businesses[currentBusinessIndex];
+  const monthlyBody = document.getElementById('monthly-body');
+  monthlyBody.innerHTML = '';
 
-// Generate Health Tip
-function generateHealthTip(score, netWorth, revenueTarget) {
-  const tips = [];
-  if (score <= 39) {
-    tips.push(
-      "Your liabilities exceed your assets. Consider reducing debts or increasing assets.",
-      "Your net worth is negative. Focus on paying off debts to improve your financial health.",
-      "High liabilities can lead to financial stress. Focus on reducing debts and building assets.",
-      "Your financial health is in danger. Take immediate steps to reduce liabilities and increase assets.",
-      "Your net worth is low compared to your revenue target. Work on improving it."
-    );
-  } else if (score <= 59) {
-    tips.push(
-      "Your net worth is marginally positive. Continue building assets and reducing liabilities.",
-      "You're making progress. Keep working on reducing liabilities to improve your financial health.",
-      "Your net worth is slightly lower than half your revenue target. Invest in assets to grow wealth.",
-      "Your financial health is moderate. Strengthen your finances by increasing assets.",
-      "Track your spending to identify areas where you can allocate more funds towards liabilities."
-    );
-  } else if (score <= 79) {
-    tips.push(
-      "Great job! Your net worth is growing. Keep building your assets.",
-      "Your net worth is over half your revenue target. Maintain a healthy savings rate.",
-      "Your financial health is good. Continue investing in assets to achieve your financial goals.",
-      "Your net worth is steadily increasing. Consider diversifying your investments.",
-      "Your financial habits are improving. Keep up the good work and stay committed to your goals."
-    );
-  } else {
-    tips.push(
-      "Congratulations! Your net worth exceeds your revenue target.",
-      "You're financially free. Continue growing your wealth to create long-term financial stability.",
-      "Your financial health is exceptional. Consider mentoring others on managing finances.",
-      "Your net worth is outstanding. Focus on strategic investments and philanthropy.",
-      "You've achieved financial freedom. Enjoy the fruits of your hard work and consider diversifying."
-    );
-  }
+  (business.incomeStatement.months || []).forEach((monthData, monthIndex) => {
+    const row = document.createElement('tr');
+    row.classList.add('expandable');
+    row.innerHTML = `
+      <td class="editable-date" onclick="editDate('month', ${monthIndex})">${monthData.month}</td>
+      <td>${business.currency} ${monthData.totalIncome}</td>
+      <td>${business.currency} ${monthData.totalExpenses}</td>
+      <td>${business.currency} ${monthData.totalIncome - monthData.totalExpenses}</td>
+      <td>
+        <button onclick="duplicateMonth(${monthIndex})">♻️</button>
+        <button onclick="deleteMonth(${monthIndex})">🗑️</button>
+      </td>
+    `;
+    monthlyBody.appendChild(row);
 
-  return tips[Math.floor(Math.random() * tips.length)];
-}
+    const categoryContainer = document.createElement('tr');
+    categoryContainer.classList.add('nested');
+    categoryContainer.innerHTML = `
+      <td colspan="5">
+        <table class="category-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Income</th>
+              <th>Expenses</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="category-body-${monthIndex}"></tbody>
+        </table>
+      </td>
+    `;
+    monthlyBody.appendChild(categoryContainer);
 
-// Save Data to LocalStorage
-function saveDataToLocalStorage() {
-  localStorage.setItem("businesses", JSON.stringify(businesses));
-}
+    (monthData.categories || []).forEach((category, catIndex) => {
+      const categoryRow = document.createElement('tr');
+      categoryRow.classList.add('expandable');
+      categoryRow.innerHTML = `
+        <td>${category.name}</td>
+        <td>${business.currency} ${category.totalIncome}</td>
+        <td>${business.currency} ${category.totalExpenses}</td>
+        <td>
+          <button onclick="duplicateCategory(${monthIndex}, ${catIndex})">♻️</button>
+          <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
+        </td>
+      `;
+      document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
 
-// Load Saved Data
-function loadSavedData() {
-  const savedData = localStorage.getItem("businesses");
-  if (savedData) {
-    businesses = JSON.parse(savedData);
-    businesses.forEach(business => {
-      business.incomeStatement = business.incomeStatement || {
-        months: [],
-        categories: []
-      };
+      const dailyContainer = document.createElement('tr');
+      dailyContainer.classList.add('nested');
+      dailyContainer.innerHTML = `
+        <td colspan="4">
+          <table class="daily-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="daily-body-${monthIndex}-${catIndex}"></tbody>
+          </table>
+        </td>
+      `;
+      document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
+
+      (category.entries || []).forEach((entry, entryIndex) => {
+        const dailyRow = document.createElement('tr');
+        dailyRow.innerHTML = `
+          <td class="editable-date" onclick="editEntryDate(${monthIndex}, ${catIndex}, ${entryIndex})">
+            ${entry.date}
+          </td>
+          <td>${entry.description}</td>
+          <td>${entry.amount}</td>
+          <td>${entry.type}</td>
+          <td>
+            <button onclick="duplicateEntry(${monthIndex}, ${catIndex}, ${entryIndex})">♻️</button>
+            <button onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">✏️</button>
+            <button onclick="deleteEntry(${monthIndex}, ${catIndex}, ${entryIndex})">🗑️</button>
+          </td>
+        `;
+        document.getElementById(`daily-body-${monthIndex}-${catIndex}`).appendChild(dailyRow);
+      });
     });
-    updateBusinessList();
-    switchBusiness(0);
+  });
+
+  updateAverages();
+}
+
+// Duplicate Month
+function duplicateMonth(index) {
+  const business = businesses[currentBusinessIndex];
+  const monthToDuplicate = business.incomeStatement.months[index];
+  const newMonth = JSON.parse(JSON.stringify(monthToDuplicate));
+  newMonth.month = newMonth.month.split("-").map((part, i) => part + (i === 1 ? 1 : 0)).join("-");
+  business.incomeStatement.months.push(newMonth);
+  updateMonthlyTable();
+}
+
+// Delete Month
+function deleteMonth(index) {
+  const business = businesses[currentBusinessIndex];
+  business.incomeStatement.months.splice(index, 1);
+  updateMonthlyTable();
+}
+
+// Function to handle expanding/collapsing rows
+function expandCollapseRow(rowElement) {
+  const nextRow = rowElement.nextElementSibling;
+  if (nextRow?.classList.contains('nested')) {
+    nextRow.style.display = nextRow.style.display === 'table-row' ? 'none' : 'table-row';
+    rowElement.classList.toggle('expanded');
   }
 }
 
-// Export Business Data
+// Add New Entry
+function saveEntry() {
+  const type = document.getElementById('entryType').value;
+  const amount = parseFloat(document.getElementById('entryAmount').value);
+  const description = document.getElementById('entryDescription').value.trim();
+  const category = document.getElementById('entryCategory').value || document.getElementById('newCategory').value.trim();
+
+  if (!category || isNaN(amount) || amount <= 0 || !description) {
+    alert('Please fill all fields correctly');
+    return;
+  }
+
+  const business = businesses[currentBusinessIndex];
+  const currentMonth = getCurrentMonth();
+  let monthObject;
+  let categoryObject;
+
+  // Create or Update Month
+  if (!business.incomeStatement.months.some(m => m.month === currentMonth)) {
+    business.incomeStatement.months.push({
+      month: currentMonth,
+      categories: [],
+      totalIncome: 0,
+      totalExpenses: 0,
+    });
+  }
+
+  monthObject = business.incomeStatement.months.find(m => m.month === currentMonth);
+
+  // Create or Update Category
+  if (!monthObject.categories.some(cat => cat.name === category)) {
+    monthObject.categories.push({
+      name: category,
+      totalIncome: 0,
+      totalExpenses: 0,
+      entries: [],
+    });
+  }
+
+  categoryObject = monthObject.categories.find(cat => cat.name === category);
+
+  // Create New Entry
+  categoryObject.entries.push({
+    date: new Date().toISOString().split("T")[0],
+    description,
+    amount,
+    type: type,
+  });
+
+  // Update Totals
+  if (type === 'income') {
+    monthObject.totalIncome += amount;
+    categoryObject.totalIncome += amount;
+  } else if (type === 'expense') {
+    monthObject.totalExpenses += amount;
+    categoryObject.totalExpenses += amount;
+  }
+
+  updateMonthlyTable();
+  closeModal();
+  saveDataToLocalStorage();
+}
+
+// Generate Current Month
+function getCurrentMonth() {
+  const date = new Date();
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  month = month < 10 ? `0${month}` : month;
+  return `${year}-${month}`;
+}
+
+// Additional Data Management Functions
 function exportBusinessData() {
-  const fileName = saveFileNameInput.value.trim() || businesses[currentBusinessIndex].name;
-  const data = businesses[currentBusinessIndex];
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const business = businesses[currentBusinessIndex];
+  const fileName = saveFileNameInput.value.trim() || business.name;
+  const data = JSON.stringify(business);
+  const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -396,38 +542,26 @@ function exportBusinessData() {
   a.click();
 }
 
-// Import Business Data
 function importBusinessData() {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "application/json";
   input.onchange = (event) => {
     const file = event.target.files[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = JSON.parse(e.target.result);
-      const business = businesses.find(b => b.name === data.name);
-      if (business) {
-        Object.assign(business, data);
-        saveDataToLocalStorage();
-        alert("Business Data Updated!");
-      } else {
-        businesses.push(data);
-        updateBusinessList();
-        switchBusiness(businesses.length - 1);
-        saveDataToLocalStorage();
-        alert("Business Data Imported!");
-      }
-      updateMonthlyTable();
-      updateBalanceSheet();
-      updateFinancialHealth();
+      businesses.push(data);
+      updateBusinessList();
+      switchBusiness(businesses.length - 1);
+      saveDataToLocalStorage();
     };
     reader.readAsText(file);
   };
   input.click();
 }
 
-// Clear Business Data
 function clearBusinessData() {
   if (confirm("Are you sure you want to clear this business's data?")) {
     businesses[currentBusinessIndex] = {
@@ -441,70 +575,67 @@ function clearBusinessData() {
       },
       balanceSheet: [],
     };
-    businessDescriptionInput.value = "";
-    currencySelect.value = "USD";
-    revenueTargetInput.value = "";
     updateMonthlyTable();
     updateBalanceSheet();
     updateFinancialHealth();
     saveDataToLocalStorage();
-    alert("Business Data Cleared!");
   }
 }
 
-// Share on WhatsApp
+// Data Storage
+function saveDataToLocalStorage() {
+  localStorage.setItem("financialTrackerData", JSON.stringify(businesses));
+}
+
+function loadSavedData() {
+  const savedData = JSON.parse(localStorage.getItem("financialTrackerData"));
+  businesses = savedData || [];
+  updateBusinessList();
+  if (businesses.length > 0) switchBusiness(0);
+}
+
+// UI Event Handlers
+document.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target.classList.contains('expandable')) {
+    expandCollapseRow(target.closest('tr'));
+  }
+});
+
+document.getElementById('balanceSheetDate').addEventListener('change', () => {
+  updateBalanceSheet();
+});
+
+// Initial Load
+loadSavedData();
+
+// Additional Functions (convertCurrency, share buttons, etc.) remain the same as before
+
+// Share Functions
 function shareOnWhatsApp() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20awesome%20Financial%20Tracker%20App%20${url}`);
+  const appUrl = encodeURIComponent(window.location.href);
+  window.open(`https://api.whatsapp.com/send?text=Check out this app ${appUrl}`);
 }
 
-// Share on Facebook
 function shareOnFacebook() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+  const appUrl = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${appUrl}`);
 }
 
-// Share on Twitter
 function shareOnTwitter() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20awesome%20Financial%20Tracker%20App`);
+  const appUrl = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?url=${appUrl}&text=Check out this app`);
 }
 
-// Download App
-function downloadApp() {
+function openAppDownload() {
   window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
 }
 
-// Generate Business Financial Story
-function generateBusinessStory() {
-  const business = businesses[currentBusinessIndex];
-  const totalAssetsAmount = parseFloat(totalAssets.textContent.replace(business.currency, ""));
-  const totalLiabilitiesAmount = parseFloat(totalLiabilities.textContent.replace(business.currency, ""));
-  const netWorth = totalAssetsAmount - totalLiabilitiesAmount;
-
-  const story = `
-    ${business.name}, a business focused on ${business.description}, has been tracking its finances diligently. 
-
-    Its total assets are ${business.currency} ${totalAssetsAmount}, and its liabilities amount to ${business.currency} ${totalLiabilitiesAmount}, resulting in a net worth of ${business.currency} ${netWorth}. 
-
-    Its revenue target is ${business.currency} ${business.revenueTarget}. 
-
-    TIPS: ${generateHealthTip(healthChart.data.datasets[0].data[0], netWorth, business.revenueTarget)}
-  `;
-  businessFinancialStory.textContent = story;
-}
-
-// Toggle Calculator Popup
-function toggleCalculator() {
-  calculatorPopup.style.display = calculatorPopup.style.display === "block" ? "none" : "block";
-}
-
-// Append to Calculator Input
+// Calculator Functions
 function appendToCalculator(value) {
   calculatorInput.value += value;
 }
 
-// Calculate Result
 function calculateResult() {
   try {
     calculatorInput.value = eval(calculatorInput.value);
@@ -513,298 +644,306 @@ function calculateResult() {
   }
 }
 
-// Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
 }
 
-// Convert Currency
+function toggleCalculator() {
+  calculatorPopup.style.display = calculatorPopup.style.display === "block" ? "none" : "block";
+}
+
+// Financial Health Calculations
+function updateAverages() {
+  const business = businesses[currentBusinessIndex];
+  const months = business.incomeStatement.months || [];
+  
+  const totalMonths = months.length || 1;
+  const avgIncome = months.reduce((sum, m) => sum + m.totalIncome, 0) / totalMonths;
+  const avgExpenses = months.reduce((sum, m) => sum + m.totalExpenses, 0) / totalMonths;
+  const avgCashflow = avgIncome - avgExpenses;
+
+  document.getElementById('average-income').textContent = `${business.currency} ${avgIncome.toFixed(2)}`;
+  document.getElementById('average-expenses').textContent = `${business.currency} ${avgExpenses.toFixed(2)}`;
+  document.getElementById('average-cashflow').textContent = `${business.currency} ${avgCashflow.toFixed(2)}`;
+
+  updateFinancialHealth();
+}
+
+function updateFinancialHealth() {
+  const business = businesses[currentBusinessIndex];
+  const avgCashflow = parseFloat(document.getElementById('average-cashflow').textContent.replace(business.currency, '').trim());
+  const healthScore = Math.round((avgCashflow / business.revenueTarget) * 100);
+
+  healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
+  healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
+  healthChart.update();
+
+  healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
+  healthTips.textContent = generateHealthTip(healthScore, avgCashflow, business.revenueTarget);
+}
+
+function getHealthColor(score) {
+  return score <= 39 ? "#ff6384" : score <= 59 ? "#ffcd56" : score <= 79 ? "#4bc0c0" : "#36a2eb";
+}
+
+function generateHealthTip(score, cashflow, target) {
+  const tips = {
+    low: [
+      "Your expenses are higher than your income. Consider cutting down on unnecessary spending.",
+      "Focus on reducing liabilities and increasing assets to improve your financial health."
+    ],
+    moderate: [
+      "Your financial health is improving. Try to reduce your liabilities to improve your net worth.",
+      "Your savings rate is low. Consider increasing your income or reducing expenses."
+    ],
+    good: [
+      "Great job! Your income is higher than your expenses. Keep building your assets.",
+      "You're on the right track. Consider investing in assets to generate passive income."
+    ],
+    excellent: [
+      "Excellent! Your financial health is in great shape. Keep up the good work!",
+      "You're doing amazing! Consider diversifying your investments to further grow your wealth."
+    ]
+  };
+
+  const section = score <= 39 ? 'low' : score <= 59 ? 'moderate' : score <= 79 ? 'good' : 'excellent';
+  const extraTips = [];
+  
+  if (cashflow < target) {
+    extraTips.push("Your cashflow is below your revenue target. Focus on increasing income or reducing expenses.");
+  } else {
+    extraTips.push("Your cashflow exceeds your revenue target. Keep up the good work!");
+  }
+
+  return tips[section][Math.floor(Math.random() * tips[section].length)] + " " + extraTips.join(" ");
+}
+
+// Generate Business Financial Story
+function generateBusinessStory() {
+  const business = businesses[currentBusinessIndex];
+  const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(business.currency, "").trim());
+  const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(business.currency, "").trim());
+  const avgCashflow = parseFloat(document.getElementById("average-cashflow").textContent.replace(business.currency, "").trim());
+  const avgIncome = parseFloat(document.getElementById("average-income").textContent.replace(business.currency, "").trim());
+  const avgExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(business.currency, "").trim());
+
+  const story = `
+    ${business.name} is a thriving ${business.description} business. 
+    Their average monthly income stands at ${business.currency} ${avgIncome}, 
+    with average expenses totaling ${business.currency} ${avgExpenses}. This results in a monthly net profit of ${business.currency} ${avgCashflow}. 
+    The business owns assets worth ${business.currency} ${totalAssets}, 
+    and maintains a manageable level of liabilities at ${business.currency} ${totalLiabilities}, 
+    leading to a robust net worth of ${business.currency} ${totalAssets - totalLiabilities}.
+    Financial tip: ${generateHealthTip(healthChart.data.datasets[0].data[0], avgCashflow, business.revenueTarget)}
+    `;
+
+  businessFinancialStory.textContent = story;
+}
+
+// Currency Converter
 function convertCurrency() {
   const amount = parseFloat(document.getElementById("amount").value);
   const from = fromCurrency.value;
   const to = toCurrency.value;
 
-  if (amount && from && to) {
+  if (!isNaN(amount) && from && to) {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
 }
 
-// Function to get the current month
-function getCurrentMonth() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}`;
-}
-
-// Add new month if not exists
-function addMonthIfNew(month) {
+// Edit Functions
+function editDate(tableType, index) {
   const business = businesses[currentBusinessIndex];
-  if (!business.incomeStatement.months.some(m => m.month === month)) {
-    business.incomeStatement.months.push({
-      month,
-      categories: [],
-      totalIncome: 0,
-      totalExpenses: 0
-    });
+  if (tableType === 'month') {
+    const oldDate = business.incomeStatement.months[index].month;
+    const newDate = prompt("Enter New Date (YYYY-MM):", oldDate);
+    if (newDate) {
+      business.incomeStatement.months[index].month = newDate;
+      updateMonthlyTable();
+      saveDataToLocalStorage();
+    }
+  } else if (tableType === 'entry') {
+    console.log("Implement editEntryDate for specific entry");
   }
 }
 
-// Function to update monthly table
-function updateMonthlyTable() {
-  const business = businesses[currentBusinessIndex];
-  const monthlyBody = document.getElementById('monthly-body');
-  monthlyBody.innerHTML = '';
-  
-  business.incomeStatement.months.forEach((monthData, index) => {
-    const row = document.createElement('tr');
-    row.classList.add('expandable');
-    row.innerHTML = `
-      <td class="editable-date">${monthData.month}</td>
-      <td>${business.currency} ${monthData.totalIncome}</td>
-      <td>${business.currency} ${monthData.totalExpenses}</td>
-      <td>${business.currency} ${monthData.totalIncome - monthData.totalExpenses}</td>
-      <td>
-        <button onclick="deleteMonth(${index})">🗑️</button>
-      </td>
-    `;
-    monthlyBody.appendChild(row);
-    
-    // Add category table
-    const categoryRow = document.createElement('tr');
-    categoryRow.classList.add('nested');
-    const categoryCell = document.createElement('td');
-    categoryCell.colSpan = 5;
-    categoryCell.innerHTML = `
-      <table class="category-table">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Income</th>
-            <th>Expenses</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="category-body-${index}"></tbody>
-      </table>
-    `;
-    monthlyBody.appendChild(categoryRow);
-    updateCategoryTable(index);
-  });
-  
-  updateAverages();
-}
-
-// Function to update category table
-function updateCategoryTable(monthIndex) {
+function editEntry(monthIndex, catIndex, entryIndex) {
   const business = businesses[currentBusinessIndex];
   const month = business.incomeStatement.months[monthIndex];
-  const categoryBody = document.getElementById(`category-body-${monthIndex}`);
-  categoryBody.innerHTML = '';
-  
-  month.categories.forEach((category, catIndex) => {
-    const row = document.createElement('tr');
-    row.classList.add('expandable');
-    row.innerHTML = `
-      <td>${category.name}</td>
-      <td>${business.currency} ${category.totalIncome}</td>
-      <td>${business.currency} ${category.totalExpenses}</td>
-      <td>
-        <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
-      </td>
-    `;
-    categoryBody.appendChild(row);
-    
-    // Add daily table
-    const dailyRow = document.createElement('tr');
-    dailyRow.classList.add('nested');
-    const dailyCell = document.createElement('td');
-    dailyCell.colSpan = 4;
-    dailyCell.innerHTML = `
-      <table class="daily-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="daily-body-${monthIndex}-${catIndex}"></tbody>
-      </table>
-    `;
-    categoryBody.appendChild(dailyRow);
-    updateDailyTable(monthIndex, catIndex);
-  });
+  const category = month.categories[catIndex];
+  const entry = category.entries[entryIndex];
+
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  const newDescription = prompt("Edit Description:", entry.description);
+
+  if (!isNaN(newAmount) && newDescription) {
+    entry.amount = newAmount;
+    entry.description = newDescription;
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
 }
 
-// Function to update daily table
-function updateDailyTable(monthIndex, catIndex) {
+function duplicateCategory(monthIndex, catIndex) {
   const business = businesses[currentBusinessIndex];
-  const category = business.incomeStatement.months[monthIndex].categories[catIndex];
-  const dailyBody = document.getElementById(`daily-body-${monthIndex}-${catIndex}`);
-  dailyBody.innerHTML = '';
-  
-  category.entries.forEach((entry, entryIndex) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${entry.date}</td>
-      <td>${entry.description}</td>
-      <td>${business.currency} ${entry.amount}</td>
-      <td>
-        <button onclick="deleteEntry(${monthIndex}, ${catIndex}, ${entryIndex})">🗑️</button>
-      </td>
-    `;
-    dailyBody.appendChild(row);
-  });
-}
-
-// Function to show the entry modal
-function showEntryModal(type) {
-  document.getElementById('entryType').value = type;
-  document.getElementById('entryModal').style.display = 'block';
-  populateCategories();
-}
-
-// Function to populate categories in the modal
-function populateCategories() {
-  const business = businesses[currentBusinessIndex];
-  const select = document.getElementById('entryCategory');
-  select.innerHTML = '';
-  business.incomeStatement.categories.forEach(cat => {
-    const option = document.createElement('option');
-    option.value = cat.name;
-    option.textContent = cat.name;
-    select.appendChild(option);
-  });
-}
-
-// Function to save the entry
-function saveEntry() {
-  const type = document.getElementById('entryType').value;
-  let amount = document.getElementById('entryAmount').value;
-  const description = document.getElementById('entryDescription').value;
-  const category = document.getElementById('entryCategory').value || document.getElementById('newCategory').value;
-  
-  if (!category || isNaN(amount) || !description) {
-    alert('Please fill all fields');
-    return;
-  }
-  
-  amount = parseFloat(amount);
-  
-  const business = businesses[currentBusinessIndex];
-  const date = new Date();
-  const month = getCurrentMonth();
-  
-  // Update categories
-  if (!business.incomeStatement.categories.some(c => c.name === category)) {
-    business.incomeStatement.categories.push({ name: category, type: type });
-  }
-  
-  addMonthIfNew(month);
-  
-  const monthIndex = business.incomeStatement.months.findIndex(m => m.month === month);
-  let categoryIndex = business.incomeStatement.months[monthIndex].categories.findIndex(c => c.name === category);
-  
-  if (categoryIndex === -1) {
-    business.incomeStatement.months[monthIndex].categories.push({
-      name: category,
-      totalIncome: 0,
-      totalExpenses: 0,
-      entries: []
-    });
-    categoryIndex = business.incomeStatement.months[monthIndex].categories.length - 1;
-  }
-  
-  const entry = {
-    date: date.toLocaleDateString(),
-    description,
-    amount,
-    type
-  };
-  
-  business.incomeStatement.months[monthIndex].categories[categoryIndex].entries.push(entry);
-  
-  if (type === 'income') {
-    business.incomeStatement.months[monthIndex].totalIncome += amount;
-    business.incomeStatement.months[monthIndex].categories[categoryIndex].totalIncome += amount;
-  } else {
-    business.incomeStatement.months[monthIndex].totalExpenses += amount;
-    business.incomeStatement.months[monthIndex].categories[categoryIndex].totalExpenses += amount;
-  }
-  
+  const month = business.incomeStatement.months[monthIndex];
+  const categoryToDuplicate = month.categories[catIndex];
+  const newCategory = JSON.parse(JSON.stringify(categoryToDuplicate));
+  newCategory.name += " - Copy";
+  month.categories.push(newCategory);
   updateMonthlyTable();
-  closeModal();
-  saveDataToLocalStorage();
 }
 
-// Function to update averages
-function updateAverages() {
+function deleteCategory(monthIndex, catIndex) {
+  if (confirm("Are you sure you want to delete this category?")) {
+    const business = businesses[currentBusinessIndex];
+    business.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+function duplicateEntry(monthIndex, catIndex, entryIndex) {
   const business = businesses[currentBusinessIndex];
-  const months = business.incomeStatement.months;
-  const totalMonths = months.length || 1;
-  
-  const totalIncomes = months.reduce((sum, m) => sum + m.totalIncome, 0);
-  const totalExpenses = months.reduce((sum, m) => sum + m.totalExpenses, 0);
-  const totalCashflow = totalIncomes - totalExpenses;
-  
-  const avgIncome = (totalIncomes / totalMonths).toFixed(2);
-  const avgExpenses = (totalExpenses / totalMonths).toFixed(2);
-  const avgCashflow = (totalCashflow / totalMonths).toFixed(2);
-  
-  document.getElementById('average-income').textContent = `${business.currency} ${avgIncome}`;
-  document.getElementById('average-expenses').textContent = `${business.currency} ${avgExpenses}`;
-  document.getElementById('average-cashflow').textContent = `${business.currency} ${avgCashflow}`;
-  
-  // Update financial health score
-  const healthScore = Math.round((totalCashflow / business.revenueTarget) * 100);
-  healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
-  healthChart.update();
-  healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
+  const entryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+  const newEntry = { ...entryToDuplicate };
+  newEntry.date = entryToDuplicate.date.replace(/(\d{4})-(\d{2})-(\d{2})$/, (_, y, m, d) => `${y}-${m}-${+d + 1}`);
+  business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
+  updateMonthlyTable();
 }
 
-// Function to add event listeners for table rows
-document.addEventListener('click', function(e) {
-  if (e.target.closest('.expandable')) {
-    const nested = e.target.closest('tr').nextElementSibling;
-    nested.style.display = nested.style.display === 'none' ? 'table-row' : 'none';
+// Financial Health Event Listeners
+healthChart.canvas.onclick = expandWhenClick;
+
+healthChart.canvas.addEventListener('mousemove', function (event) {
+  const tooltip = this.tooltip;
+  if (tooltip) {
+    const position = Chart.helpers.getRelativePosition(event, this);
+    tooltip.update(true, position);
+    tooltip.draw();
   }
 });
 
-// Function to delete a month
-function deleteMonth(index) {
-  const business = businesses[currentBusinessIndex];
-  if (confirm("Are you sure you want to delete this month's data?")) {
-    business.incomeStatement.months.splice(index, 1);
-    updateMonthlyTable();
-    saveDataToLocalStorage();
+function expandWhenClick(evt) {
+  const activePoints = healthChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, false);
+  const datasetIndex = activePoints[0].datasetIndex;
+  console.log("Dataset index clicked:", datasetIndex);
+}
+
+// Browser Back Button and Refresh Handling
+window.onbeforeunload = function () {
+  confirm("Are you sure you want to leave? Changes might be lost.");
+};
+
+function checkBackupTimer() {
+  const lastBackup = localStorage.getItem("lastBackup");
+  if (lastBackup) {
+    const now = Date.now();
+    const timeSinceBackup = now - lastBackup;
+    if (timeSinceBackup >= 24 * 60 * 60 * 1000) {
+      backupData();
+    }
+  } else {
+    backupData();
   }
 }
 
-// Function to delete a category
-function deleteCategory(monthIndex, categoryIndex) {
-  const business = businesses[currentBusinessIndex];
-  if (confirm("Are you sure you want to delete this category?")) {
-    business.incomeStatement.months[monthIndex].categories.splice(categoryIndex, 1);
-    updateMonthlyTable();
-    saveDataToLocalStorage();
+setInterval(checkBackupTimer, 1000);
+
+function backupData() {
+  const backup = JSON.stringify(businesses);
+  localStorage.setItem("financialTrackerBackup", backup);
+  localStorage.setItem("lastBackup", Date.now());
+  localStorageBackup++;
+}
+
+function restoreData() {
+  const backup = JSON.parse(localStorage.getItem("financialTrackerBackup"));
+  if (backup) {
+    if (confirm("A backup was found. Do you want to restore it?")) {
+      businesses = backup;
+      updateBusinessList();
+      loadSavedData();
+      alert("Data restored from backup!");
+    }
   }
 }
 
-// Function to delete an entry
-function deleteEntry(monthIndex, categoryIndex, entryIndex) {
-  const business = businesses[currentBusinessIndex];
-  if (confirm("Are you sure you want to delete this entry?")) {
-    business.incomeStatement.months[monthIndex].categories[categoryIndex].entries.splice(entryIndex, 1);
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  restoreData();
+});
+
+// Add Account Button
+function addAccount() {
+  // Assuming each business has accounts to add
+  console.log("Add Bank Account functionality not implemented yet.");
 }
 
-// Function to handle date picker
-function updateEntryDate() {
-  const business = businesses[currentBusinessIndex];
-  const entryAmount = document.getElementById('entryAmount');
-  entryAmount.placeholder = `Amount (${business.currency})`;
-  entryAmount.value = '';
+// Fix Existing Errors
+function fixErrors() {
+  console.log("Error fixing functionality not implemented yet.");
 }
+
+// DeepSeek AI Integration (placeholder)
+function deepSeekIntegration() {
+  // Implement DeepSeek AI analytics or suggestions here
+  console.log("DeepSeek AI analyzing data...");
+}
+
+// Time Travel Feature (placeholder)
+function timeTravel(feature) {
+  const currentTime = new Date();
+  const availableFeatures = ['3-months', '1-year', '5-years', 'max'];
+
+  if (!availableFeatures.includes(feature)) {
+    alert("Time travel feature not available.");
+    return;
+  }
+
+  switch (feature) {
+    case '3-months':
+      localStorage.setItem('travelTimestamp', currentTime.getTime() - 3 * 30 * 24 * 60 * 60 * 1000);
+      break;
+    case '1-year':
+      localStorage.setItem('travelTimestamp', currentTime.getTime() - 12 * 30 * 24 * 60 * 60 * 1000);
+      break;
+    case '5-years':
+      localStorage.setItem('travelTimestamp', currentTime.getTime() - 60 * 30 * 24 * 60 * 60 * 1000);
+      break;
+    case 'max':
+      localStorage.removeItem('travelTimestamp');
+      break;
+  }
+
+  location.reload();
+}
+
+// Add AI Tip of the Day (placeholder)
+function aiFinancialTip() {
+  const tips = [
+    "Invest in yourself - education is the best asset.",
+    "Save 20% of your income for future goals.",
+    "Automate your savings for peace of mind.",
+    "Diversify your investments to manage risk."
+  ];
+
+  return tips[Math.floor(Math.random() * tips.length)];
+}
+
+// Display AI Tip on UI
+document.getElementById("healthTips").innerHTML += `<br>Tip of the Day: ${aiFinancialTip()}`;
+
+// Add dateFormat function
+function dateFormat(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+}
+
+// Add cancel button functionality
+document.getElementById("cancelButton").onclick = () => {
+  document.getElementById("newCategory").value = "";
+};
+
+// Add Auto-Save Feature
+setInterval(saveDataToLocalStorage, 5000); // Auto-save every 5 seconds
