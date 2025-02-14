@@ -1,137 +1,126 @@
-let businesses = [];
-let currentBusinessIndex = 0;
-let categories = { income: [], expense: [] };
-
-// DOM Elements
-const businessList = document.getElementById("businessList");
-const incomeBody = document.getElementById("monthlyBody");
-const balanceBody = document.getElementById("balanceBody");
-const entryModal = document.getElementById("entryModal");
-const modalTitle = document.getElementById("modalTitle");
-const entryForm = document.getElementById("entryForm");
-const entryCategory = document.getElementById("entryCategory");
-const healthChartCtx = document.getElementById("healthChart").getContext("2d");
-
-// Initialize
-document.addEventListener("DOMContentLoaded", () => {
-  loadSavedData();
-  updateBusinessList();
-  switchBusiness(0);
-});
-
-// Business Management
-function addBusiness() {
-  const name = document.getElementById("businessName").value.trim();
-  if (name) {
-    businesses.push({
-      name,
-      description: "",
-      currency: "USD",
-      incomeStatement: [],
-      balanceSheet: [],
-    });
-    saveDataToLocalStorage();
-    updateBusinessList();
-    switchBusiness(businesses.length - 1);
-  }
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --success-color: #27ae60;
+  --danger-color: #e74c3c;
 }
 
-function updateBusinessList() {
-  businessList.innerHTML = businesses.map((business, index) => 
-    `<option value="${index}">${business.name}</option>`
-  ).join("");
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
 }
 
-function switchBusiness(index) {
-  currentBusinessIndex = index;
-  updateIncomeStatement();
-  updateBalanceSheet();
-  updateFinancialHealth();
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-// Income/Expense Management
-function showEntryModal(type) {
-  modalTitle.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-  populateCategories(type);
-  entryModal.style.display = "block";
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-function populateCategories(type) {
-  entryCategory.innerHTML = "<option value=''>Select Category</option>";
-  categories[type].forEach(category => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    entryCategory.appendChild(option);
-  });
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
-function addFinancialEntry() {
-  const date = document.getElementById("entryDate").value || new Date().toISOString().split("T")[0];
-  const description = document.getElementById("entryDescription").value;
-  const category = document.getElementById("entryCategory").value;
-  const amount = parseFloat(document.getElementById("entryAmount").value);
-
-  if (description && amount) {
-    const business = businesses[currentBusinessIndex];
-    business.incomeStatement.push({
-      type: modalTitle.textContent.includes("Income") ? "income" : "expense",
-      date,
-      description,
-      category,
-      amount,
-    });
-    if (!categories[type].includes(category)) {
-      categories[type].push(category);
-    }
-    updateIncomeStatement();
-    entryModal.style.display = "none";
-    saveDataToLocalStorage();
-  }
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
 }
 
-// Update Tables
-function updateIncomeStatement() {
-  const business = businesses[currentBusinessIndex];
-  incomeBody.innerHTML = "";
-
-  const monthlyTotals = {};
-  business.incomeStatement.forEach(entry => {
-    const month = entry.date.slice(0, 7);
-    if (!monthlyTotals[month]) {
-      monthlyTotals[month] = { income: 0, expenses: 0 };
-    }
-    if (entry.type === "income") {
-      monthlyTotals[month].income += entry.amount;
-    } else {
-      monthlyTotals[month].expenses += entry.amount;
-    }
-  });
-
-  Object.entries(monthlyTotals).forEach(([month, { income, expenses }]) => {
-    const netIncome = income - expenses;
-    incomeBody.innerHTML += `
-      <tr>
-        <td>${month}</td>
-        <td>${income}</td>
-        <td>${expenses}</td>
-        <td>${netIncome}</td>
-        <td>
-          <button onclick="expandCategory('${month}')">Expand</button>
-        </td>
-      </tr>
-    `;
-  });
+th {
+  background-color: var(--primary-color);
+  color: white;
 }
 
-// Save/Load Data
-function saveDataToLocalStorage() {
-  localStorage.setItem("gapFinanceTracker", JSON.stringify(businesses));
+button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px;
 }
 
-function loadSavedData() {
-  const savedData = localStorage.getItem("gapFinanceTracker");
-  if (savedData) {
-    businesses = JSON.parse(savedData);
-  }
-         }
+button:hover {
+  background-color: #2980b9;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 10% auto;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.calculator-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calculator-popup {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calculator-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.calculator-buttons button {
+  background-color: #f4f4f4;
+  color: var(--primary-color);
+  border: 1px solid #ddd;
+}
+
+.calculator-buttons button:hover {
+  background-color: #ddd;
+}
