@@ -29,17 +29,17 @@ body {
 }
 
 .business-controls {
-    margin-bottom: 10px; /* Adds space below the controls */
+  margin-bottom: 10px;
 }
 
 .business-controls + select,
 .business-controls + div {
-    margin-left: 20px; /* Adjusts left margin for elements following the controls */
-  }
+  margin-left: 20px;
+}
 
 .business-list-controls {
-    margin-left: 20px; /* Matches the indent of other controls */
-    margin-top: 10px; /* Adds space above the new div */
+  margin-left: 20px;
+  margin-top: 10px;
 }  
 
 h1, h2 {
@@ -178,7 +178,7 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: green; /* Deep green text color */
+  color: green;
 }
 
 .calculator-buttons button:hover {
@@ -186,28 +186,26 @@ th, td {
   color: white;
 }
 
-/* Business version specific styles */
 .business-selector {
   margin-bottom: 20px;
 }
 
 #switchLink {
-    display: inline-block;
-    background-color: #0056b3;
-    box-shadow: 2px 2px 4px green;
-    padding: 5px 10px;
-    margin: 0;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
+  display: inline-block;
+  background-color: #0056b3;
+  box-shadow: 2px 2px 4px green;
+  padding: 5px 10px;
+  margin: 0;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
 }
 
 #switchLink:hover {
-    box-shadow: 2px 2px 4px #007bff;
-    }
-
+  box-shadow: 2px 2px 4px #007bff;
+}
 
 .business-controls {
   display: flex;
@@ -221,3 +219,48 @@ th, td {
   border-radius: 5px;
   flex-grow: 1;
 }
+
+/* New CSS Additions */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.category-table, .daily-table {
+  margin-left: 30px;
+  width: calc(100% - 30px);
+}
+
+.expandable {
+  cursor: pointer;
+}
+
+.category-select {
+  margin: 10px 0;
+  display: flex;
+  gap: 5px;
+}
+
+.nested {
+  display: none;
+}
+
+.editable-date {
+  cursor: pointer;
+  text-decoration: underline;
+  }
