@@ -1,138 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAP Multi-Business Financial Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAP Multi-Business Financial Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
+  <div class="container">
+    <!-- Business Selector -->
+    <section class="business-selector card">
+      <h3><a href="https://gap-tools.github.io/GAP-Financial-Tracker/" id="switchLink">Switch to Personal</a></h3>
+      <h2>BUSINESS FINANCIAL TRACKER</h2>
+      <div class="controls">
+        <input type="text" id="businessName" placeholder="Enter Business Name">
+        <button onclick="addBusiness()">Add Business</button>
+      </div>
+      <select id="businessList" onchange="switchBusiness()"></select>
+      <button onclick="editBusinessName()">✏️ Edit</button>
+      <button onclick="deleteBusiness()">🗑️ Delete</button>
+    </section>
 
-        <!-- Business Selector -->
-        <div class="business-selector">
-            <h3><a href="https://gap-tools.github.io/GAP-Financial-Tracker/" id="switchLink">Switch to Personal</a></h3>
-            <h2>BUSINESS FINANCIAL TRACKER</h2>
-            <div class="controls">
-                <input type="text" id="businessName" placeholder="Enter Business Name">
-                <button onclick="addBusiness()">Add Business</button>
-            </div>
-            <select id="businessList" onchange="switchBusiness()"></select>
-            <button onclick="editBusinessName()">-checked</button>
-            <button onclick="deleteBusiness()">-delete</button>
-        </div>
+    <!-- Income Statement -->
+    <section class="income-statement card">
+      <h2>Income Statement</h2>
+      <div class="table-container">
+        <table id="monthlyTable">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total Income</th>
+              <th>Total Expenses</th>
+              <th>Net Income</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyBody"></tbody>
+        </table>
+      </div>
+      <div class="averages">
+        <p>Avg Income: <span id="avg-income">0</span></p>
+        <p>Avg Expenses: <span id="avg-expenses">0</span></p>
+        <p>Avg Cashflow: <span id="avg-cashflow">0</span></p>
+      </div>
+      <button onclick="showEntryModal('income')">Add Income</button>
+      <button onclick="showEntryModal('expense')">Add Expense</button>
+    </section>
 
-        <!-- Income Statement -->
-        <div class="income-statement">
-            <h2>Income Statement</h2>
-            <div class="table-container">
-                <table id="monthlyTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Total Income</th>
-                            <th>Total Expenses</th>
-                            <th>Net Cashflow</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="monthlyBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="averages">
-                <p>Avg. Cashflow: <span id="avgCash">0</span></p>
-                <p>Health Score: <span id="healthScore">0%</span></p>
-            </div>
-            <div class="controls">
-                <button onclick="showEntryModal('income')">Add Income</button>
-                <button onclick="showEntryModal('expense')">Add Expense</button>
-            </div>
-        </div>
+    <!-- Balance Sheet -->
+    <section class="balance-sheet card">
+      <h2>Balance Sheet</h2>
+      <div class="table-container">
+        <table id="balanceTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Assets</th>
+              <th>Liabilities</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="balanceBody"></tbody>
+        </table>
+      </div>
+      <button onclick="addAsset()">Add Asset</button>
+      <button onclick="addLiability()">Add Liability</button>
+    </section>
 
-        <!-- Balance Sheet -->
-        <div class="balance-sheet">
-            <h2>Balance Sheet</h2>
-            <div class="table-container">
-                <table id="balanceTable">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Description</th>
-                            <th>Value</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="balanceBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="controls">
-                <button onclick="addAsset()">Add Asset</button>
-                <button onclick="addLiability()">Add Liability</button>
-            </div>
-        </div>
+    <!-- Financial Health -->
+    <section class="financial-health card">
+      <h2>Financial Health</h2>
+      <div class="health-score">
+        <canvas id="healthChart"></canvas>
+        <p id="healthPercentage"></p>
+        <p id="healthTips"></p>
+      </div>
+    </section>
 
-        <!-- Financial Health -->
-        <div class="financial-health">
-            <h2>Financial Health</h2>
-            <div class="chart-container">
-                <canvas id="healthChart"></canvas>
-            </div>
-            <div class="tip" id="healthTip">
-                <!-- Tip will be populated dynamically -->
-            </div>
-        </div>
-
-        <!-- Calculator -->
-        <div class="calculator">
-            <button onclick="toggleCalculator()">Calculator</button>
-            <div id="calculator" class="hidden">
-                <input type="text" id="display" readonly>
-                <div class="keys">
-                    <button onclick="calc('C')">C</button>
-                    <button onclick="calc('/')">/</button>
-                    <button onclick="calc('7')">7</button>
-                    <button onclick="calc('8')">8</button>
-                    <button onclick="calc('9')">9</button>
-                    <button onclick="calc('*')">*</button>
-                    <button onclick="calc('4')">4</button>
-                    <button onclick="calc('5')">5</button>
-                    <button onclick="calc('6')">6</button>
-                    <button onclick="calc('-')">-</button>
-                    <button onclick="calc('1')">1</button>
-                    <button onclick="calc('2')">2</button>
-                    <button onclick="calc('3')">3</button>
-                    <button onclick="calc('+')">+</button>
-                    <button onclick="calc('0')">0</button>
-                    <button onclick="calc('.')">.</button>
-                    <button onclick="calc('=')">=</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modals -->
-        <div id="entryModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal()">×</span>
-                <h2 id="modalTitle">Add Entry</h2>
-                <form id="entryForm">
-                    <input type="date" id="entryDate" required>
-                    <input type="text" id="entryDesc" placeholder="Description" required>
-                    <input type="number" id="entryAmount" placeholder="Amount" step="0.01" required>
-                    <select id="entryType">
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                    </select>
-                    <button type="submit">Save</button>
-                </form>
-            </div>
-        </div>
-
+    <!-- Modals -->
+    <div id="entryModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h3 id="modalTitle"></h3>
+        <form id="entryForm">
+          <input type="date" id="entryDate" required>
+          <input type="text" id="entryDescription" placeholder="Description" required>
+          <select id="entryCategory" required>
+            <option value="">Select Category</option>
+          </select>
+          <input type="number" id="entryAmount" placeholder="Amount" step="0.01" required>
+          <button type="submit">Add Entry</button>
+        </form>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Floating Calculator -->
+    <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
+    <div id="calculatorPopup" class="calculator-popup">
+      <div class="calculator-content">
+        <h3>Basic Calculator</h3>
+        <input type="text" id="calculatorInput" readonly>
+        <div class="calculator-buttons">
+          <button onclick="appendToCalculator('7')">7</button>
+          <button onclick="appendToCalculator('8')">8</button>
+          <button onclick="appendToCalculator('9')">9</button>
+          <button onclick="appendToCalculator('+')">+</button>
+          <button onclick="appendToCalculator('4')">4</button>
+          <button onclick="appendToCalculator('5')">5</button>
+          <button onclick="appendToCalculator('6')">6</button>
+          <button onclick="appendToCalculator('-')">-</button>
+          <button onclick="appendToCalculator('1')">1</button>
+          <button onclick="appendToCalculator('2')">2</button>
+          <button onclick="appendToCalculator('3')">3</button>
+          <button onclick="appendToCalculator('*')">*</button>
+          <button onclick="appendToCalculator('0')">0</button>
+          <button onclick="appendToCalculator('.')">.</button>
+          <button onclick="calculateResult()">=</button>
+          <button onclick="appendToCalculator('/')">/</button>
+          <button onclick="clearCalculator()">C</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
-              </html>
+          </html<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAP Multi-Business Financial Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Business Selector -->
+    <section class="business-selector card">
+      <h3><a href="https://gap-tools.github.io/GAP-Financial-Tracker/Business/" id="switchLink">Switch to Personal</a></h3>
+      <h2>BUSINESS FINANCIAL TRACKER</h2>
+      <div class="controls">
+        <input type="text" id="businessName" placeholder="Enter Business Name">
+        <button onclick="addBusiness()">Add Business</button>
+      </div>
+      <select id="businessList" onchange="switchBusiness()"></select>
+      <button onclick="editBusinessName()">✏️ Edit</button>
+      <button onclick="deleteBusiness()">🗑️ Delete</button>
+    </section>
+
+    <!-- Income Statement -->
+    <section class="income-statement card">
+      <h2>Income Statement</h2>
+      <div class="table-container">
+        <table id="monthlyTable">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total Income</th>
+              <th>Total Expenses</th>
+              <th>Net Income</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="monthlyBody"></tbody>
+        </table>
+      </div>
+      <div class="averages">
+        <p>Avg Income: <span id="avg-income">0</span></p>
+        <p>Avg Expenses: <span id="avg-expenses">0</span></p>
+        <p>Avg Cashflow: <span id="avg-cashflow">0</span></p>
+      </div>
+      <button onclick="showEntryModal('income')">Add Income</button>
+      <button onclick="showEntryModal('expense')">Add Expense</button>
+    </section>
+
+    <!-- Balance Sheet -->
+    <section class="balance-sheet card">
+      <h2>Balance Sheet</h2>
+      <div class="table-container">
+        <table id="balanceTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Assets</th>
+              <th>Liabilities</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="balanceBody"></tbody>
+        </table>
+      </div>
+      <button onclick="addAsset()">Add Asset</button>
+      <button onclick="addLiability()">Add Liability</button>
+    </section>
+
+    <!-- Financial Health -->
+    <section class="financial-health card">
+      <h2>Financial Health</h2>
+      <div class="health-score">
+        <canvas id="healthChart"></canvas>
+        <p id="healthPercentage"></p>
+        <p id="healthTips"></p>
+      </div>
+    </section>
+
+    <!-- Modals -->
+    <div id="entryModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h3 id="modalTitle"></h3>
+        <form id="entryForm">
+          <input type="date" id="entryDate" required>
+          <input type="text" id="entryDescription" placeholder="Description" required>
+          <select id="entryCategory" required>
+            <option value="">Select Category</option>
+          </select>
+          <input type="number" id="entryAmount" placeholder="Amount" step="0.01" required>
+          <button type="submit">Add Entry</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Floating Calculator -->
+    <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
+    <div id="calculatorPopup" class="calculator-popup">
+      <div class="calculator-content">
+        <h3>Basic Calculator</h3>
+        <input type="text" id="calculatorInput" readonly>
+        <div class="calculator-buttons">
+          <button onclick="appendToCalculator('7')">7</button>
+          <button onclick="appendToCalculator('8')">8</button>
+          <button onclick="appendToCalculator('9')">9</button>
+          <button onclick="appendToCalculator('+')">+</button>
+          <button onclick="appendToCalculator('4')">4</button>
+          <button onclick="appendToCalculator('5')">5</button>
+          <button onclick="appendToCalculator('6')">6</button>
+          <button onclick="appendToCalculator('-')">-</button>
+          <button onclick="appendToCalculator('1')">1</button>
+          <button onclick="appendToCalculator('2')">2</button>
+          <button onclick="appendToCalculator('3')">3</button>
+          <button onclick="appendToCalculator('*')">*</button>
+          <button onclick="appendToCalculator('0')">0</button>
+          <button onclick="appendToCalculator('.')">.</button>
+          <button onclick="calculateResult()">=</button>
+          <button onclick="appendToCalculator('/')">/</button>
+          <button onclick="clearCalculator()">C</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>￼Enter
