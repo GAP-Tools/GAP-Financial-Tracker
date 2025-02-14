@@ -18,23 +18,22 @@
         <input type="text" id="businessName" placeholder="Enter Business Name">
         <button onclick="addBusiness()">Add Business</button>
       </div>
-      <select id="businessList" onchange="switchBusiness()">
-        <!-- Business list populated dynamically -->
-      </select>
-      <div class="business-list-controls">
-        <button onclick="editBusinessName()">✏️</button>
-        <button onclick="deleteBusiness()">🗑️</button>
-      </div>
+      <select id="businessList" onchange="switchBusiness()"></select>
+        <button onclick="editBusinessName()">✏️</button> <!-- Edit Button -->
+        <button onclick="deleteBusiness()">🗑️</button> <!-- Delete Button -->
     </section>
 
     <!-- Business Profile Section -->
     <section class="profile-section">
       <h2>Business Profile</h2>
-      <input type="text" id="businessDescription" placeholder="Business Description">
-      <label for="currency">Preferred Currency:</label>
-      <select id="currency"></select>
-      <label for="revenue-target">Revenue/Residual Income Target:</label>
-      <div class="target-input">
+        <input type="text" id="businessDescription" placeholder="Business Description">
+          <br>
+         <label for="currency">Preferred Currency:</label>
+        <select id="currency"></select>
+          <br>
+          <br>
+         <label for="revenue-target">Revenue/Residual Income Target:</label>
+        <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
         <button onclick="editRevenueTarget()">✏️</button>
       </div>
@@ -58,16 +57,14 @@
         <table class="monthly-table">
           <thead>
             <tr>
-              <th>Month <span class="tooltip" title="Automatic calculation based on entry dates">📅</span></th>
+              <th>Month</th>
               <th>Total Income</th>
               <th>Total Expenses</th>
               <th>Net Income</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="monthly-body">
-            <!-- Monthly data rows -->
-          </tbody>
+          <tbody id="monthly-body"></tbody>
         </table>
         <div class="averages">
           <p>Average Income: <span id="average-income">0</span></p>
@@ -93,14 +90,12 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="balance-sheet-body">
-            <!-- Balance sheet entries -->
-          </tbody>
+          <tbody id="balance-sheet-body"></tbody>
         </table>
         <div class="totals">
-          <p>Total Assets: <span id="total-assets">0</span></p>
-          <p>Total Liabilities: <span id="total-liabilities">0</span></p>
-          <p>Net Worth: <span id="net-worth">0</span></p>
+          <p>Total Assets: <span id="total-assets">0</span> <span class="tooltip">🏠 Things owned that makes money</span></p>
+          <p>Total Liabilities: <span id="total-liabilities">0</span> <span class="tooltip">🏦 Things owned/owed that takes money</span></p>
+          <p>Net Worth: <span id="net-worth">0</span> <span class="tooltip">💼 Assets - Liabilities</span></p>
         </div>
       </div>
       <button onclick="addAsset()">Add Asset</button>
@@ -121,17 +116,17 @@
     <section class="data-management">
       <h2>Data Management</h2>
       <input type="text" id="saveFileName" placeholder="Enter file name">
-      <button onclick="exportBusinessData()">Export</button>
-      <button onclick="importBusinessData()">Import</button>
-      <button onclick="clearBusinessData()">Clear</button>
+      <button onclick="exportBusinessData()">Export Business Data</button>
+      <button onclick="importBusinessData()">Import Business Data</button>
+      <button onclick="clearBusinessData()">Clear Business Data</button>
     </section>
 
     <!-- Share App -->
     <section class="share-app">
       <h2>Share App</h2>
-      <button onclick="shareOnWhatsApp()">WhatsApp</button>
-      <button onclick="shareOnFacebook()">Facebook</button>
-      <button onclick="shareOnTwitter()">X (Twitter)</button>
+      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+      <button onclick="shareOnFacebook()">Share on Facebook</button>
+      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
       <button onclick="downloadApp()">Download App</button>
     </section>
 
@@ -182,7 +177,7 @@
         <option value="income">Income</option>
         <option value="expense">Expense</option>
       </select>
-      <input type="number" id="entryAmount" placeholder="Amount">
+      <input type="text" id="entryAmount" placeholder="Amount" oninput="updateEntryDate()"><!-- Add dynamic currency symbol -->
       <input type="text" id="entryDescription" placeholder="Description">
       <div class="category-select">
         <select id="entryCategory"></select>
@@ -194,4 +189,4 @@
 
   <script src="script.js"></script>
 </body>
-</html
+  </html>
