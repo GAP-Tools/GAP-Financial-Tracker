@@ -484,9 +484,12 @@ function editEntry(type, ...args) {
     const entry = profile.balanceSheet[index];
     const newDescription = prompt("Edit Description:", entry.description);
     const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-    if (newDescription && !isNaN(newAmount)) {
+    const newDate = prompt("Edit Date:", entry.date);
+
+    if (newDescription && !isNaN(newAmount) && newDate) {
       entry.description = newDescription;
       entry.amount = newAmount;
+      entry.date = new Date(newDate).toISOString().split("T")[0];
       updateBalanceSheet();
       saveDataToLocalStorage();
     }
