@@ -1,43 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wealth Flow Allocator</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAP Financial Tracker Pro</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="allocator-form">
-        <h2>Wealth Flow Allocator</h2>
-        
-        <div>
-            <input type="number" id="amount" placeholder="Enter amount">
-            <button onclick="allocateFunds()">Allocate Funds</button>
-        </div>
+  <div class="container">
+    <!-- Personal Profile Section -->
+    <section class="profile-section">
+      <h3><span id="switchLink">Switch to Business</span></h3>
+      <h2>PERSONAL FINANCIAL TRACKER</h2>
+      <!-- Existing profile inputs remain same -->
+    </section>
 
-        <h3>Allocation Percentages</h3>
-        <div id="categories">
-            <!-- Dynamically generated -->
-        </div>
+    <!-- New Allocation System Section -->
+    <section class="allocation-system">
+      <h2>Wealth Flow Allocation</h2>
+      <div class="allocation-controls">
+        <button onclick="showAllocationModal()">Manage Categories</button>
+        <button onclick="showAutoAllocationModal()">Set Auto-Allocation</button>
+      </div>
+      
+      <div class="allocation-summary">
+        <h3>Current Allocation</h3>
+        <div id="allocationPercentageBars"></div>
+        <div id="categoryBalances"></div>
+      </div>
+      
+      <div class="allocation-actions">
+        <input type="number" id="allocateAmount" placeholder="Amount to allocate">
+        <button onclick="allocateFunds()">Allocate Now</button>
+        <button onclick="withdrawFunds()">Withdraw Funds</button>
+      </div>
+    </section>
 
-        <h3>Withdraw Funds</h3>
-        <select id="withdrawCategory"></select>
-        <input type="number" id="withdrawAmount" placeholder="Amount">
-        <button onclick="withdrawFunds()">Withdraw</button>
+    <!-- Modified Income Statement Section -->
+    <section class="income-statement">
+      <h2>Income Statement</h2>
+      <!-- Existing table structure remains -->
+      <!-- Add allocation status indicator -->
+      <div class="allocation-status">
+        <span id="autoAllocationStatus">Auto-Allocation: Off</span>
+        <button onclick="toggleAutoAllocation()">Toggle Auto</button>
+      </div>
+    </section>
+
+    <!-- Existing Balance Sheet, Health Score, etc. remain -->
+
+    <!-- New Allocation Modals -->
+    <div id="allocationModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Manage Allocation Categories</h3>
+        <div id="categoryManagement">
+          <div class="category-list" id="allocationCategories"></div>
+          <div class="category-edit">
+            <input type="text" id="categoryName" placeholder="Category Name">
+            <input type="number" id="categoryPercentage" placeholder="Percentage">
+            <button onclick="saveCategory()">Save Category</button>
+            <button onclick="deleteCategory()">Delete Category</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="dashboard">
-        <div class="balance-summary">
-            <h3>Current Balances</h3>
-            <div id="balanceDisplay"></div>
-        </div>
+    <!-- Existing modals and calculator remain -->
 
-        <div class="transaction-log">
-            <h3>Transaction History</h3>
-            <div id="transactions"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  </div>
+  <script src="script.js"></script>
 </body>
-</html>
+          </html>
