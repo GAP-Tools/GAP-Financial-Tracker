@@ -80,14 +80,15 @@ th, td {
 }
 
 .actions button {
-  background: none;
+  background: #0056b3;
   border: none;
   cursor: pointer;
   font-size: 16px;
 }
 
 .actions button:hover {
-  color: green;
+  background-color: #0056b3;
+  color: white;
 }
 
 .target-input {
@@ -335,11 +336,7 @@ tbody tr:hover {
 }
 
 /* Action Button Colors */
-.actions button:hover {
+.table-container .actions button:hover {
   background-color: green;
   color: white;
-}
-
-.actions button:active {
-  background-color: #0056b3;
   }
