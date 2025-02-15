@@ -475,9 +475,20 @@ function editEntry(type, ...args) {
     const newDate = prompt("Edit Date:", entry.date);
 
     if (!isNaN(newAmount) && newDescription && newDate) {
+      const oldAmount = entry.amount;
       entry.amount = newAmount;
       entry.description = newDescription;
       entry.date = new Date(newDate).toISOString().split("T")[0];
+
+      // Update totals
+      if (entry.type === 'income') {
+        profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newAmount - oldAmount;
+        profile.incomeStatement.months[monthIndex].totalIncome += newAmount - oldAmount;
+      } else if (entry.type === 'expense') {
+        profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newAmount - oldAmount;
+        profile.incomeStatement.months[monthIndex].totalExpenses += newAmount - oldAmount;
+      }
+
       updateMonthlyTable();
       saveDataToLocalStorage();
     }
@@ -502,13 +513,28 @@ function editEntry(type, ...args) {
 function deleteEntry(type, ...args) {
   if (type === 'income') {
     const [monthIndex, catIndex, entryIndex] = args;
+    const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+    const oldAmount = entry.amount;
+
     if (confirm("Are you sure you want to delete this entry?")) {
       profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+
+      // Update totals
+      if (entry.type === 'income') {
+        profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= oldAmount;
+        profile.incomeStatement.months[monthIndex].totalIncome -= oldAmount;
+      } else if (entry.type === 'expense') {
+        profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses -= oldAmount;
+        profile.incomeStatement.months[monthIndex].totalExpenses -= oldAmount;
+      }
+
       updateMonthlyTable();
       saveDataToLocalStorage();
     }
   } else if (type === 'balance') {
     const index = args[0];
+    const entry = profile.balanceSheet[index];
+
     if (confirm("Are you sure you want to delete this entry?")) {
       profile.balanceSheet.splice(index, 1);
       updateBalanceSheet();
@@ -524,25 +550,16 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
     const category = month.categories[catIndex];
     const entry = category.entries[entryIndex];
 
-    // Create a new entry with the same details
+    // Create a new entry with the same details but amount set to zero
     const newEntry = {
       date: entry.date,
-      description: entry.description,
-      amount: entry.amount,
+      description: `${entry.description} - Copy`,
+      amount: 0,
       type: entry.type
     };
 
     // Add the new entry to the same category
     category.entries.push(newEntry);
-
-    // Update totals for the category and month
-    if (newEntry.type === 'income') {
-      category.totalIncome += newEntry.amount;
-      month.totalIncome += newEntry.amount;
-    } else if (newEntry.type === 'expense') {
-      category.totalExpenses += newEntry.amount;
-      month.totalExpenses += newEntry.amount;
-    }
 
     // Update the UI
     updateMonthlyTable();
@@ -550,11 +567,11 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   } else if (type === 'balance') {
     const entry = profile.balanceSheet[entryIndex];
 
-    // Create a new entry with the same details
+    // Create a new entry with the same details but amount set to zero
     const newEntry = {
       date: entry.date,
-      description: entry.description,
-      amount: entry.amount,
+      description: `${entry.description} - Copy`,
+      amount: 0,
       type: entry.type
     };
 
@@ -572,12 +589,17 @@ function duplicateCategory(monthIndex, catIndex) {
   const month = profile.incomeStatement.months[monthIndex];
   const category = month.categories[catIndex];
 
-  // Create a new category with the same details
+  // Create a new category with the same details but name appended with " - Copy"
   const newCategory = {
     name: `${category.name} - Copy`,
     totalIncome: 0,
     totalExpenses: 0,
-    entries: []
+    entries: category.entries.map(entry => ({
+      date: entry.date,
+      description: `${entry.description} - Copy`,
+      amount: 0,
+      type: entry.type
+    }))
   };
 
   // Add the new category to the same month
@@ -604,8 +626,12 @@ function editCategoryName(monthIndex, catIndex) {
 // Delete Category
 function deleteCategory(monthIndex, catIndex) {
   const month = profile.incomeStatement.months[monthIndex];
+  const category = month.categories[catIndex];
+
   if (confirm("Are you sure you want to delete this category?")) {
     month.categories.splice(catIndex, 1);
+
+    // Update the UI
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
@@ -786,4 +812,4 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-  }
+                                                }
