@@ -567,6 +567,50 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   }
 }
 
+// Duplicate Category
+function duplicateCategory(monthIndex, catIndex) {
+  const month = profile.incomeStatement.months[monthIndex];
+  const category = month.categories[catIndex];
+
+  // Create a new category with the same details
+  const newCategory = {
+    name: `${category.name} - Copy`,
+    totalIncome: 0,
+    totalExpenses: 0,
+    entries: []
+  };
+
+  // Add the new category to the same month
+  month.categories.push(newCategory);
+
+  // Update the UI
+  updateMonthlyTable();
+  saveDataToLocalStorage();
+}
+
+// Edit Category Name
+function editCategoryName(monthIndex, catIndex) {
+  const month = profile.incomeStatement.months[monthIndex];
+  const category = month.categories[catIndex];
+  const newCategoryName = prompt("Edit Category Name:", category.name);
+
+  if (newCategoryName) {
+    category.name = newCategoryName;
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Delete Category
+function deleteCategory(monthIndex, catIndex) {
+  const month = profile.incomeStatement.months[monthIndex];
+  if (confirm("Are you sure you want to delete this category?")) {
+    month.categories.splice(catIndex, 1);
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
 // Generate Financial Story
 function generateStory() {
   const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
@@ -601,9 +645,9 @@ function convertCurrency() {
 function getCurrentDate() {
   const date = new Date();
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  let month = date.getMonth() + 1;
+  month = month < 10 ? `0${month}` : month;
+  return `${year}-${month}`;
 }
 
 // Save Data to LocalStorage
