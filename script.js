@@ -517,36 +517,52 @@ function deleteEntry(type, ...args) {
   }
 }
 
-// Duplicate Category
-function duplicateCategory(monthIndex, catIndex) {
-  const categoryToDuplicate = profile.incomeStatement.months[monthIndex].categories[catIndex];
-  const newCategory = {
-    name: `${categoryToDuplicate.name} - Copy`,
-    totalIncome: 0,
-    totalExpenses: 0,
-    entries: [],
-  };
-  profile.incomeStatement.months[monthIndex].categories.push(newCategory);
-  populateCategories();
-  updateMonthlyTable();
-}
+// Duplicate Entry
+function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
+  if (type === 'income') {
+    const month = profile.incomeStatement.months[monthIndex];
+    const category = month.categories[catIndex];
+    const entry = category.entries[entryIndex];
 
-// Edit Category Name
-function editCategoryName(monthIndex, catIndex) {
-  const newCategoryName = prompt("Edit Category Name:", profile.incomeStatement.months[monthIndex].categories[catIndex].name);
-  if (newCategoryName) {
-    profile.incomeStatement.months[monthIndex].categories[catIndex].name = newCategoryName;
-    populateCategories();
+    // Create a new entry with the same details
+    const newEntry = {
+      date: entry.date,
+      description: entry.description,
+      amount: entry.amount,
+      type: entry.type
+    };
+
+    // Add the new entry to the same category
+    category.entries.push(newEntry);
+
+    // Update totals for the category and month
+    if (newEntry.type === 'income') {
+      category.totalIncome += newEntry.amount;
+      month.totalIncome += newEntry.amount;
+    } else if (newEntry.type === 'expense') {
+      category.totalExpenses += newEntry.amount;
+      month.totalExpenses += newEntry.amount;
+    }
+
+    // Update the UI
     updateMonthlyTable();
     saveDataToLocalStorage();
-  }
-}
+  } else if (type === 'balance') {
+    const entry = profile.balanceSheet[entryIndex];
 
-// Delete Category
-function deleteCategory(monthIndex, catIndex) {
-  if (confirm("Are you sure you want to delete this category?")) {
-    profile.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
-    updateMonthlyTable();
+    // Create a new entry with the same details
+    const newEntry = {
+      date: entry.date,
+      description: entry.description,
+      amount: entry.amount,
+      type: entry.type
+    };
+
+    // Add the new entry to the balance sheet
+    profile.balanceSheet.push(newEntry);
+
+    // Update the UI
+    updateBalanceSheet();
     saveDataToLocalStorage();
   }
 }
