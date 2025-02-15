@@ -15,33 +15,6 @@ body {
   margin-bottom: 40px;
 }
 
-.business-controls button {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-}
-
-.business-controls button:hover {
-  background-color: #0056b3;
-}
-
-.business-controls {
-  margin-bottom: 10px;
-}
-
-.business-controls + select,
-.business-controls + div {
-  margin-left: 20px;
-}
-
-.business-list-controls {
-  margin-left: 20px;
-  margin-top: 10px;
-}
-
 h1, h2 {
   color: #333;
 }
@@ -114,7 +87,7 @@ th, td {
 }
 
 .actions button:hover {
-  color: #0056b3;
+  color: green;
 }
 
 .target-input {
@@ -134,6 +107,23 @@ th, td {
   font-size: 12px;
   color: #555;
   margin-left: 5px;
+}
+
+#switchLink {
+  display: inline-block;
+  background-color: green;
+  box-shadow: 2px 2px 4px #0056b3;
+  padding: 5px 10px;
+  margin: 0;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+#switchLink:hover {
+  box-shadow: 2px 2px 4px #007bff;
 }
 
 .calculator-icon {
@@ -178,46 +168,12 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: green;
+  color: #0056b3;
 }
 
 .calculator-buttons button:hover {
-  background-color: #0056b3;
-  color: white;
-}
-
-.business-selector {
-  margin-bottom: 20px;
-}
-
-#switchLink {
-  display: inline-block;
   background-color: green;
-  box-shadow: 2px 2px 4px #0056b3;
-  padding: 5px 10px;
-  margin: 0;
   color: white;
-  font-family: Arial, sans-serif;
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
-}
-
-#switchLink:hover {
-  box-shadow: 2px 2px 4px #007bff;
-}
-
-.business-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-#businessList {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  flex-grow: 1;
 }
 
 /* New CSS */
