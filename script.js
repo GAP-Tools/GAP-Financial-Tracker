@@ -8,7 +8,6 @@ let profile = {
   passiveIncomeTarget: 0,
   incomeStatement: {
     months: [],
-    categories: [],
   },
   balanceSheet: [],
 };
@@ -144,10 +143,13 @@ function populateCategories() {
   const categorySelect = document.getElementById('entryCategory');
   categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-  profile.incomeStatement.categories.forEach(category => {
+  const allCategories = profile.incomeStatement.months.reduce((acc, month) => acc.concat(month.categories), []);
+  const uniqueCategories = [...new Set(allCategories.map(cat => cat.name))];
+
+  uniqueCategories.forEach(categoryName => {
     const option = document.createElement('option');
-    option.value = category.name;
-    option.textContent = category.name;
+    option.value = categoryName;
+    option.textContent = categoryName;
     categorySelect.appendChild(option);
   });
 }
@@ -405,7 +407,7 @@ function generateHealthTip(score, cashflow, passiveIncomeTarget) {
 
 // Add Asset
 function addAsset() {
-  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const date = prompt("Enter Date (YYYY-MM-DD):", getCurrentDate());
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Asset Value:"));
 
@@ -420,7 +422,7 @@ function addAsset() {
 
 // Add Liability
 function addLiability() {
-  const date = prompt("Enter Date (YYYY-MM-DD):");
+  const date = prompt("Enter Date (YYYY-MM-DD):", getCurrentDate());
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Liability Amount:"));
 
@@ -529,6 +531,17 @@ function duplicateCategory(monthIndex, catIndex) {
   updateMonthlyTable();
 }
 
+// Edit Category Name
+function editCategoryName(monthIndex, catIndex) {
+  const newCategoryName = prompt("Edit Category Name:", profile.incomeStatement.months[monthIndex].categories[catIndex].name);
+  if (newCategoryName) {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].name = newCategoryName;
+    populateCategories();
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
 // Generate Financial Story
 function generateStory() {
   const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
@@ -557,6 +570,15 @@ function convertCurrency() {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
+}
+
+// Get Current Date
+function getCurrentDate() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 // Save Data to LocalStorage
@@ -633,7 +655,6 @@ function clearData() {
       passiveIncomeTarget: 0,
       incomeStatement: {
         months: [],
-        categories: [],
       },
       balanceSheet: [],
     };
@@ -696,4 +717,4 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-}
+    }
