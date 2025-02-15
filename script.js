@@ -230,241 +230,6 @@ function updateMonthlyTable() {
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="dailyTo resolve the issues with the delete, edit, and duplicate icons not working in your Financial Tracker application, here's the updated JavaScript code with all necessary fixes:
-
-```javascript
-// Initialize variables
-let profile = {
-  name: "",
-  age: "",
-  occupation: "",
-  dream: "",
-  currency: "USD",
-  passiveIncomeTarget: 0,
-  incomeStatement: {
-    months: [],
-  },
-  balanceSheet: [],
-};
-
-let currencyRates = {};
-
-// DOM Elements
-const incomeStatementBody = document.getElementById("income-statement-body");
-const balanceSheetBody = document.getElementById("balance-sheet-body");
-const totalAssets = document.getElementById("total-assets");
-const totalLiabilities = document.getElementById("total-liabilities");
-const netWorthDisplay = document.getElementById("net-worth");
-const healthChartCtx = document.getElementById("healthChart").getContext("2d");
-const healthPercentage = document.getElementById("healthPercentage");
-const healthTips = document.getElementById("healthTips");
-const fromCurrency = document.getElementById("fromCurrency");
-const toCurrency = document.getElementById("toCurrency");
-const conversionResult = document.getElementById("conversionResult");
-const financialStory = document.getElementById("financialStory");
-const currencySelect = document.getElementById("currency");
-const passiveIncomeTargetInput = document.getElementById("passive-income-target");
-const cashflowDisplay = document.getElementById("cashflow");
-const saveFileNameInput = document.getElementById("saveFileName");
-const calculatorPopup = document.getElementById("calculatorPopup");
-const calculatorInput = document.getElementById("calculatorInput");
-
-// Chart Initialization
-const healthChart = new Chart(healthChartCtx, {
-  type: "doughnut",
-  data: {
-    labels: ["Health"],
-    datasets: [{
-      data: [0],
-      backgroundColor: ["#ff6384"],
-    }],
-  },
-  options: {
-    cutout: "70%",
-    responsive: true,
-    maintainAspectRatio: false,
-  },
-});
-
-// Fetch Currency Rates
-async function fetchCurrencyRates() {
-  const apiUrl = "https://v6.exchangerate-api.com/v6/bbf3e2a38cee4116e7f051b8/latest/USD";
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    if (data.result === "success") {
-      currencyRates = data.conversion_rates;
-      populateCurrencyDropdowns();
-      loadSavedData();
-    }
-  } catch (error) {
-    console.error("Error fetching currency rates:", error);
-  }
-}
-
-fetchCurrencyRates();
-
-// Populate Currency Dropdowns
-function populateCurrencyDropdowns() {
-  for (const currency in currencyRates) {
-    const newOption = document.createElement("option");
-    newOption.value = currency;
-    newOption.text = `${currency} (${getCurrencySymbol(currency)})`;
-    fromCurrency.add(newOption);
-    toCurrency.add(newOption);
-    currencySelect.add(newOption);
-  }
-}
-
-// Get Currency Symbol
-function getCurrencySymbol(currency) {
-  const symbols = {
-    USD: "$", EUR: "€", GBP: "£", NGN: "₦", JPY: "¥", INR: "₹", AUD: "A$", CAD: "C$",
-    CHF: "CHF", CNY: "¥", // Add more symbols as needed
-  };
-  return symbols[currency] || currency;
-}
-
-// Switch to Business
-document.addEventListener('DOMContentLoaded', function() {
-  const switchLink = document.getElementById('switchLink');
-  switchLink.addEventListener('click', function() {
-    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Business";
-  });
-});
-
-// Save Profile
-function saveProfile() {
-  profile.name = document.getElementById("name").value;
-  profile.age = document.getElementById("age").value;
-  profile.occupation = document.getElementById("occupation").value;
-  profile.dream = document.getElementById("dream").value;
-  profile.currency = currencySelect.value;
-  profile.passiveIncomeTarget = parseFloat(passiveIncomeTargetInput.value) || 0;
-  alert("Profile Saved!");
-  saveDataToLocalStorage();
-}
-
-// Edit Passive Income Target
-function editPassiveIncomeTarget() {
-  const newTarget = prompt("Enter New Passive Income Target:", profile.passiveIncomeTarget);
-  if (newTarget && !isNaN(newTarget)) {
-    profile.passiveIncomeTarget = parseFloat(newTarget);
-    passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
-    updateFinancialHealth();
-    saveDataToLocalStorage();
-  } else {
-    alert("Invalid Input!");
-  }
-}
-
-// Show Entry Modal
-function showEntryModal(type) {
-  document.getElementById('entryModal').style.display = 'block';
-  document.getElementById('entryType').value = type;
-  populateCategories();
-  document.getElementById('newCategory').value = '';
-  document.getElementById('entryAmount').value = '';
-  document.getElementById('entryDescription').value = '';
-}
-
-// Close Modal
-function closeModal() {
-  document.getElementById('entryModal').style.display = 'none';
-}
-
-// Populate Categories in Entry Modal
-function populateCategories() {
-  const categorySelect = document.getElementById('entryCategory');
-  categorySelect.innerHTML = '<option value="">Select Category</option>';
-
-  const allCategories = profile.incomeStatement.months.reduce((acc, month) => acc.concat(month.categories), []);
-  const uniqueCategories = [...new Set(allCategories.map(cat => cat.name))];
-
-  uniqueCategories.forEach(categoryName => {
-    const option = document.createElement('option');
-    option.value = categoryName;
-    option.textContent = categoryName;
-    categorySelect.appendChild(option);
-  });
-}
-
-// Update Monthly Table
-function updateMonthlyTable() {
-  const monthlyBody = document.getElementById('monthly-body');
-  monthlyBody.innerHTML = '';
-
-  (profile.incomeStatement.months || []).forEach((monthData, monthIndex) => {
-    const row = document.createElement('tr');
-    row.classList.add('expandable');
-    row.innerHTML = `
-      <td class="editable-date" onclick="editDate('month', ${monthIndex})">${monthData.month}</td>
-      <td>${profile.currency} ${monthData.totalIncome}</td>
-      <td>${profile.currency} ${monthData.totalExpenses}</td>
-      <td>${profile.currency} ${monthData.totalIncome - monthData.totalExpenses}</td>
-      <td>
-        <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
-          <svg class="expand-icon" viewBox="0 0 24 24">
-            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
-          </svg>
-        </button>
-      </td>
-    `;
-    monthlyBody.appendChild(row);
-
-    const categoryContainer = document.createElement('tr');
-    categoryContainer.classList.add('nested');
-    categoryContainer.innerHTML = `
-      <td colspan="5">
-        <table class="category-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Income</th>
-              <th>Expenses</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="category-body-${monthIndex}"></tbody>
-        </table>
-      </td>
-    `;
-    monthlyBody.appendChild(categoryContainer);
-
-    (monthData.categories || []).forEach((category, catIndex) => {
-      const categoryRow = document.createElement('tr');
-      categoryRow.classList.add('expandable');
-      categoryRow.innerHTML = `
-        <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${category.name}</td>
-        <td>${profile.currency} ${category.totalIncome}</td>
-        <td>${profile.currency} ${category.totalExpenses}</td>
-        <td>
-          <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
-            <svg class="expand-icon" viewBox="0 0 24 24">
-              <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
-            </svg>
-          </button>
-          <button onclick="editCategoryName(${monthIndex}, ${catIndex})">✎</button>
-          <button onclick="duplicateCategory(${monthIndex}, ${catIndex})">♻️</button>
-          <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
-        </td>
-      `;
-      document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
-
-      const dailyContainer = document.createElement('tr');
-      dailyContainer.classList.add('nested');
-      dailyContainer.innerHTML = `
-        <td colspan="4">
-          <table class="daily-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Type</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
             <tbody id="daily-body-${monthIndex}-${catIndex}"></tbody>
           </table>
         </td>
@@ -752,20 +517,6 @@ function deleteEntry(type, ...args) {
   }
 }
 
-// Duplicate Entry
-function duplicateEntry(entryType, monthIndex, catIndex, entryIndex) {
-  let newEntry;
-  if (entryType === 'income') {
-    const original = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    newEntry = {
-      ...original,
-      description: `${original.description} - Copy`,
-    };
-    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
-    updateMonthlyTable();
-  }
-}
-
 // Duplicate Category
 function duplicateCategory(monthIndex, catIndex) {
   const categoryToDuplicate = profile.incomeStatement.months[monthIndex].categories[catIndex];
@@ -780,21 +531,21 @@ function duplicateCategory(monthIndex, catIndex) {
   updateMonthlyTable();
 }
 
-// Delete Category
-function deleteCategory(monthIndex, catIndex) {
-  if (confirm("Are you sure you want to delete this category?")) {
-    profile.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-}
-
 // Edit Category Name
 function editCategoryName(monthIndex, catIndex) {
   const newCategoryName = prompt("Edit Category Name:", profile.incomeStatement.months[monthIndex].categories[catIndex].name);
   if (newCategoryName) {
     profile.incomeStatement.months[monthIndex].categories[catIndex].name = newCategoryName;
     populateCategories();
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
+// Delete Category
+function deleteCategory(monthIndex, catIndex) {
+  if (confirm("Are you sure you want to delete this category?")) {
+    profile.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
@@ -975,4 +726,4 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-    }
+  }
