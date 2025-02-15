@@ -1,52 +1,96 @@
-:root {
-    --primary: #2c3e50;
-    --secondary: #3498db;
+/* Add these to your existing CSS */
+
+/* Allocation System Styles */
+.allocation-system {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
 }
 
-body {
-    font-family: 'Arial', sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+.allocation-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.dashboard {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+.allocation-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.category {
-    background: #f5f6fa;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 10px 0;
+#allocationPercentageBars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.allocator-form {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.allocation-bar {
+  height: 20px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
 }
 
-input, select, button {
-    padding: 8px;
-    margin: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.bar-fill {
+  height: 100%;
+  transition: width 0.5s ease;
 }
 
-button {
-    background: var(--secondary);
-    color: white;
-    border: none;
-    cursor: pointer;
+.category-balance-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #f8f9fa;
+  margin: 5px 0;
+  border-radius: 5px;
 }
 
-.transaction-log {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
+.allocation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#allocateAmount {
+  flex: 1;
+}
+
+/* Category Management */
+#categoryManagement {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+.category-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.category-item {
+  padding: 10px;
+  margin: 5px 0;
+  background: #f8f9fa;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-item.active {
+  border-left: 4px solid #0056b3;
+}
+
+.allocation-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  padding: 10px;
+  background: #e9f5ff;
+  border-radius: 5px;
 }
