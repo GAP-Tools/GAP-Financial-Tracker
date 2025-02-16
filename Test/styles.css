@@ -30,7 +30,6 @@ button {
   background-color: #0056b3;
   color: white;
   cursor: pointer;
-  border: none;
 }
 
 button:hover {
@@ -322,4 +321,4 @@ tbody tr:hover {
 .asset-liability-table td, .asset-liability-table th {
   border: 1px solid #000;
   padding: 8px;
-}
+  }
