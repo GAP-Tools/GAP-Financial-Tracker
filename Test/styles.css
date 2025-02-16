@@ -246,7 +246,7 @@ tbody tr:hover {
   margin-top: 20px;
 }
 
- frais {
+.frais {
   color: orange;
 }
 
@@ -321,4 +321,4 @@ tbody tr:hover {
 .asset-liability-table td, .asset-liability-table th {
   border: 1px solid #000;
   padding: 8px;
-                             }
+  }
