@@ -403,11 +403,11 @@ function getHealthColor(score) {
   return score <= 39 ? "#ff6384" : score <= 59 ? "#ffcd56" : score <= 79 ? "#4bc0c0" : "#36a2eb";
 }
 
-function generateFinancialTip(score, cashflow, passiveIncomeTarget) {
+function generateHealthTip(score, cashflow, passiveIncomeTarget) {
   const tips = {
     low: [
-      "Your financial health is in danger. Your expenses are higher than your income. Start by cutting unnecessary spending like dining out or subscriptions you don’t use.",
-      "You’re living paycheck to paycheck. This is a red flag. Focus on building an emergency fund, even if it’s just $10 a week.",
+      "Your expenses are higher than your income. Start by cutting unnecessary spending like dining out or subscriptions you don’t use.",
+      "You’re living paycheck to paycheck. Focus on building an emergency fund, even if it’s just $10 a week.",
       "Your debt is likely overwhelming. Prioritize paying off high-interest debts like credit cards first.",
       "You might be spending too much on wants instead of needs. Track your expenses and identify areas to cut back.",
       "Your financial habits are keeping you stuck. Start by creating a budget and sticking to it.",
@@ -606,6 +606,7 @@ function generateFinancialTip(score, cashflow, passiveIncomeTarget) {
   };
 
   const section = score <= 39 ? 'low' : score <= 59 ? 'moderate' : score <= 79 ? 'good' : 'excellent';
+
   const extraTips = [];
   if (cashflow < passiveIncomeTarget) {
     extraTips.push(
@@ -712,8 +713,15 @@ function generateFinancialTip(score, cashflow, passiveIncomeTarget) {
     );
   }
 
-  return `${tips[section][Math.floor(Math.random() * tips[section].length)]} ${extraTips[Math.floor(Math.random() * extraTips.length)]}`;
-    }
+  // Randomly select a tip from the section
+  const randomTip = tips[section][Math.floor(Math.random() * tips[section].length)];
+
+  // Randomly select an extra tip
+  const randomExtraTip = extraTips[Math.floor(Math.random() * extraTips.length)];
+
+  // Combine and return the tips
+  return `${randomTip} ${randomExtraTip}`;
+      }
 
 function addAsset() {
   const date = prompt("Enter Date (YYYY-MM-DD):", getCurrentDate());
