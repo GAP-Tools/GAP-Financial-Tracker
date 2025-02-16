@@ -11,11 +11,15 @@ body {
   padding: 20px;
 }
 
-.profile-section, .income-statement, .balance-sheet, .health-score, .currency-converter, .data-management, .share-app, .story-generation, .fund-allocation {
+section {
   margin-bottom: 40px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-h1, h2 {
+h2 {
   color: #333;
 }
 
@@ -27,154 +31,29 @@ input, select, button {
 }
 
 button {
-  background-color: #0056b3;
+  background-color: #007bff;
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: green;
+  background-color: #0056b3;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 th, td {
   padding: 10px;
-  border: 1px solid #ccc;
   text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.totals {
-  font-weight: bold;
-}
-
-.circle-container {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-}
-
-#healthPercentage {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 20px;
-  font-weight: bold;
-}
-
-#healthTips {
-  text-align: center;
-  margin-top: 10px;
-  color: #555;
-}
-
-.actions {
-  display: flex;
-  gap: 5px;
-}
-
-.actions button {
-  background: #0056b3;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.actions button:hover {
-  background-color: #0056b3;
-  color: white;
-}
-
-.target-input {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.target-input button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.tooltip {
-  font-size: 12px;
-  color: #555;
-  margin-left: 5px;
-}
-
-#switchLink {
-  display: inline-block;
-  background-color: green;
-  box-shadow: 2px 2px 4px #0056b3;
-  padding: 5px 10px;
-  margin: 0;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
-}
-
-#switchLink:hover {
-  box-shadow: 2px 2px 4px #007bff;
-}
-
-.calculator-icon {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
-  border-radius: 50%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.calculator-popup {
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.calculator-content {
-  text-align: center;
-}
-
-.calculator-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.calculator-buttons button {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f4f4f4;
-  cursor: pointer;
-  color: #0056b3;
-}
-
-.calculator-buttons button:hover {
-  background-color: green;
-  color: white;
+th {
+  background-color: #f8f9fa;
 }
 
 .modal {
@@ -185,140 +64,44 @@ th, td {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0,0,0,0.4);
 }
 
 .modal-content {
   background-color: #fefefe;
   margin: 15% auto;
   padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
+  border-radius: 5px;
+  width: 90%;
   max-width: 500px;
 }
 
-.category-table, .daily-table {
-  margin-left: 30px;
-  width: calc(100% - 30px);
-}
-
-.expand-icon {
-  width: 15px;
-  height: 15px;
-  fill: #0056b3;
-  cursor: pointer;
-  margin-right: 5px;
-}
-
-.expand-button {
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-tbody tr:hover {
-  background-color: #f5f5f5;
-}
-
-.editable-date {
-  cursor: pointer;
-  text-decoration: underline;
-  color: blue;
-}
-
-.editable-date:hover {
-  color: #0056b3;
-}
-
-.category-select {
-  margin: 10px 0;
-  display: flex;
-  gap: 5px;
-}
-
-#fund-allocation-table, #fund-allocation-table th, #fund-allocation-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-}
-
-#fund-allocation-table {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.frais {
-  color: orange;
-}
-
-.allocation-modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
-}
-
-.allocation-modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
-}
-
-.category-list {
-  margin-bottom: 20px;
-}
-
-.category-form input {
-  margin: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.draft-indicator {
-  background-color: yellow;
-  color: black;
-  padding: 5px;
-  border-radius: 5px;
-}
-
-.draft-indicator.saved {
-  background-color: lightgreen;
-}
-
-.total-row {
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
   font-weight: bold;
-  background-color: #e1e1e1;
 }
 
-.account-history {
-  max-height: 200px;
+.close:hover {
+  color: black;
+  cursor: pointer;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+#healthChart {
+  max-width: 400px;
+  height: 400px;
+  margin: 0 auto;
+}
+
+#financialStory {
+  white-space: pre-line;
+  height: 300px;
   overflow-y: auto;
-}
-
-.account-history li {
-  margin: 5px 0;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.account-history li:hover {
-  background-color: #f9f9f9;
-}
-
-.asset-liability-table {
-  border: 1px solid #000;
-  border-collapse: collapse;
-}
-
-.asset-liability-table td, .asset-liability-table th {
-  border: 1px solid #000;
-  padding: 8px;
-}
+  }
