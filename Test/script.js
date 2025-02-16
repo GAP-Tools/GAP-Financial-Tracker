@@ -208,9 +208,6 @@ function updateMonthlyTable() {
               <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
             </svg>
           </button>
-          <button onclick="editCategoryName(${monthIndex}, ${catIndex})">✎</button>
-          <button onclick="duplicateCategory(${monthIndex}, ${catIndex})">♻️</button>
-          <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
         </td>
       `;
       document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
@@ -687,6 +684,7 @@ function updateFundAllocationTable() {
       <td>
         <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
       </td>
+      <td>${cat.percentage}%</td>
     `;
     body.appendChild(row);
   });
@@ -763,4 +761,4 @@ function shareOnTwitter() {
 
 function downloadApp() {
   window.open("https://gap-tools.github.io/GAP-Financial-Tracker/Personal", "_blank");
-}
+                          }
