@@ -745,4 +745,4 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-    }
+      }
