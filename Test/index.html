@@ -31,14 +31,23 @@
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
+    <!-- Fund Allocation Section -->
+    <section class="fund-allocation">
+      <h2>Fund Allocation</h2>
+      <button onclick="showAllocationModal()">Manage Categories</button>
+      <div class="table-container">
+        <table id="fund-allocation-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Balance</th>
+              <th>Summary</th>
+              <th>Allocation[%]</th>
+            </tr>
+          </thead>
+          <tbody id="fund-allocation-body"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Income Statement Section -->
@@ -67,22 +76,14 @@
       <button onclick="showEntryModal('expense')">Add Expense</button>
     </section>
 
-    <!-- Fund Allocation Section -->
-    <section class="fund-allocation">
-      <h2>Fund Allocation</h2>
-      <button onclick="showAllocationModal()">Manage Categories</button>
-      <div class="table-container">
-        <table id="fund-allocation-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Balance</th>
-              <th>Summary</th>
-            </tr>
-          </thead>
-          <tbody id="fund-allocation-body"></tbody>
-        </table>
-      </div>
+    <!-- Currency Converter -->
+    <section class="currency-converter">
+      <h2>Currency Converter</h2>
+      <input type="number" id="amount" placeholder="Amount">
+      <select id="fromCurrency"></select>
+      <select id="toCurrency"></select>
+      <button onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult"></p>
     </section>
 
     <!-- Balance Sheet Section -->
@@ -223,4 +224,4 @@
 
   <script src="script.js"></script>
 </body>
-                                                   </html>
+            </html>
