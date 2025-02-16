@@ -14,6 +14,10 @@ let profile = {
     categories: [],
     totalPercentage: 0,
   },
+  generalIncome: {
+    balance: 0,
+    transactions: [],
+  },
 };
 
 let currencyRates = {};
@@ -136,7 +140,7 @@ function showEntryModal(type) {
   populateCategories();
   if (type === 'income') {
     document.getElementById('entryCategory').disabled = true;
-    document.getElementById('entryCategory').value = '';
+    document.getElementById('entryCategory').value = 'General Income';
   } else {
     document.getElementById('entryCategory').disabled = false;
   }
@@ -284,11 +288,7 @@ function saveEntry() {
   const category = document.getElementById('entryCategory').value;
 
   if (isNaN(amount) || amount <= 0 || !description) {
-    if (type === 'income') {
-      alert('Invalid or missing amount/description');
-    } else {
-      alert('Invalid or missing amount/description and category');
-    }
+    alert('Invalid or missing amount/description');
     return;
   }
 
@@ -308,16 +308,16 @@ function saveEntry() {
   monthObject = profile.incomeStatement.months.find(m => m.month === currentMonth);
 
   if (type === 'income') {
-    // Add income entry to income statement
-    if (!monthObject.categories.some(cat => cat.name === 'Income')) {
+    // Add to general income category
+    if (!monthObject.categories.some(cat => cat.name === 'General Income')) {
       monthObject.categories.push({
-        name: 'Income',
+        name: 'General Income',
         totalIncome: 0,
         totalExpenses: 0,
         entries: [],
       });
     }
-    categoryObject = monthObject.categories.find(cat => cat.name === 'Income');
+    categoryObject = monthObject.categories.find(cat => cat.name === 'General Income');
     categoryObject.totalIncome += amount;
     monthObject.totalIncome += amount;
     categoryObject.entries.push({
@@ -326,6 +326,8 @@ function saveEntry() {
       amount: amount,
       type: 'income',
     });
+
+    // Allocate to fund allocations
     allocateIncome(amount, description);
   } else if (type === 'expense') {
     if (!category) {
@@ -370,6 +372,14 @@ function allocateIncome(amount, description) {
       description: description,
     });
   });
+
+  profile.generalIncome.balance += amount;
+  profile.generalIncome.transactions.push({
+    date: new Date().toISOString().split("T")[0],
+    amount: amount,
+    type: 'income',
+    description: description,
+  });
 }
 
 // Deduct expense from selected category
@@ -378,6 +388,14 @@ function deductExpenseFromCategory(categoryName, amount, description) {
   if (!category) return;
   category.balance -= amount;
   category.transactions.push({
+    date: new Date().toISOString().split("T")[0],
+    amount: -amount,
+    type: 'expense',
+    description: description,
+  });
+
+  profile.generalIncome.balance -= amount;
+  profile.generalIncome.transactions.push({
     date: new Date().toISOString().split("T")[0],
     amount: -amount,
     type: 'expense',
@@ -618,18 +636,13 @@ function viewCategoryTransactions(categoryIndex) {
   const category = profile.fundAllocations.categories[categoryIndex];
   if (!category) return;
 
-  const summaryBody = document.getElementById('transactionSummaryBody');
-  summaryBody.innerHTML = '';
+  const summaryText = document.getElementById('transactionSummaryText');
+  summaryText.innerHTML = '';
 
   category.transactions.forEach(transaction => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${transaction.date}</td>
-      <td>${transaction.description}</td>
-      <td>${profile.currency} ${transaction.amount}</td>
-      <td>${transaction.type === 'income' ? 'Income' : 'Expense'}</td>
-    `;
-    summaryBody.appendChild(row);
+    const paragraph = document.createElement('p');
+    paragraph.textContent = `On ${transaction.date}, an amount of ${profile.currency} ${transaction.amount} was recorded as ${transaction.type}: ${transaction.description}.`;
+    summaryText.appendChild(paragraph);
   });
 
   document.getElementById('transactionSummaryModal').style.display = 'block';
@@ -685,27 +698,29 @@ function loadSavedData() {
   }
 }
 
-// Share on WhatsApp
-function shareOnWhatsApp() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check out this Financial Tracker ${url}`);
-}
+// Generate Financial Story
+function generateStory() {
+  const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
+  const totalExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(profile.currency, "").trim());
+  const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(profile.currency, "").trim());
+  const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(profile.currency, "").trim());
+  const netWorth = totalAssets - totalLiabilities;
 
-// Share on Facebook
-function shareOnFacebook() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
-}
+  let story = `
+    Meet ${profile.name}, a ${profile.age}-year-old ${profile.occupation} with a dream to ${profile.dream}. 
+    Currently, ${profile.name} earns an average of ${profile.currency} ${totalIncome} per month but spends ${profile.currency} ${totalExpenses}, leaving an average cashflow of ${profile.currency} ${totalIncome - totalExpenses}. 
+    They own assets worth ${profile.currency} ${totalAssets} and have liabilities of ${profile.currency} ${totalLiabilities}, resulting in a net worth of ${profile.currency} ${netWorth}. 
+    Their goal is to achieve a passive income of ${profile.currency} ${profile.passiveIncomeTarget}. 
+  `;
 
-// Share on Twitter
-function shareOnTwitter() {
-  const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check out this Financial Tracker`);
-}
+  // Add fund allocation details
+  profile.fundAllocations.categories.forEach(cat => {
+    story += `
+      ${cat.name} currently has a balance of ${profile.currency} ${cat.balance} with ${cat.transactions.length} transactions.
+    `;
+  });
 
-// Download App
-function downloadApp() {
-  window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
+  financialStory.textContent = story;
 }
 
 // Toggle Calculator Popup
@@ -730,4 +745,4 @@ function calculateResult() {
 // Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
-}
+    }
