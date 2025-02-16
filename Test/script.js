@@ -1,4 +1,3 @@
-// Initialize variables
 let profile = {
   name: "",
   age: "",
@@ -22,7 +21,6 @@ let profile = {
 
 let currencyRates = {};
 
-// DOM Elements
 const incomeStatementBody = document.getElementById("income-statement-body");
 const balanceSheetBody = document.getElementById("balance-sheet-body");
 const totalAssets = document.getElementById("total-assets");
@@ -44,7 +42,6 @@ const calculatorInput = document.getElementById("calculatorInput");
 const allocationModal = document.getElementById("allocationModal");
 const entryCategorySelect = document.getElementById("entryCategory");
 
-// Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
   type: "doughnut",
   data: {
@@ -61,9 +58,8 @@ const healthChart = new Chart(healthChartCtx, {
   },
 });
 
-// Fetch Currency Rates
 async function fetchCurrencyRates() {
-  const apiUrl = `https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD`;
+  const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD";
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -77,14 +73,7 @@ async function fetchCurrencyRates() {
   }
 }
 
-fetchCurrencyRates();
-
-// Populate Currency Dropdowns
 function populateCurrencyDropdowns() {
-  fromCurrency.innerHTML = "";
-  toCurrency.innerHTML = "";
-  currencySelect.innerHTML = "";
-
   for (const currency in currencyRates) {
     const newOption = document.createElement("option");
     newOption.value = currency;
@@ -95,7 +84,6 @@ function populateCurrencyDropdowns() {
   }
 }
 
-// Get Currency Symbol
 function getCurrencySymbol(currency) {
   const symbols = {
     USD: "$",
@@ -112,7 +100,6 @@ function getCurrencySymbol(currency) {
   return symbols[currency] || currency;
 }
 
-// Switch to Business
 document.addEventListener('DOMContentLoaded', function() {
   const switchLink = document.getElementById('switchLink');
   switchLink.addEventListener('click', function() {
@@ -120,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Save Profile
 function saveProfile() {
   profile.name = document.getElementById("name").value;
   profile.age = document.getElementById("age").value;
@@ -132,7 +118,6 @@ function saveProfile() {
   saveDataToLocalStorage();
 }
 
-// Edit Passive Income Target
 function editPassiveIncomeTarget() {
   const newTarget = prompt("Enter New Passive Income Target:", profile.passiveIncomeTarget);
   if (!isNaN(newTarget)) {
@@ -143,7 +128,6 @@ function editPassiveIncomeTarget() {
   }
 }
 
-// Show Entry Modal
 function showEntryModal(type) {
   document.getElementById('entryModal').style.display = 'block';
   document.getElementById('entryType').value = type;
@@ -158,29 +142,24 @@ function showEntryModal(type) {
   document.getElementById('entryDescription').value = '';
 }
 
-// Close Modal
 function closeModal() {
   document.getElementById('entryModal').style.display = 'none';
 }
 
-// Populate Categories in Entry Modal
 function populateCategories() {
   const categorySelect = document.getElementById('entryCategory');
   categorySelect.innerHTML = '<option value="">Select Category</option>';
-
-  profile.fundAllocations.categories.forEach(category => {
+  profile.fundAllocations.categories.forEach(cat => {
     const option = document.createElement('option');
-    option.value = category.name;
-    option.textContent = category.name;
+    option.value = cat.name;
+    option.textContent = cat.name;
     categorySelect.appendChild(option);
   });
 }
 
-// Update Monthly Table
 function updateMonthlyTable() {
   const monthlyBody = document.getElementById('monthly-body');
   monthlyBody.innerHTML = '';
-
   (profile.incomeStatement.months || []).forEach((monthData, monthIndex) => {
     const row = document.createElement('tr');
     row.classList.add('expandable');
@@ -198,7 +177,6 @@ function updateMonthlyTable() {
       </td>
     `;
     monthlyBody.appendChild(row);
-
     const categoryContainer = document.createElement('tr');
     categoryContainer.classList.add('nested');
     categoryContainer.innerHTML = `
@@ -217,14 +195,13 @@ function updateMonthlyTable() {
       </td>
     `;
     monthlyBody.appendChild(categoryContainer);
-
-    (monthData.categories || []).forEach((category, catIndex) => {
+    (monthData.categories || []).forEach((cat, catIndex) => {
       const categoryRow = document.createElement('tr');
       categoryRow.classList.add('expandable');
       categoryRow.innerHTML = `
-        <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${category.name}</td>
-        <td>${profile.currency} ${category.totalIncome}</td>
-        <td>${profile.currency} ${category.totalExpenses}</td>
+        <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${cat.name}</td>
+        <td>${profile.currency} ${cat.totalIncome}</td>
+        <td>${profile.currency} ${cat.totalExpenses}</td>
         <td>
           <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
             <svg class="expand-icon" viewBox="0 0 24 24">
@@ -237,7 +214,6 @@ function updateMonthlyTable() {
         </td>
       `;
       document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
-
       const dailyContainer = document.createElement('tr');
       dailyContainer.classList.add('nested');
       dailyContainer.innerHTML = `
@@ -257,8 +233,7 @@ function updateMonthlyTable() {
         </td>
       `;
       document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
-
-      (category.entries || []).forEach((entry, entryIndex) => {
+      (cat.entries || []).forEach((entry, entryIndex) => {
         const dailyRow = document.createElement('tr');
         dailyRow.innerHTML = `
           <td class="editable-date" onclick="editEntry('income', ${monthIndex}, ${catIndex}, ${entryIndex})">
@@ -277,11 +252,9 @@ function updateMonthlyTable() {
       });
     });
   });
-
   updateAverages();
 }
 
-// Expand/Collapse Row
 function expandCollapseRow(rowElement) {
   rowElement.classList.toggle('expanded');
   const nextRow = rowElement.nextElementSibling;
@@ -290,22 +263,18 @@ function expandCollapseRow(rowElement) {
   }
 }
 
-// Save Entry
 function saveEntry() {
   const type = document.getElementById('entryType').value;
   const amount = parseFloat(document.getElementById('entryAmount').value);
   const description = document.getElementById('entryDescription').value.trim();
   const category = document.getElementById('entryCategory').value;
-
   if (isNaN(amount) || amount <= 0 || !description) {
     alert('Invalid or missing amount/description');
     return;
   }
-
   const currentMonth = getCurrentMonth();
   let monthObject;
   let categoryObject;
-
   if (!profile.incomeStatement.months.some(m => m.month === currentMonth)) {
     profile.incomeStatement.months.push({
       month: currentMonth,
@@ -314,9 +283,7 @@ function saveEntry() {
       totalExpenses: 0,
     });
   }
-
   monthObject = profile.incomeStatement.months.find(m => m.month === currentMonth);
-
   if (type === 'income') {
     if (!monthObject.categories.some(cat => cat.name === 'General Income')) {
       monthObject.categories.push({
@@ -335,7 +302,6 @@ function saveEntry() {
       amount: amount,
       type: 'income',
     });
-
     allocateIncome(amount, description);
   } else if (type === 'expense') {
     if (!category) {
@@ -361,14 +327,12 @@ function saveEntry() {
     });
     deductExpenseFromCategory(category, amount, description);
   }
-
   updateMonthlyTable();
   updateFundAllocationTable();
   closeModal();
   saveDataToLocalStorage();
 }
 
-// Distribute income to fund allocations
 function allocateIncome(amount, description) {
   profile.fundAllocations.categories.forEach(cat => {
     const allocatedAmount = amount * (cat.percentage / 100);
@@ -380,7 +344,6 @@ function allocateIncome(amount, description) {
       description: description,
     });
   });
-
   profile.generalIncome.balance += amount;
   profile.generalIncome.transactions.push({
     date: new Date().toISOString().split("T")[0],
@@ -390,7 +353,6 @@ function allocateIncome(amount, description) {
   });
 }
 
-// Deduct expense from selected category
 function deductExpenseFromCategory(categoryName, amount, description) {
   const category = profile.fundAllocations.categories.find(cat => cat.name === categoryName);
   if (!category) return;
@@ -401,7 +363,6 @@ function deductExpenseFromCategory(categoryName, amount, description) {
     type: 'expense',
     description: description,
   });
-
   profile.generalIncome.balance -= amount;
   profile.generalIncome.transactions.push({
     date: new Date().toISOString().split("T")[0],
@@ -411,7 +372,6 @@ function deductExpenseFromCategory(categoryName, amount, description) {
   });
 }
 
-// Generate Current Month
 function getCurrentMonth() {
   const date = new Date();
   const year = date.getFullYear();
@@ -420,40 +380,32 @@ function getCurrentMonth() {
   return `${year}-${month}`;
 }
 
-// Update Averages
 function updateAverages() {
   const profileMonths = profile.incomeStatement.months || [];
   const totalMonths = profileMonths.length || 1;
   const avgIncome = profileMonths.reduce((sum, m) => sum + m.totalIncome, 0) / totalMonths;
   const avgExpenses = profileMonths.reduce((sum, m) => sum + m.totalExpenses, 0) / totalMonths;
   const avgCashflow = avgIncome - avgExpenses;
-
   document.getElementById('average-income').textContent = `${profile.currency} ${avgIncome.toFixed(2)}`;
   document.getElementById('average-expenses').textContent = `${profile.currency} ${avgExpenses.toFixed(2)}`;
   document.getElementById('average-cashflow').textContent = `${profile.currency} ${avgCashflow.toFixed(2)}`;
-
   updateFinancialHealth();
 }
 
-// Update Financial Health
 function updateFinancialHealth() {
   const avgCashflow = parseFloat(document.getElementById('average-cashflow').textContent.replace(profile.currency, '').trim());
   const healthScore = Math.round((avgCashflow / profile.passiveIncomeTarget) * 100);
-
   healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
   healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
   healthChart.update();
-
   healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
   healthTips.textContent = generateHealthTip(healthScore, avgCashflow, profile.passiveIncomeTarget);
 }
 
-// Get Health Color
 function getHealthColor(score) {
   return score <= 39 ? "#ff6384" : score <= 59 ? "#ffcd56" : score <= 79 ? "#4bc0c0" : "#36a2eb";
 }
 
-// Generate Health Tip
 function generateHealthTip(score, cashflow, passiveIncomeTarget) {
   const tips = {
     low: [
@@ -473,25 +425,20 @@ function generateHealthTip(score, cashflow, passiveIncomeTarget) {
       "You're doing amazing! Consider diversifying your investments to further grow your wealth."
     ]
   };
-
   const section = score <= 39 ? 'low' : score <= 59 ? 'moderate' : score <= 79 ? 'good' : 'excellent';
   const extraTips = [];
-  
   if (cashflow < passiveIncomeTarget) {
     extraTips.push("Your cashflow is below your passive income target. Focus on increasing income or reducing expenses.");
   } else {
     extraTips.push("Your cashflow exceeds your passive income target. Keep up the good work!");
   }
-
   return `${tips[section][Math.floor(Math.random() * tips[section].length)]} ${extraTips.join(" ")}`;
 }
 
-// Add Asset
 function addAsset() {
   const date = prompt("Enter Date (YYYY-MM-DD):", getCurrentDate());
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Asset Value:"));
-
   if (date && description && amount) {
     profile.balanceSheet.push({ date, description, type: "Asset", amount });
     updateBalanceSheet();
@@ -501,12 +448,10 @@ function addAsset() {
   }
 }
 
-// Add Liability
 function addLiability() {
   const date = prompt("Enter Date (YYYY-MM-DD):", getCurrentDate());
   const description = prompt("Enter Description:");
   const amount = parseFloat(prompt("Enter Liability Amount:"));
-
   if (date && description && amount) {
     profile.balanceSheet.push({ date, description, type: "Liability", amount });
     updateBalanceSheet();
@@ -516,13 +461,11 @@ function addLiability() {
   }
 }
 
-// Update Balance Sheet
 function updateBalanceSheet() {
   const balanceSheetBody = document.getElementById("balance-sheet-body");
   balanceSheetBody.innerHTML = "";
   let totalAssetsAmount = 0;
   let totalLiabilitiesAmount = 0;
-
   profile.balanceSheet.forEach((entry, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -536,36 +479,28 @@ function updateBalanceSheet() {
       </td>
     `;
     balanceSheetBody.appendChild(row);
-
     if (entry.type === "Asset") totalAssetsAmount += entry.amount;
     if (entry.type === "Liability") totalLiabilitiesAmount += entry.amount;
   });
-
   totalAssets.textContent = `${profile.currency} ${totalAssetsAmount}`;
   totalLiabilities.textContent = `${profile.currency} ${totalLiabilitiesAmount}`;
   netWorthDisplay.textContent = `${profile.currency} ${totalAssetsAmount - totalLiabilitiesAmount}`;
 }
 
-// Edit Balance Entry
 function editBalanceEntry(type, index) {
   const entry = profile.balanceSheet[index];
-  if (!entry) return;
-
   const newDescription = prompt("Edit Description:", entry.description);
   const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
   const newDate = prompt("Edit Date:", entry.date);
-
   if (newDescription && !isNaN(newAmount) && newDate) {
     entry.description = newDescription;
     entry.amount = newAmount;
     entry.date = newDate;
-
     updateBalanceSheet();
     saveDataToLocalStorage();
   }
 }
 
-// Delete Balance Entry
 function deleteBalanceEntry(type, index) {
   if (confirm("Are you sure you want to delete this entry?")) {
     profile.balanceSheet.splice(index, 1);
@@ -574,130 +509,16 @@ function deleteBalanceEntry(type, index) {
   }
 }
 
-// Edit Entry
-function editEntry(type, ...args) {
-  if (type === 'income') {
-    const [monthIndex, catIndex, entryIndex] = args;
-    const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-    const newDescription = prompt("Edit Description:", entry.description);
-    const newDate = prompt("Edit Date:", entry.date);
-
-    if (!isNaN(newAmount) && newDescription && newDate) {
-      const oldAmount = entry.amount;
-      entry.amount = newAmount;
-      entry.description = newDescription;
-      entry.date = new Date(newDate).toISOString().split("T")[0];
-
-      if (entry.type === 'income') {
-        profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newAmount - oldAmount;
-        profile.incomeStatement.months[monthIndex].totalIncome += newAmount - oldAmount;
-      } else if (entry.type === 'expense') {
-        profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newAmount - oldAmount;
-        profile.incomeStatement.months[monthIndex].totalExpenses += newAmount - oldAmount;
-      }
-
-      updateMonthlyTable();
-      saveDataToLocalStorage();
-    }
-  } else if (type === 'balance') {
-    const index = args[0];
-    const entry = profile.balanceSheet[index];
-    const newDescription = prompt("Edit Description:", entry.description);
-    const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-    const newDate = prompt("Edit Date:", entry.date);
-
-    if (newDescription && !isNaN(newAmount) && newDate) {
-      entry.description = newDescription;
-      entry.amount = newAmount;
-      entry.date = newDate;
-
-      updateBalanceSheet();
-      saveDataToLocalStorage();
-    }
-  }
-}
-
-// Delete Entry
-function deleteEntry(type, ...args) {
-  if (type === 'income') {
-    const [monthIndex, catIndex, entryIndex] = args;
-    const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    if (confirm("Are you sure you want to delete this entry?")) {
-      const oldAmount = entry.amount;
-      profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
-      if (entry.type === 'income') {
-        profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= oldAmount;
-        profile.incomeStatement.months[monthIndex].totalIncome -= oldAmount;
-      } else if (entry.type === 'expense') {
-        profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses -= oldAmount;
-        profile.incomeStatement.months[monthIndex].totalExpenses -= oldAmount;
-      }
-      updateMonthlyTable();
-      saveDataToLocalStorage();
-    }
-  } else if (type === 'balance') {
-    const index = args[0];
-    if (confirm("Are you sure you want to delete this entry?")) {
-      profile.balanceSheet.splice(index, 1);
-      updateBalanceSheet();
-      saveDataToLocalStorage();
-    }
-  }
-}
-
-// Update Fund Allocation Table
-function updateFundAllocationTable() {
-  const body = document.getElementById('fund-allocation-body');
-  body.innerHTML = '';
-  profile.fundAllocations.categories.forEach(cat => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${cat.name}</td>
-      <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
-      <td>
-        <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
-      </td>
-    `;
-    body.appendChild(row);
-  });
-}
-
-// Show Transaction Summary Modal
-function viewCategoryTransactions(categoryIndex) {
-  const category = profile.fundAllocations.categories[categoryIndex];
-  if (!category) return;
-
-  const summaryText = document.getElementById('transactionSummaryText');
-  summaryText.innerHTML = '';
-
-  category.transactions.forEach(transaction => {
-    const paragraph = document.createElement('p');
-    paragraph.textContent = `On ${transaction.date}, an amount of ${profile.currency} ${transaction.amount} was recorded as ${transaction.type}: ${transaction.description}.`;
-    summaryText.appendChild(paragraph);
-  });
-
-  document.getElementById('transactionSummaryModal').style.display = 'block';
-}
-
-// Close Transaction Summary Modal
-function closeSummaryModal() {
-  document.getElementById('transactionSummaryModal').style.display = 'none';
-}
-
-// Convert Currency
 function convertCurrency() {
   const amount = parseFloat(document.getElementById("amount").value);
   const from = fromCurrency.value;
   const to = toCurrency.value;
-
   if (!isNaN(amount) && from && to) {
     const convertedAmount = (amount / currencyRates[from]) * currencyRates[to];
     conversionResult.textContent = `${amount} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
   }
 }
 
-// Get Current Date
 function getCurrentDate() {
   const date = new Date();
   const year = date.getFullYear();
@@ -706,12 +527,10 @@ function getCurrentDate() {
   return `${year}-${month}`;
 }
 
-// Save Data to LocalStorage
 function saveDataToLocalStorage() {
   localStorage.setItem("financialData", JSON.stringify(profile));
 }
 
-// Load Saved Data
 function loadSavedData() {
   const savedData = localStorage.getItem("financialData");
   if (savedData) {
@@ -730,42 +549,34 @@ function loadSavedData() {
   }
 }
 
-// Generate Financial Story
 function generateStory() {
   const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
   const totalExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(profile.currency, "").trim());
   const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(profile.currency, "").trim());
   const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(profile.currency, "").trim());
   const netWorth = totalAssets - totalLiabilities;
-
   let story = `
     Meet ${profile.name}, a ${profile.age}-year-old ${profile.occupation} with a dream to ${profile.dream}. 
     Currently, ${profile.name} earns an average of ${profile.currency} ${totalIncome} per month but spends ${profile.currency} ${totalExpenses}, leaving an average cashflow of ${profile.currency} ${totalIncome - totalExpenses}. 
     They own assets worth ${profile.currency} ${totalAssets} and have liabilities of ${profile.currency} ${totalLiabilities}, resulting in a net worth of ${profile.currency} ${netWorth}. 
     Their goal is to achieve a passive income of ${profile.currency} ${profile.passiveIncomeTarget}. 
   `;
-
-  // Add fund allocation details
   profile.fundAllocations.categories.forEach(cat => {
     story += `
       ${cat.name} currently has a balance of ${profile.currency} ${cat.balance} with ${cat.transactions.length} transactions.
     `;
   });
-
   financialStory.textContent = story;
 }
 
-// Toggle Calculator Popup
 function toggleCalculator() {
   calculatorPopup.style.display = calculatorPopup.style.display === "block" ? "none" : "block";
 }
 
-// Append to Calculator Input
 function appendToCalculator(value) {
   calculatorInput.value += value;
 }
 
-// Calculate Result
 function calculateResult() {
   try {
     calculatorInput.value = eval(calculatorInput.value);
@@ -774,46 +585,38 @@ function calculateResult() {
   }
 }
 
-// Clear Calculator
 function clearCalculator() {
   calculatorInput.value = "";
 }
 
-// Add Allocation Category
 function addAllocationCategory() {
   const newCategory = document.getElementById("newAllocationCategory").value;
   const newPercentage = parseFloat(document.getElementById("newAllocationPercentage").value);
-
   if (newCategory && !isNaN(newPercentage)) {
     if (isNaN(newPercentage) || newPercentage <= 0) {
       alert("Invalid percentage");
       return;
     }
-
     const totalPercentage = profile.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
     if (totalPercentage + newPercentage > 100) {
       alert("Total percentage exceeds 100%");
       return;
     }
-
     profile.fundAllocations.categories.push({
       name: newCategory,
       percentage: newPercentage,
       balance: 0,
       transactions: [],
     });
-
     populateAllocationCategories();
   }
 }
 
-// Save Allocations
 function saveAllocations() {
   let totalPercentage = 0;
   profile.fundAllocations.categories.forEach(cat => {
     totalPercentage += cat.percentage;
   });
-
   if (totalPercentage === 100) {
     closeAllocationModal();
     saveDataToLocalStorage();
@@ -823,26 +626,17 @@ function saveAllocations() {
   }
 }
 
-// Close Allocation Modal
 function closeAllocationModal() {
   document.getElementById("allocationModal").style.display = "none";
 }
 
-// Show Allocation Modal
 function showAllocationModal() {
   document.getElementById("allocationModal").style.display = "block";
 }
 
-// Close Modal
-function closeModal() {
-  document.getElementById("entryModal").style.display = "none";
-}
-
-// Populate Allocation Categories
 function populateAllocationCategories() {
   const categoryList = document.getElementById("allocationCategories");
   categoryList.innerHTML = "";
-
   profile.fundAllocations.categories.forEach((cat, index) => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -854,21 +648,17 @@ function populateAllocationCategories() {
   });
 }
 
-// Edit Allocation Category
 function editAllocationCategory(index) {
   const category = profile.fundAllocations.categories[index];
   const newCategoryName = prompt("Edit Category Name:", category.name);
   const newPercentage = parseFloat(prompt("Edit Percentage:", category.percentage));
-
   if (newCategoryName && !isNaN(newPercentage)) {
     category.name = newCategoryName;
     category.percentage = newPercentage;
-
     let totalPercentage = 0;
     profile.fundAllocations.categories.forEach(cat => {
       totalPercentage += cat.percentage;
     });
-
     if (totalPercentage === 100) {
       populateAllocationCategories();
       saveDataToLocalStorage();
@@ -878,7 +668,6 @@ function editAllocationCategory(index) {
   }
 }
 
-// Delete Allocation Category
 function deleteAllocationCategory(index) {
   if (confirm("Are you sure you want to delete this category?")) {
     profile.fundAllocations.categories.splice(index, 1);
@@ -887,7 +676,39 @@ function deleteAllocationCategory(index) {
   }
 }
 
-// Export Data
+function updateFundAllocationTable() {
+  const body = document.getElementById('fund-allocation-body');
+  body.innerHTML = '';
+  profile.fundAllocations.categories.forEach(cat => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${cat.name}</td>
+      <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
+      <td>
+        <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
+      </td>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function viewCategoryTransactions(categoryIndex) {
+  const category = profile.fundAllocations.categories[categoryIndex];
+  if (!category) return;
+  const summaryText = document.getElementById('transactionSummaryText');
+  summaryText.innerHTML = '';
+  category.transactions.forEach(transaction => {
+    const paragraph = document.createElement('p');
+    paragraph.textContent = `On ${transaction.date}, an amount of ${profile.currency} ${transaction.amount} was recorded as ${transaction.type}: ${transaction.description}.`;
+    summaryText.appendChild(paragraph);
+  });
+  document.getElementById('transactionSummaryModal').style.display = 'block';
+}
+
+function closeSummaryModal() {
+  document.getElementById('transactionSummaryModal').style.display = 'none';
+}
+
 function exportData() {
   const fileName = document.getElementById("saveFileName").value || "financial_data.json";
   const data = JSON.stringify(profile);
@@ -899,7 +720,6 @@ function exportData() {
   a.click();
 }
 
-// Import Data
 function importData() {
   const input = document.createElement("input");
   input.type = "file";
@@ -919,7 +739,6 @@ function importData() {
   input.click();
 }
 
-// Clear Data
 function clearData() {
   if (confirm("Are you sure you want to clear all data?")) {
     localStorage.removeItem("financialData");
@@ -927,25 +746,21 @@ function clearData() {
   }
 }
 
-// Share on WhatsApp
 function shareOnWhatsApp() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application%3A%20${url}`);
+  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application:%20${url}`);
 }
 
-// Share on Facebook
 function shareOnFacebook() {
   const url = encodeURIComponent(window.location.href);
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
 }
 
-// Share on Twitter
 function shareOnTwitter() {
   const url = encodeURIComponent(window.location.href);
   window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20financial%20tracker%20application`);
 }
 
-// Download App
 function downloadApp() {
   window.open("https://gap-tools.github.io/GAP-Financial-Tracker/Personal", "_blank");
-    }
+}
