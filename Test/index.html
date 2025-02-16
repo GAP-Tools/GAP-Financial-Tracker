@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GAP Personal Financial Tracker</title>
+  <title>GAP Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -11,34 +11,14 @@
   <div class="container">
     <!-- Personal Profile Section -->
     <section class="profile-section">
-      <h3><span id="switchLink">Switch to Business</span></h3>
-      <h2>PERSONAL FINANCIAL TRACKER</h2>
       <h2>Personal Profile</h2>
       <input type="text" id="name" placeholder="Name">
       <input type="number" id="age" placeholder="Age">
       <input type="text" id="occupation" placeholder="Occupation">
-      <input type="text" id="dream" placeholder="Dream">
-      <br>
-      <label for="currency">Preferred Currency:</label>
+      <input type="text" id="dream" placeholder="Financial Goal">
+      <label for="currency">Currency:</label>
       <select id="currency"></select>
-      <br>
-      <br>
-      <label for="passive-income-target">Passive Income Target:</label>
-      <div class="target-input">
-        <input type="number" id="passive-income-target" placeholder="Target">
-        <button onclick="editPassiveIncomeTarget()">✎</button>
-      </div>
       <button onclick="saveProfile()">Save Profile</button>
-    </section>
-
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
     </section>
 
     <!-- Income Statement Section -->
@@ -57,11 +37,6 @@
           </thead>
           <tbody id="monthly-body"></tbody>
         </table>
-        <div class="averages">
-          <p>Average Total Income: <span id="average-income">0</span></p>
-          <p>Average Total Expenses: <span id="average-expenses">0</span></p>
-          <p>Average Cashflow: <span id="average-cashflow">0</span></p>
-        </div>
       </div>
       <button onclick="showEntryModal('income')">Add Income</button>
       <button onclick="showEntryModal('expense')">Add Expense</button>
@@ -76,6 +51,7 @@
           <thead>
             <tr>
               <th>Category</th>
+              <th>Percentage</th>
               <th>Balance</th>
               <th>Summary</th>
             </tr>
@@ -130,97 +106,52 @@
       <button onclick="clearData()">Clear Data</button>
     </section>
 
-    <!-- Share App -->
-    <section class="share-app">
-      <h2>Share App</h2>
-      <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
-      <button onclick="shareOnFacebook()">Share on Facebook</button>
-      <button onclick="shareOnTwitter()">Share on X (Twitter)</button>
-      <button onclick="downloadApp()">Download App</button>
-    </section>
-
     <!-- Story Generation -->
     <section class="story-generation">
-      <h2>Financial Story</h2>
+      <h2>Generate Financial Story</h2>
       <button onclick="generateStory()">Generate Story</button>
       <p id="financialStory"></p>
     </section>
-  </div>
 
-  <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">calculator</div>
-
-  <!-- Calculator Popup -->
-  <div id="calculatorPopup" class="calculator-popup">
-    <div class="calculator-content">
-      <h3>Basic Calculator</h3>
-      <input type="text" id="calculatorInput" readonly>
-      <div class="calculator-buttons">
-        <button onclick="appendToCalculator('7')">7</button>
-        <button onclick="appendToCalculator('8')">8</button>
-        <button onclick="appendToCalculator('9')">9</button>
-        <button onclick="appendToCalculator('+')">+</button>
-        <button onclick="appendToCalculator('4')">4</button>
-        <button onclick="appendToCalculator('5')">5</button>
-        <button onclick="appendToCalculator('6')">6</button>
-        <button onclick="appendToCalculator('-')">-</button>
-        <button onclick="appendToCalculator('1')">1</button>
-        <button onclick="appendToCalculator('2')">2</button>
-        <button onclick="appendToCalculator('3')">3</button>
-        <button onclick="appendToCalculator('*')">*</button>
-        <button onclick="appendToCalculator('0')">0</button>
-        <button onclick="appendToCalculator('.')">.</button>
-        <button onclick="calculateResult()">=</button>
-        <button onclick="appendToCalculator('/')">/</button>
-        <button onclick="clearCalculator()">C</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Entry Modal -->
-  <div id="entryModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h3>Add New Entry</h3>
-      <select id="entryType">
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-      </select>
-      <input type="number" id="entryAmount" placeholder="Amount">
-      <input type="text" id="entryDescription" placeholder="Description">
-      <div class="category-select">
+    <!-- Entry Modal -->
+    <div id="entryModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Add Entry</h3>
+        <select id="entryType">
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <input type="number" id="entryAmount" placeholder="Amount">
+        <input type="text" id="entryDescription" placeholder="Description">
         <select id="entryCategory"></select>
+        <button onclick="saveEntry()">Save Entry</button>
       </div>
-      <button onclick="saveEntry()">Save Entry</button>
     </div>
-  </div>
 
-  <!-- Allocation Modal -->
-  <div id="allocationModal" class="allocation-modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeAllocationModal()">&times;</span>
-      <h3>Manage Fund Allocation Categories</h3>
-      <div class="category-list">
-        <ul id="allocationCategories"></ul>
+    <!-- Allocation Modal -->
+    <div id="allocationModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAllocationModal()">&times;</span>
+        <h3>Manage Fund Allocation</h3>
+        <div id="allocationCategories"></div>
+        <input type="text" id="newCategory" placeholder="New Category">
+        <input type="number" id="newPercentage" placeholder="Percentage">
+        <button onclick="addCategory()">Add Category</button>
+        <button onclick="saveAllocations()">Save Changes</button>
       </div>
-      <div class="category-form">
-        <input type="text" id="newAllocationCategory" placeholder="New Category">
-        <input type="number" id="newAllocationPercentage" placeholder="Percentage">
-        <button onclick="addAllocationCategory()">Add Category</button>
-      </div>
-      <button onclick="saveAllocations()">Save Allocations</button>
     </div>
-  </div>
 
-  <!-- Transaction Summary Modal -->
-  <div id="transactionSummaryModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeSummaryModal()">&times;</span>
-      <h3>Transaction Summary</h3>
-      <div id="transactionSummaryText"></div>
+    <!-- Transaction Summary Modal -->
+    <div id="transactionSummaryModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeSummaryModal()">&times;</span>
+        <h3>Transaction Summary</h3>
+        <div id="transactionSummary"></div>
+      </div>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
-  </html>
+        </html>
