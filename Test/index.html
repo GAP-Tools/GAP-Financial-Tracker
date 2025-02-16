@@ -148,7 +148,7 @@
   </div>
 
   <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">calculator</div>
+  <div class="calculator-icon" onclick="toggleCalculator()">Calculator</div>
 
   <!-- Calculator Popup -->
   <div id="calculatorPopup" class="calculator-popup">
@@ -198,4 +198,29 @@
   <!-- Allocation Modal -->
   <div id="allocationModal" class="allocation-modal">
     <div class="modal-content">
-      <span class="close" onclick="closeAllocationModal
+      <span class="close" onclick="closeAllocationModal()">&times;</span>
+      <h3>Manage Fund Allocation Categories</h3>
+      <div class="category-list">
+        <ul id="allocationCategories"></ul>
+      </div>
+      <div class="category-form">
+        <input type="text" id="newAllocationCategory" placeholder="New Category">
+        <input type="number" id="newAllocationPercentage" placeholder="Percentage">
+        <button onclick="addAllocationCategory()">Add Category</button>
+      </div>
+      <button onclick="saveAllocations()">Save Allocations</button>
+    </div>
+  </div>
+
+  <!-- Transaction Summary Modal -->
+  <div id="transactionSummaryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeSummaryModal()">&times;</span>
+      <h3>Transaction Summary</h3>
+      <div id="transactionSummaryText"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+                                                   </html>
