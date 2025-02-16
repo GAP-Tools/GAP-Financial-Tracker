@@ -236,60 +236,55 @@ tbody tr:hover {
   gap: 5px;
 }
 
-ómo {
-  color: green;
+MeasureSpec {
+ font-size: 24px;
 }
 
-.nested {
-  display: none;
+#fund-allocation-table, #fund-allocation-table th, #fund-allocation-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
 }
 
-.expandable.expanded + .nested {
-  display: table-row;
-}
-
-.collapsible {
-  cursor: pointer;
-}
-
-.collapsible:hover {
-  background-color: #ddd;
-}
-
-.abs-pack-right {
-  position: sticky;
-  right: 0;
-  background-color: white;
-  padding: 5px;
-}
-
-.abs-pack-right a {
-  color: blue;
-  text-decoration: none;
-}
-
-.abs-pack-right a:hover {
-  text-decoration: underline;
-}
-
-.date-picker {
-  cursor: pointer;
-}
-
-.date-picker svg {
-  margin-right: 5px;
-}
-
-.numeric-keypad {
+#fund-allocation-table {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  margin-top: 20px;
 }
 
-.numeric-keypad button {
-  padding: 15px;
-  font-size: 20px;
+ правительств {
+  font-size: 12px;
+  color: #555;
+  margin-left: 5px;
+}
+
+.allocation-modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.allocation-modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.category-list {
+  margin-bottom: 20px;
+}
+
+.category-form input {
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .draft-indicator {
@@ -332,45 +327,4 @@ tbody tr:hover {
 .asset-liability-table td, .asset-liability-table th {
   border: 1px solid #000;
   padding: 8px;
-}
-
-.allocation-modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
-}
-
-.allocation-modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
-}
-
-.category-list {
-  margin-bottom: 20px;
-}
-
-.category-form input {
-  margin: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-#fund-allocation-table, #fund-allocation-table th, #fund-allocation-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-}
-
-#fund-allocation-table {
-  width: 100%;
-  margin-top: 20px;
   }
