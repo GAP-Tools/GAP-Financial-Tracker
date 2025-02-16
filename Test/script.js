@@ -38,6 +38,7 @@ const saveFileNameInput = document.getElementById("saveFileName");
 const calculatorPopup = document.getElementById("calculatorPopup");
 const calculatorInput = document.getElementById("calculatorInput");
 const allocationModal = document.getElementById("allocationModal");
+const entryCategorySelect = document.getElementById("entryCategory");
 
 // Chart Initialization
 const healthChart = new Chart(healthChartCtx, {
@@ -148,13 +149,10 @@ function populateCategories() {
   const categorySelect = document.getElementById('entryCategory');
   categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-  const allCategories = profile.incomeStatement.months.reduce((acc, month) => acc.concat(month.categories), []);
-  const uniqueCategories = [...new Set(allCategories.map(cat => cat.name))];
-
-  uniqueCategories.forEach(categoryName => {
+  profile.fundAllocations.categories.forEach(category => {
     const option = document.createElement('option');
-    option.value = categoryName;
-    option.textContent = categoryName;
+    option.value = category.name;
+    option.textContent = category.name;
     categorySelect.appendChild(option);
   });
 }
@@ -278,19 +276,11 @@ function saveEntry() {
   const type = document.getElementById('entryType').value;
   const amount = parseFloat(document.getElementById('entryAmount').value);
   const description = document.getElementById('entryDescription').value.trim();
-  const category = document.getElementById('entryCategory').value || document.getElementById('newCategory').value.trim();
+  const category = document.getElementById('entryCategory').value;
 
-  if (type === 'income') {
-    profile.fundAllocations.categories.forEach(cat => {
-      const allocatedAmount = amount * (cat.percentage / 100);
-      cat.balance += allocatedAmount;
-      cat.transactions.push({
-        date: new Date().toISOString().split("T")[0],
-        amount: allocatedAmount,
-        type: 'income',
-        description: description,
-      });
-    });
+  if (!category || isNaN(amount) || amount <= 0 || !description) {
+    alert('Please fill all fields correctly');
+    return;
   }
 
   const currentMonth = getCurrentMonth();
@@ -322,6 +312,13 @@ function saveEntry() {
   if (type === 'income') {
     categoryObject.totalIncome += amount;
     monthObject.totalIncome += amount;
+    categoryObject.entries.push({
+      date: new Date().toISOString().split("T")[0],
+      description: description,
+      amount: amount,
+      type: 'income',
+    });
+    allocateIncome(amount);
   } else if (type === 'expense') {
     categoryObject.totalExpenses += amount;
     monthObject.totalExpenses += amount;
@@ -331,12 +328,40 @@ function saveEntry() {
       amount: amount,
       type: 'expense',
     });
+    deductExpenseFromCategory(category, amount);
   }
 
   updateMonthlyTable();
   updateFundAllocationTable();
   closeModal();
   saveDataToLocalStorage();
+}
+
+// Distribute income to fund allocations
+function allocateIncome(amount) {
+  profile.fundAllocations.categories.forEach(cat => {
+    const allocatedAmount = amount * (cat.percentage / 100);
+    cat.balance += allocatedAmount;
+    cat.transactions.push({
+      date: new Date().toISOString().split("T")[0],
+      amount: allocatedAmount,
+      type: 'income',
+      description: description,
+    });
+  });
+}
+
+// Deduct expense from selected category
+function deductExpenseFromCategory(categoryName, amount) {
+  const category = profile.fundAllocations.categories.find(cat => cat.name === categoryName);
+  if (!category) return;
+  category.balance -= amount;
+  category.transactions.push({
+    date: new Date().toISOString().split("T")[0],
+    amount: -amount,
+    type: 'expense',
+    description: description,
+  });
 }
 
 // Generate Current Month
@@ -704,6 +729,7 @@ function loadSavedData() {
     updateMonthlyTable();
     updateBalanceSheet();
     updateFinancialHealth();
+    populateAllocationCategories();
     updateFundAllocationTable();
   }
 }
@@ -740,6 +766,7 @@ function importData() {
       updateMonthlyTable();
       updateBalanceSheet();
       updateFinancialHealth();
+      populateAllocationCategories();
       updateFundAllocationTable();
       saveDataToLocalStorage();
       alert("Data Loaded!");
@@ -871,9 +898,9 @@ function addAllocationCategory() {
 }
 
 function saveAllocations() {
-  let total = profile.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
-  if (total !== 100) {
-    alert("Total percentage must equal 100%");
+  let totalPercentage = profile.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
+  if (totalPercentage !== 100) {
+    alert("Total percentage must be 100%");
     return;
   }
   closeAllocationModal();
@@ -887,30 +914,38 @@ function updateFundAllocationTable() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${cat.name}</td>
-      <td>${profile.currency} ${cat.balance}</td>
+      <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
       <td>
-        <button onclick="withdrawFromCategory(${profile.fundAllocations.categories.indexOf(cat)})">Withdraw</button>
+        <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
       </td>
     `;
     body.appendChild(row);
   });
 }
 
-function withdrawFromCategory(index) {
-  const amount = parseFloat(prompt("Enter Withdrawal Amount:"));
-  if (amount) {
-    const cat = profile.fundAllocations.categories[index];
-    if (amount > cat.balance) {
-      alert("Insufficient balance in category");
-      return;
-    }
-    cat.balance -= amount;
-    cat.transactions.push({
-      date: new Date().toISOString().split("T")[0],
-      amount: -amount,
-      type: 'withdrawal',
-      description: 'Manual Withdrawal',
-    });
+function viewCategoryTransactions(categoryIndex) {
+  console.log("Viewing transactions for category:", categoryIndex);
+  // Implement modal to display category transactions here
+}
+
+function editAllocationCategory(index) {
+  const category = profile.fundAllocations.categories[index];
+  const newName = prompt("Edit Category Name:", category.name);
+  const newPercentage = prompt("Edit Percentage:", category.percentage);
+
+  if (newName && !isNaN(newPercentage)) {
+    category.name = newName;
+    category.percentage = parseFloat(newPercentage);
+    populateAllocationCategories();
     saveDataToLocalStorage();
   }
-    }
+}
+
+function deleteAllocationCategory(index) {
+  const category = profile.fundAllocations.categories[index];
+  if (confirm("Are you sure you want to delete this category?")) {
+    profile.fundAllocations.categories.splice(index, 1);
+    populateAllocationCategories();
+    saveDataToLocalStorage();
+  }
+  }
