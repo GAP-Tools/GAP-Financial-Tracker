@@ -134,7 +134,12 @@ function showEntryModal(type) {
   document.getElementById('entryModal').style.display = 'block';
   document.getElementById('entryType').value = type;
   populateCategories();
-  document.getElementById('newCategory').value = '';
+  if (type === 'income') {
+    document.getElementById('entryCategory').disabled = true;
+    document.getElementById('entryCategory').value = '';
+  } else {
+    document.getElementById('entryCategory').disabled = false;
+  }
   document.getElementById('entryAmount').value = '';
   document.getElementById('entryDescription').value = '';
 }
@@ -278,8 +283,12 @@ function saveEntry() {
   const description = document.getElementById('entryDescription').value.trim();
   const category = document.getElementById('entryCategory').value;
 
-  if (!category || isNaN(amount) || amount <= 0 || !description) {
-    alert('Please fill all fields correctly');
+  if (isNaN(amount) || amount <= 0 || !description) {
+    if (type === 'income') {
+      alert('Invalid or missing amount/description');
+    } else {
+      alert('Invalid or missing amount/description and category');
+    }
     return;
   }
 
@@ -298,18 +307,17 @@ function saveEntry() {
 
   monthObject = profile.incomeStatement.months.find(m => m.month === currentMonth);
 
-  if (!monthObject.categories.some(cat => cat.name === category)) {
-    monthObject.categories.push({
-      name: category,
-      totalIncome: 0,
-      totalExpenses: 0,
-      entries: [],
-    });
-  }
-
-  categoryObject = monthObject.categories.find(cat => cat.name === category);
-
   if (type === 'income') {
+    // Add income entry to income statement
+    if (!monthObject.categories.some(cat => cat.name === 'Income')) {
+      monthObject.categories.push({
+        name: 'Income',
+        totalIncome: 0,
+        totalExpenses: 0,
+        entries: [],
+      });
+    }
+    categoryObject = monthObject.categories.find(cat => cat.name === 'Income');
     categoryObject.totalIncome += amount;
     monthObject.totalIncome += amount;
     categoryObject.entries.push({
@@ -318,8 +326,21 @@ function saveEntry() {
       amount: amount,
       type: 'income',
     });
-    allocateIncome(amount);
+    allocateIncome(amount, description);
   } else if (type === 'expense') {
+    if (!category) {
+      alert('Please select a category for expenses');
+      return;
+    }
+    if (!monthObject.categories.some(cat => cat.name === category)) {
+      monthObject.categories.push({
+        name: category,
+        totalIncome: 0,
+        totalExpenses: 0,
+        entries: [],
+      });
+    }
+    categoryObject = monthObject.categories.find(cat => cat.name === category);
     categoryObject.totalExpenses += amount;
     monthObject.totalExpenses += amount;
     categoryObject.entries.push({
@@ -328,7 +349,7 @@ function saveEntry() {
       amount: amount,
       type: 'expense',
     });
-    deductExpenseFromCategory(category, amount);
+    deductExpenseFromCategory(category, amount, description);
   }
 
   updateMonthlyTable();
@@ -338,7 +359,7 @@ function saveEntry() {
 }
 
 // Distribute income to fund allocations
-function allocateIncome(amount) {
+function allocateIncome(amount, description) {
   profile.fundAllocations.categories.forEach(cat => {
     const allocatedAmount = amount * (cat.percentage / 100);
     cat.balance += allocatedAmount;
@@ -352,7 +373,7 @@ function allocateIncome(amount) {
 }
 
 // Deduct expense from selected category
-function deductExpenseFromCategory(categoryName, amount) {
+function deductExpenseFromCategory(categoryName, amount, description) {
   const category = profile.fundAllocations.categories.find(cat => cat.name === categoryName);
   if (!category) return;
   category.balance -= amount;
@@ -514,7 +535,6 @@ function editEntry(type, ...args) {
       entry.description = newDescription;
       entry.date = new Date(newDate).toISOString().split("T")[0];
 
-      // Update totals
       if (entry.type === 'income') {
         profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newAmount - oldAmount;
         profile.incomeStatement.months[monthIndex].totalIncome += newAmount - oldAmount;
@@ -553,7 +573,6 @@ function deleteEntry(type, ...args) {
     if (confirm("Are you sure you want to delete this entry?")) {
       profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
 
-      // Update totals
       if (entry.type === 'income') {
         profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= oldAmount;
         profile.incomeStatement.months[monthIndex].totalIncome -= oldAmount;
@@ -577,116 +596,48 @@ function deleteEntry(type, ...args) {
   }
 }
 
-// Duplicate Entry
-function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
-  if (type === 'income') {
-    const month = profile.incomeStatement.months[monthIndex];
-    const category = month.categories[catIndex];
-    const entry = category.entries[entryIndex];
-
-    // Create a new entry with the same details but amount set to zero
-    const newEntry = {
-      date: entry.date,
-      description: `${entry.description} - Copy`,
-      amount: 0,
-      type: entry.type
-    };
-
-    // Add the new entry to the same category
-    category.entries.push(newEntry);
-
-    // Update the UI
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  } else if (type === 'balance') {
-    const entry = profile.balanceSheet[entryIndex];
-
-    // Create a new entry with the same details but amount set to zero
-    const newEntry = {
-      date: entry.date,
-      description: `${entry.description} - Copy`,
-      amount: 0,
-      type: entry.type
-    };
-
-    // Add the new entry to the balance sheet
-    profile.balanceSheet.push(newEntry);
-
-    // Update the UI
-    updateBalanceSheet();
-    saveDataToLocalStorage();
-  }
+// Update Fund Allocation Table
+function updateFundAllocationTable() {
+  const body = document.getElementById('fund-allocation-body');
+  body.innerHTML = '';
+  profile.fundAllocations.categories.forEach(cat => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${cat.name}</td>
+      <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
+      <td>
+        <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
+      </td>
+    `;
+    body.appendChild(row);
+  });
 }
 
-// Duplicate Category
-function duplicateCategory(monthIndex, catIndex) {
-  const month = profile.incomeStatement.months[monthIndex];
-  const category = month.categories[catIndex];
+// Show Transaction Summary Modal
+function viewCategoryTransactions(categoryIndex) {
+  const category = profile.fundAllocations.categories[categoryIndex];
+  if (!category) return;
 
-  // Create a new category with the same details but name appended with " - Copy"
-  const newCategory = {
-    name: `${category.name} - Copy`,
-    totalIncome: 0,
-    totalExpenses: 0,
-    entries: category.entries.map(entry => ({
-      date: entry.date,
-      description: `${entry.description} - Copy`,
-      amount: 0,
-      type: entry.type
-    }))
-  };
+  const summaryBody = document.getElementById('transactionSummaryBody');
+  summaryBody.innerHTML = '';
 
-  // Add the new category to the same month
-  month.categories.push(newCategory);
+  category.transactions.forEach(transaction => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${transaction.date}</td>
+      <td>${transaction.description}</td>
+      <td>${profile.currency} ${transaction.amount}</td>
+      <td>${transaction.type === 'income' ? 'Income' : 'Expense'}</td>
+    `;
+    summaryBody.appendChild(row);
+  });
 
-  // Update the UI
-  updateMonthlyTable();
-  saveDataToLocalStorage();
+  document.getElementById('transactionSummaryModal').style.display = 'block';
 }
 
-// Edit Category Name
-function editCategoryName(monthIndex, catIndex) {
-  const month = profile.incomeStatement.months[monthIndex];
-  const category = month.categories[catIndex];
-  const newCategoryName = prompt("Edit Category Name:", category.name);
-
-  if (newCategoryName) {
-    category.name = newCategoryName;
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-}
-
-// Delete Category
-function deleteCategory(monthIndex, catIndex) {
-  const month = profile.incomeStatement.months[monthIndex];
-  const category = month.categories[catIndex];
-
-  if (confirm("Are you sure you want to delete this category?")) {
-    month.categories.splice(catIndex, 1);
-
-    // Update the UI
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-}
-
-// Generate Financial Story
-function generateStory() {
-  const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
-  const totalExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(profile.currency, "").trim());
-  const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(profile.currency, "").trim());
-  const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(profile.currency, "").trim());
-  const netWorth = totalAssets - totalLiabilities;
-
-  const story = `
-    Meet ${profile.name}, a ${profile.age}-year-old ${profile.occupation} with a dream to ${profile.dream}. 
-    Currently, ${profile.name} earns an average of ${profile.currency} ${totalIncome} per month but spends ${profile.currency} ${totalExpenses}, leaving an average cashflow of ${profile.currency} ${totalIncome - totalExpenses}. 
-    They own assets worth ${profile.currency} ${totalAssets} and have liabilities of ${profile.currency} ${totalLiabilities}, resulting in a net worth of ${profile.currency} ${netWorth}. 
-    Their goal is to achieve a passive income of ${profile.currency} ${profile.passiveIncomeTarget}. ${generateHealthTip(healthChart.data.datasets[0].data[0], totalIncome - totalExpenses, profile.passiveIncomeTarget)}
-  `;
-
-  financialStory.textContent = story;
+// Close Transaction Summary Modal
+function closeSummaryModal() {
+  document.getElementById('transactionSummaryModal').style.display = 'none';
 }
 
 // Convert Currency
@@ -731,82 +682,6 @@ function loadSavedData() {
     updateFinancialHealth();
     populateAllocationCategories();
     updateFundAllocationTable();
-  }
-}
-
-// Export Data
-function exportData() {
-  const fileName = saveFileNameInput.value.trim() || "financial_data";
-  const data = { profile };
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${fileName}.json`;
-  a.click();
-}
-
-// Import Data
-function importData() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "application/json";
-  input.onchange = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = JSON.parse(e.target.result);
-      profile = data.profile;
-      document.getElementById("name").value = profile.name;
-      document.getElementById("age").value = profile.age;
-      document.getElementById("occupation").value = profile.occupation;
-      document.getElementById("dream").value = profile.dream;
-      currencySelect.value = profile.currency;
-      passiveIncomeTargetInput.value = profile.passiveIncomeTarget;
-      updateMonthlyTable();
-      updateBalanceSheet();
-      updateFinancialHealth();
-      populateAllocationCategories();
-      updateFundAllocationTable();
-      saveDataToLocalStorage();
-      alert("Data Loaded!");
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// Clear Data
-function clearData() {
-  if (confirm("Are you sure you want to clear all data?")) {
-    profile = {
-      name: "",
-      age: "",
-      occupation: "",
-      dream: "",
-      currency: "USD",
-      passiveIncomeTarget: 0,
-      incomeStatement: {
-        months: [],
-      },
-      balanceSheet: [],
-      fundAllocations: {
-        categories: [],
-        totalPercentage: 0,
-      },
-    };
-    document.getElementById("name").value = "";
-    document.getElementById("age").value = "";
-    document.getElementById("occupation").value = "";
-    document.getElementById("dream").value = "";
-    currencySelect.value = "USD";
-    passiveIncomeTargetInput.value = "";
-    updateMonthlyTable();
-    updateBalanceSheet();
-    updateFinancialHealth();
-    updateFundAllocationTable();
-    localStorage.removeItem("financialData");
-    alert("Data Cleared!");
   }
 }
 
@@ -856,96 +731,3 @@ function calculateResult() {
 function clearCalculator() {
   calculatorInput.value = "";
 }
-
-// Fund Allocation Features
-function showAllocationModal() {
-  allocationModal.style.display = 'block';
-  populateAllocationCategories();
-}
-
-function closeAllocationModal() {
-  allocationModal.style.display = 'none';
-}
-
-function populateAllocationCategories() {
-  const categoryList = document.getElementById('allocationCategories');
-  categoryList.innerHTML = '';
-  profile.fundAllocations.categories.forEach((cat, index) => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      ${cat.name} (${cat.percentage}%)
-      <button onclick="editAllocationCategory(${index})">✎</button>
-      <button onclick="deleteAllocationCategory(${index})">🗑️</button>
-    `;
-    categoryList.appendChild(li);
-  });
-}
-
-function addAllocationCategory() {
-  const name = document.getElementById('newAllocationCategory').value;
-  const percentage = parseFloat(document.getElementById('newAllocationPercentage').value);
-  if (name && percentage) {
-    profile.fundAllocations.categories.push({
-      name: name,
-      percentage: percentage,
-      balance: 0,
-      transactions: [],
-    });
-    populateAllocationCategories();
-    document.getElementById('newAllocationCategory').value = '';
-    document.getElementById('newAllocationPercentage').value = '';
-  }
-}
-
-function saveAllocations() {
-  let totalPercentage = profile.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
-  if (totalPercentage !== 100) {
-    alert("Total percentage must be 100%");
-    return;
-  }
-  closeAllocationModal();
-  saveDataToLocalStorage();
-}
-
-function updateFundAllocationTable() {
-  const body = document.getElementById('fund-allocation-body');
-  body.innerHTML = '';
-  profile.fundAllocations.categories.forEach(cat => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${cat.name}</td>
-      <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
-      <td>
-        <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
-      </td>
-    `;
-    body.appendChild(row);
-  });
-}
-
-function viewCategoryTransactions(categoryIndex) {
-  console.log("Viewing transactions for category:", categoryIndex);
-  // Implement modal to display category transactions here
-}
-
-function editAllocationCategory(index) {
-  const category = profile.fundAllocations.categories[index];
-  const newName = prompt("Edit Category Name:", category.name);
-  const newPercentage = prompt("Edit Percentage:", category.percentage);
-
-  if (newName && !isNaN(newPercentage)) {
-    category.name = newName;
-    category.percentage = parseFloat(newPercentage);
-    populateAllocationCategories();
-    saveDataToLocalStorage();
-  }
-}
-
-function deleteAllocationCategory(index) {
-  const category = profile.fundAllocations.categories[index];
-  if (confirm("Are you sure you want to delete this category?")) {
-    profile.fundAllocations.categories.splice(index, 1);
-    populateAllocationCategories();
-    saveDataToLocalStorage();
-  }
-  }
