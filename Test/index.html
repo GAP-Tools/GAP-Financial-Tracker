@@ -31,15 +31,8 @@
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
-    </section>
+    <!-- Hide or remove currency converter -->
+    <!-- <section class="currency-converter">...</section> -->
 
     <!-- Fund Allocation Section -->
     <section class="fund-allocation">
@@ -174,6 +167,7 @@
         <button onclick="calculateResult()">=</button>
         <button onclick="appendToCalculator('/')">/</button>
         <button onclick="clearCalculator()">C</button>
+        <button onclick="backspaceCalculator()">←</button>
       </div>
     </div>
   </div>
@@ -224,4 +218,4 @@
 
   <script src="script.js"></script>
 </body>
-        </html>
+  </html>
