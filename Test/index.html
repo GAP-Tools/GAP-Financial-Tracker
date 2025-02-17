@@ -31,9 +31,6 @@
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
-    <!-- Hide or remove currency converter -->
-    <!-- <section class="currency-converter">...</section> -->
-
     <!-- Fund Allocation Section -->
     <section class="fund-allocation">
       <h2>Fund Allocation</h2>
@@ -164,10 +161,10 @@
         <button onclick="appendToCalculator('*')">*</button>
         <button onclick="appendToCalculator('0')">0</button>
         <button onclick="appendToCalculator('.')">.</button>
+        <button onclick="deleteLastCharacter()">⌫</button>
         <button onclick="calculateResult()">=</button>
         <button onclick="appendToCalculator('/')">/</button>
         <button onclick="clearCalculator()">C</button>
-        <button onclick="backspaceCalculator()">←</button>
       </div>
     </div>
   </div>
@@ -183,7 +180,7 @@
       </select>
       <input type="number" id="entryAmount" placeholder="Amount">
       <input type="text" id="entryDescription" placeholder="Description">
-      <div class="category-select">
+      <div class="category-select" id="categorySelectDiv">
         <select id="entryCategory"></select>
       </div>
       <button onclick="saveEntry()">Save Entry</button>
