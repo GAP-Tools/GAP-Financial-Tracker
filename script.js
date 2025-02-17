@@ -761,63 +761,60 @@ function downloadApp() {
   window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
 }
 
+function editEntry(type, monthIndex, catIndex, entryIndex) {
+  const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  const newDescription = prompt("Edit Description:", entry.description);
+  const newDate = prompt("Edit Date (YYYY-MM-DD):", entry.date);
+  if (!isNaN(newAmount) && newDescription && newDate) {
+    const diff = newAmount - entry.amount;
+    if (type === 'income') {
+      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += diff;
+      profile.incomeStatement.months[monthIndex].totalIncome += diff;
+    } else {
+      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += diff;
+      profile.incomeStatement.months[monthIndex].totalExpenses += diff;
+    }
+    entry.amount = newAmount;
+    entry.description = newDescription;
+    entry.date = newDate;
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+}
+
 function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   const originalEntry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
   const newEntry = {
     date: new Date().toISOString().split("T")[0],
     description: `${originalEntry.description} copy`,
-    amount: 0,
+    amount: originalEntry.amount,
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
+  if (type === 'income') {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newEntry.amount;
+    profile.incomeStatement.months[monthIndex].totalIncome += newEntry.amount;
+  } else {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newEntry.amount;
+    profile.incomeStatement.months[monthIndex].totalExpenses += newEntry.amount;
+  }
   updateMonthlyTable();
   saveDataToLocalStorage();
 }
 
-function editEntry(type, monthIndex, catIndex, entryIndex) {
-  const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const oldAmount = entry.amount;
-
-  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-  const newDescription = prompt("Edit Description:", entry.description);
-  const newDate = prompt("Edit Date (YYYY-MM-DD):", entry.date);
-
-  if (!isNaN(newAmount) && newDescription && newDate) {
-    const delta = newAmount - oldAmount;
-
-    if (entry.type === 'income') {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += delta;
-      profile.incomeStatement.months[monthIndex].totalIncome += delta;
+function deleteEntry(type, monthIndex, catIndex, entryIndex) {
+  if (confirm("Are you sure you want to delete this entry?")) {
+    const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+    if (type === 'income') {
+      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= entry.amount;
+      profile.incomeStatement.months[monthIndex].totalIncome -= entry.amount;
     } else {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += delta;
-      profile.incomeStatement.months[monthIndex].totalExpenses += delta;
+      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses -= entry.amount;
+      profile.incomeStatement.months[monthIndex].totalExpenses -= entry.amount;
     }
-
-    entry.amount = newAmount;
-    entry.description = newDescription;
-    entry.date = newDate;
-
+    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
 }
-
-function deleteEntry(type, monthIndex, catIndex, entryIndex) {
-  const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const entryAmount = entry.amount;
-
-  if (confirm("Are you sure you want to delete this entry?")) {
-    if (entry.type === 'income') {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= entryAmount;
-      profile.incomeStatement.months[monthIndex].totalIncome -= entryAmount;
-    } else {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses -= entryAmount;
-      profile.incomeStatement.months[monthIndex].totalExpenses -= entryAmount;
-    }
-
-    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
-
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-  }
