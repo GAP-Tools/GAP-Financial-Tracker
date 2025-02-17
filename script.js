@@ -792,15 +792,7 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
-  if (type === 'income') {
-    profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newEntry.amount;
-    profile.incomeStatement.months[monthIndex].totalIncome += newEntry.amount;
-  } else {
-    profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newEntry.amount;
-    profile.incomeStatement.months[monthIndex].totalExpenses += newEntry.amount;
-  }
   updateMonthlyTable();
-  updateFundAllocationTable();
   saveDataToLocalStorage();
 }
 
@@ -816,6 +808,6 @@ function deleteEntry(type, monthIndex, catIndex, entryIndex) {
     }
     profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
     updateMonthlyTable();
-    updateFundAllocationTable();
     saveDataToLocalStorage();
   }
+  } ​ this is the correct javascript code..let the entries data link with the fund allocation table e.g Income, expenses andall entries data duplicated should link to and update in the funds allocation table and it's moda
