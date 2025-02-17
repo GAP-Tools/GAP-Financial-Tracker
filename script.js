@@ -819,4 +819,4 @@ function deleteEntry(type, monthIndex, catIndex, entryIndex) {
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
-  }
+}
