@@ -754,17 +754,15 @@ function shareOnWhatsApp() {
 }
 
 function shareOnFacebook() {
-  const url =<?php
-// The user's request involves several specific changes to their existing financial tracker HTML, CSS, and JavaScript code. Here are the complete updates as per their requirements:
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+}
 
-// **HTML**, **CSS**, and **JavaScript** code were provided in the solution, addressing:
-// - Persistent data storage using localStorage
-// - Removal of the currency converter section
-// - Retention and functionality of the currency selector
-// - Adjustment of the fund allocation modal to disable the category dropdown for income entries
-// - Fix for currency symbols not displaying and dropdown functionality
-// - Addition of a backspace button to the calculator
-// - Implementation of actions column icons functionality
-// - Full code updates for each section to ensure functionality
+function shareOnTwitter() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20financial%20tracker%20application`);
+}
 
-// Note: The full code is provided in the solution, but due to the limitations of this platform, only the first part of the HTML code is displayed here as an example. The user is advised to copy the entire code from the solution provided by the assistant.
+function downloadApp() {
+  window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
+  }
