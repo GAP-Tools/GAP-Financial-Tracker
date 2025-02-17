@@ -541,7 +541,7 @@ function loadSavedData() {
 }
 
 function generateStory() {
-  const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile.currency, "").trim());
+  const totalIncome = parseFloat(document.getElementById("average-income").textContent.replace(profile,.currency "").trim());
   const totalExpenses = parseFloat(document.getElementById("average-expenses").textContent.replace(profile.currency, "").trim());
   const totalAssets = parseFloat(document.getElementById("total-assets").textContent.replace(profile.currency, "").trim());
   const totalLiabilities = parseFloat(document.getElementById("total-liabilities").textContent.replace(profile.currency, "").trim());
@@ -778,6 +778,7 @@ function editEntry(type, monthIndex, catIndex, entryIndex) {
     entry.amount = newAmount;
     entry.description = newDescription;
     entry.date = newDate;
+    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.sort((a, b) => new Date(a.date) - new Date(b.date));
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
@@ -788,10 +789,18 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   const newEntry = {
     date: new Date().toISOString().split("T")[0],
     description: `${originalEntry.description} copy`,
-    amount: 0, // Set the initial amount to zero
+    amount: 0,
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
+  if (type === 'income') {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newEntry.amount;
+    profile.incomeStatement.months[monthIndex].totalIncome += newEntry.amount;
+  } else {
+    profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newEntry.amount;
+    profile.incomeStatement.months[monthIndex].totalExpenses += newEntry.amount;
+  }
+  profile.incomeStatement.months[monthIndex].categories[catIndex].entries.sort((a, b) => new Date(a.date) - new Date(b.date));
   updateMonthlyTable();
   saveDataToLocalStorage();
 }
