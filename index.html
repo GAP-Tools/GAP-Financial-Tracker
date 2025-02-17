@@ -31,14 +31,23 @@
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
+    <!-- Fund Allocation Section -->
+    <section class="fund-allocation">
+      <h2>Fund Allocation</h2>
+      <button onclick="showAllocationModal()">Manage Categories</button>
+      <div class="table-container">
+        <table id="fund-allocation-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Allocation[%]</th>
+              <th>Balance</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody id="fund-allocation-body"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Income Statement Section -->
@@ -130,7 +139,7 @@
   </div>
 
   <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">calculator</div>
+  <div class="calculator-icon" onclick="toggleCalculator()">Calculator</div>
 
   <!-- Calculator Popup -->
   <div id="calculatorPopup" class="calculator-popup">
@@ -152,6 +161,7 @@
         <button onclick="appendToCalculator('*')">*</button>
         <button onclick="appendToCalculator('0')">0</button>
         <button onclick="appendToCalculator('.')">.</button>
+        <button onclick="deleteLastCharacter()">⌫</button>
         <button onclick="calculateResult()">=</button>
         <button onclick="appendToCalculator('/')">/</button>
         <button onclick="clearCalculator()">C</button>
@@ -170,14 +180,39 @@
       </select>
       <input type="number" id="entryAmount" placeholder="Amount">
       <input type="text" id="entryDescription" placeholder="Description">
-      <div class="category-select">
+      <div class="category-select" id="categorySelectDiv">
         <select id="entryCategory"></select>
-        <input type="text" id="newCategory" placeholder="New Category">
       </div>
       <button onclick="saveEntry()">Save Entry</button>
     </div>
   </div>
 
+  <!-- Allocation Modal -->
+  <div id="allocationModal" class="allocation-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAllocationModal()">&times;</span>
+      <h3>Manage Fund Allocation Categories</h3>
+      <div class="category-list">
+        <ul id="allocationCategories"></ul>
+      </div>
+      <div class="category-form">
+        <input type="text" id="newAllocationCategory" placeholder="New Category">
+        <input type="number" id="newAllocationPercentage" placeholder="Percentage">
+        <button onclick="addAllocationCategory()">Add Category</button>
+      </div>
+      <button onclick="saveAllocations()">Save Allocations</button>
+    </div>
+  </div>
+
+  <!-- Transaction Summary Modal -->
+  <div id="transactionSummaryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeSummaryModal()">&times;</span>
+      <h3>Transaction Summary</h3>
+      <div id="transactionSummaryText"></div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
-        </html>
+      </html>
