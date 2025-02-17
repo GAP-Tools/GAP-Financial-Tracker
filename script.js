@@ -726,7 +726,7 @@ function importData() {
     reader.onload = (e) => {
       const data = JSON.parse(e.target.result);
       profile = data;
- load     SavedData();
+      loadSavedData();
       saveDataToLocalStorage();
       alert("Data imported successfully!");
     };
