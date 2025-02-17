@@ -820,52 +820,13 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   const newEntry = {
     date: new Date().toISOString().split("T")[0],
     description: `${originalEntry.description} (copy)`,
-    amount: originalEntry.amount,
+    amount: 0, // Set initial amount to zero
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
 
-  // Update fund allocations
-  if (type === 'income') {
-    profile.generalIncome.balance += newEntry.amount;
-    profile.fundAllocations.categories.forEach(cat => {
-      const allocatedAmount = newEntry.amount * (cat.percentage / 100);
-      cat.balance += allocatedAmount;
-      cat.transactions.push({
-        date: newEntry.date,
-        amount: allocatedAmount,
-        type: 'income',
-        description: newEntry.description,
-      });
-    });
-    profile.generalIncome.transactions.push({
-      date: newEntry.date,
-      amount: newEntry.amount,
-      type: 'income',
-      description: newEntry.description,
-    });
-  } else {
-    const fundCategory = profile.fundAllocations.categories.find(c => c.name === profile.incomeStatement.months[monthIndex].categories[catIndex].name);
-    if (fundCategory) {
-      fundCategory.balance -= newEntry.amount;
-      fundCategory.transactions.push({
-        date: newEntry.date,
-        amount: -newEntry.amount,
-        type: 'expense',
-        description: newEntry.description,
-      });
-    }
-    profile.generalIncome.balance -= newEntry.amount;
-    profile.generalIncome.transactions.push({
-      date: newEntry.date,
-      amount: -newEntry.amount,
-      type: 'expense',
-      description: newEntry.description,
-    });
-  }
-
+  // Do not update fund allocations for duplicated entries until edited
   updateMonthlyTable();
-  updateFundAllocationTable();
   saveDataToLocalStorage();
 }
 
@@ -979,4 +940,4 @@ function removeGeneralExpenseTransactions(amount, desc, date) {
     tx.amount === -amount && tx.description === desc && tx.date === date
   );
   if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-  }
+}
