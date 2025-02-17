@@ -401,7 +401,7 @@ function updateFinancialHealth() {
 
 function getHealthColor(score) {
   return score <= 39 ? "#ff6384" : score <= 59 ? "#ffcd56" : score <= 79 ? "#4bc0c0" : "#36a2eb";
-}
+                              }
 
 function generateHealthTip(score, cashflow, passiveIncomeTarget) {
   const tips = {
