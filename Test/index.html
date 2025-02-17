@@ -31,6 +31,16 @@
       <button onclick="saveProfile()">Save Profile</button>
     </section>
 
+    <!-- Currency Converter -->
+    <section class="currency-converter">
+      <h2>Currency Converter</h2>
+      <input type="number" id="amount" placeholder="Amount">
+      <select id="fromCurrency"></select>
+      <select id="toCurrency"></select>
+      <button onclick="convertCurrency()">Convert</button>
+      <p id="conversionResult"></p>
+    </section>
+
     <!-- Fund Allocation Section -->
     <section class="fund-allocation">
       <h2>Fund Allocation</h2>
@@ -40,9 +50,9 @@
           <thead>
             <tr>
               <th>Category</th>
+              <th>Allocation[%]</th>
               <th>Balance</th>
               <th>Summary</th>
-              <th>Allocation[%]</th>
             </tr>
           </thead>
           <tbody id="fund-allocation-body"></tbody>
@@ -74,16 +84,6 @@
       </div>
       <button onclick="showEntryModal('income')">Add Income</button>
       <button onclick="showEntryModal('expense')">Add Expense</button>
-    </section>
-
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
     </section>
 
     <!-- Balance Sheet Section -->
@@ -224,4 +224,4 @@
 
   <script src="script.js"></script>
 </body>
-            </html>
+        </html>
