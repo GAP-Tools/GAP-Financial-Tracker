@@ -950,4 +950,4 @@ function removeFundExpenseTransactions(transactions, amount, desc, date) {
 function removeGeneralExpenseTransactions(amount, desc, date) {
     const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
     if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-  }
+        }
