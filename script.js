@@ -56,7 +56,7 @@ const healthChart = new Chart(healthChartCtx, {
 });
 
 async function fetchCurrencyRates() {
-  const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD";
+  const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD  ";
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -98,7 +98,7 @@ function getCurrencySymbol(currency) {
 document.addEventListener('DOMContentLoaded', function() {
   const switchLink = document.getElementById('switchLink');
   switchLink.addEventListener('click', function() {
-    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Business";
+    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Business  ";
   });
   fetchCurrencyRates();
 });
@@ -744,21 +744,21 @@ function clearData() {
 
 function shareOnWhatsApp() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application:%20${url}`);
+  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application:%20  ${url}`);
 }
 
 function shareOnFacebook() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=  ${url}`);
 }
 
 function shareOnTwitter() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20financial%20tracker%20application`);
+  window.open(`https://twitter.com/intent/tweet?url=  ${url}&text=Check%20out%20this%20financial%20tracker%20application`);
 }
 
 function downloadApp() {
-  window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
+  window.open("https://www.appcreator24.com/app3480869-q98157  ", "_blank");
 }
 
 function editEntry(type, monthIndex, catIndex, entryIndex) {
@@ -810,4 +810,4 @@ function deleteEntry(type, monthIndex, catIndex, entryIndex) {
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
-  } ​ this is the correct javascript code..let the entries data link with the fund allocation table e.g Income, expenses andall entries data duplicated should link to and update in the funds allocation table and it's moda
+}
