@@ -21,7 +21,7 @@ let profile = {
 
 let currencyRates = {};
 
-const incomeStatementBody = document.getElementById("income-statement-body");
+const incomeStatementBody = document.getElementById("monthly-body");
 const balanceSheetBody = document.getElementById("balance-sheet-body");
 const totalAssets = document.getElementById("total-assets");
 const totalLiabilities = document.getElementById("total-liabilities");
@@ -406,19 +406,15 @@ function generateHealthTip(score, cashflow, passiveIncomeTarget) {
     low: [
       "Your expenses are higher than your income. Start by cutting unnecessary spending like dining out or subscriptions you don’t use.",
       "You’re living paycheck to paycheck. Focus on building an emergency fund, even if it’s just $10 a week.",
-      // ... (remaining tips are truncated for brevity)
     ],
     moderate: [
       "Your financial health is improving, but you’re not out of the woods yet. Keep reducing liabilities and focus on acquiring assets."
-      // ... (remaining tips are truncated for brevity)
     ],
     good: [
       "Great job! Your income is higher than your expenses. Keep building your assets and focus on generating passive income.",
-      // ... (remaining tips are truncated for brevity)
     ],
     excellent: [
       "Excellent! Your financial health is in great shape. Keep up the good work and focus on maintaining your wealth.",
-      // ... (remaining tips are truncated for brevity)
     ]
   };
 
@@ -428,12 +424,10 @@ function generateHealthTip(score, cashflow, passiveIncomeTarget) {
   if (cashflow < passiveIncomeTarget) {
     extraTips.push(
       "Your cashflow is below your passive income target. Focus on increasing income or reducing expenses.",
-      // ... (remaining tips are truncated for brevity)
     );
   } else {
     extraTips.push(
       "Your cashflow exceeds your passive income target. Keep up the good work!",
-      // ... (remaining tips are truncated for brevity)
     );
   }
 
@@ -684,11 +678,11 @@ function updateFundAllocationTable() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${cat.name}</td>
+      <td>${cat.percentage}%</td>
       <td>${profile.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
       <td>
         <button onclick="viewCategoryTransactions(${profile.fundAllocations.categories.indexOf(cat)})">View</button>
       </td>
-      <td>${cat.percentage}%</td>
     `;
     body.appendChild(row);
   });
