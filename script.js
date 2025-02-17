@@ -56,7 +56,7 @@ const healthChart = new Chart(healthChartCtx, {
 });
 
 async function fetchCurrencyRates() {
-  const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD  ";
+  const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD";
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -98,7 +98,7 @@ function getCurrencySymbol(currency) {
 document.addEventListener('DOMContentLoaded', function() {
   const switchLink = document.getElementById('switchLink');
   switchLink.addEventListener('click', function() {
-    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Business  ";
+    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Business";
   });
   fetchCurrencyRates();
 });
@@ -744,41 +744,73 @@ function clearData() {
 
 function shareOnWhatsApp() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application:%20  ${url}`);
+  window.open(`https://api.whatsapp.com/send?text=Check%20out%20this%20financial%20tracker%20application:%20${url}`);
 }
 
 function shareOnFacebook() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=  ${url}`);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
 }
 
 function shareOnTwitter() {
   const url = encodeURIComponent(window.location.href);
-  window.open(`https://twitter.com/intent/tweet?url=  ${url}&text=Check%20out%20this%20financial%20tracker%20application`);
+  window.open(`https://twitter.com/intent/tweet?url=${url}&text=Check%20out%20this%20financial%20tracker%20application`);
 }
 
 function downloadApp() {
-  window.open("https://www.appcreator24.com/app3480869-q98157  ", "_blank");
+  window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
 }
 
 function editEntry(type, monthIndex, catIndex, entryIndex) {
   const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
-  const newDescription = prompt("Edit Description:", entry.description);
-  const newDate = prompt("Edit Date (YYYY-MM-DD):", entry.date);
+  const oldAmount = entry.amount;
+  const oldDescription = entry.description;
+  const oldDate = entry.date;
+
+  const newAmount = parseFloat(prompt("Edit Amount:", oldAmount));
+  const newDescription = prompt("Edit Description:", oldDescription);
+  const newDate = prompt("Edit Date (YYYY-MM-DD):", oldDate);
+
   if (!isNaN(newAmount) && newDescription && newDate) {
-    const diff = newAmount - entry.amount;
+    const diff = newAmount - oldAmount;
+    const month = profile.incomeStatement.months[monthIndex];
+    const category = month.categories[catIndex];
+
+    // Update income statement totals
     if (type === 'income') {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += diff;
-      profile.incomeStatement.months[monthIndex].totalIncome += diff;
+      category.totalIncome += diff;
+      month.totalIncome += diff;
     } else {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += diff;
-      profile.incomeStatement.months[monthIndex].totalExpenses += diff;
+      category.totalExpenses += diff;
+      month.totalExpenses += diff;
     }
+
+    // Update fund allocations
+    if (type === 'income') {
+      profile.generalIncome.balance += diff;
+      profile.fundAllocations.categories.forEach(cat => {
+        const allocatedDiff = diff * (cat.percentage / 100);
+        cat.balance += allocatedDiff;
+        updateFundTransactions(cat.transactions, oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
+      });
+      updateGeneralIncomeTransactions(oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
+    } else {
+      const fundCategory = profile.fundAllocations.categories.find(c => c.name === category.name);
+      if (fundCategory) {
+        fundCategory.balance -= diff;
+        updateFundExpenseTransactions(fundCategory.transactions, oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
+      }
+      profile.generalIncome.balance -= diff;
+      updateGeneralExpenseTransactions(oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
+    }
+
+    // Update entry data
     entry.amount = newAmount;
     entry.description = newDescription;
     entry.date = newDate;
+
     updateMonthlyTable();
+    updateFundAllocationTable();
     saveDataToLocalStorage();
   }
 }
@@ -787,27 +819,164 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   const originalEntry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
   const newEntry = {
     date: new Date().toISOString().split("T")[0],
-    description: `${originalEntry.description} copy`,
-    amount: 0, // Set the initial amount to zero
+    description: `${originalEntry.description} (copy)`,
+    amount: originalEntry.amount,
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
+
+  // Update fund allocations
+  if (type === 'income') {
+    profile.generalIncome.balance += newEntry.amount;
+    profile.fundAllocations.categories.forEach(cat => {
+      const allocatedAmount = newEntry.amount * (cat.percentage / 100);
+      cat.balance += allocatedAmount;
+      cat.transactions.push({
+        date: newEntry.date,
+        amount: allocatedAmount,
+        type: 'income',
+        description: newEntry.description,
+      });
+    });
+    profile.generalIncome.transactions.push({
+      date: newEntry.date,
+      amount: newEntry.amount,
+      type: 'income',
+      description: newEntry.description,
+    });
+  } else {
+    const fundCategory = profile.fundAllocations.categories.find(c => c.name === profile.incomeStatement.months[monthIndex].categories[catIndex].name);
+    if (fundCategory) {
+      fundCategory.balance -= newEntry.amount;
+      fundCategory.transactions.push({
+        date: newEntry.date,
+        amount: -newEntry.amount,
+        type: 'expense',
+        description: newEntry.description,
+      });
+    }
+    profile.generalIncome.balance -= newEntry.amount;
+    profile.generalIncome.transactions.push({
+      date: newEntry.date,
+      amount: -newEntry.amount,
+      type: 'expense',
+      description: newEntry.description,
+    });
+  }
+
   updateMonthlyTable();
+  updateFundAllocationTable();
   saveDataToLocalStorage();
 }
 
 function deleteEntry(type, monthIndex, catIndex, entryIndex) {
   if (confirm("Are you sure you want to delete this entry?")) {
     const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+    const month = profile.incomeStatement.months[monthIndex];
+    const category = month.categories[catIndex];
+
+    // Update income statement totals
     if (type === 'income') {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome -= entry.amount;
-      profile.incomeStatement.months[monthIndex].totalIncome -= entry.amount;
+      category.totalIncome -= entry.amount;
+      month.totalIncome -= entry.amount;
     } else {
-      profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses -= entry.amount;
-      profile.incomeStatement.months[monthIndex].totalExpenses -= entry.amount;
+      category.totalExpenses -= entry.amount;
+      month.totalExpenses -= entry.amount;
     }
-    profile.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+
+    // Update fund allocations
+    if (type === 'income') {
+      profile.generalIncome.balance -= entry.amount;
+      profile.fundAllocations.categories.forEach(cat => {
+        const allocatedAmount = entry.amount * (cat.percentage / 100);
+        cat.balance -= allocatedAmount;
+        removeFundTransactions(cat.transactions, allocatedAmount, entry.description, entry.date);
+      });
+      removeGeneralIncomeTransactions(entry.amount, entry.description, entry.date);
+    } else {
+      const fundCategory = profile.fundAllocations.categories.find(c => c.name === category.name);
+      if (fundCategory) {
+        fundCategory.balance += entry.amount;
+        removeFundExpenseTransactions(fundCategory.transactions, entry.amount, entry.description, entry.date);
+      }
+      profile.generalIncome.balance += entry.amount;
+      removeGeneralExpenseTransactions(entry.amount, entry.description, entry.date);
+    }
+
+    // Remove entry
+    category.entries.splice(entryIndex, 1);
+
     updateMonthlyTable();
+    updateFundAllocationTable();
     saveDataToLocalStorage();
   }
 }
+
+// Helper functions for transaction updates
+function updateFundTransactions(transactions, oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
+  transactions.forEach(tx => {
+    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === oldAmount) {
+      tx.amount = newAmount;
+      tx.description = newDesc;
+      tx.date = newDate;
+    }
+  });
+}
+
+function updateGeneralIncomeTransactions(oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
+  profile.generalIncome.transactions.forEach(tx => {
+    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === oldAmount) {
+      tx.amount = newAmount;
+      tx.description = newDesc;
+      tx.date = newDate;
+    }
+  });
+}
+
+function removeFundTransactions(transactions, amount, desc, date) {
+  const index = transactions.findIndex(tx => 
+    tx.amount === amount && tx.description === desc && tx.date === date
+  );
+  if (index > -1) transactions.splice(index, 1);
+}
+
+function removeGeneralIncomeTransactions(amount, desc, date) {
+  const index = profile.generalIncome.transactions.findIndex(tx => 
+    tx.amount === amount && tx.description === desc && tx.date === date
+  );
+  if (index > -1) profile.generalIncome.transactions.splice(index, 1);
+}
+
+function updateFundExpenseTransactions(transactions, oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
+  transactions.forEach(tx => {
+    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === -oldAmount) {
+      tx.amount = -newAmount;
+      tx.description = newDesc;
+      tx.date = newDate;
+    }
+  });
+}
+
+function updateGeneralExpenseTransactions(oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
+  profile.generalIncome.transactions.forEach(tx => {
+    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === -oldAmount) {
+      tx.amount = -newAmount;
+      tx.description = newDesc;
+      tx.date = newDate;
+    }
+  });
+}
+
+function removeFundExpenseTransactions(transactions, amount, desc, date) {
+  const index = transactions.findIndex(tx => 
+    tx.amount === -amount && tx.description === desc && tx.date === date
+  );
+  if (index > -1) transactions.splice(index, 1);
+}
+
+function removeGeneralExpenseTransactions(amount, desc, date) {
+  const index = profile.generalIncome.transactions.findIndex(tx => 
+    tx.amount === -amount && tx.description === desc && tx.date === date
+  );
+  if (index > -1) profile.generalIncome.transactions.splice(index, 1);
+                                            }
