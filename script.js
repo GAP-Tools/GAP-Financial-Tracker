@@ -788,17 +788,10 @@ function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
   const newEntry = {
     date: new Date().toISOString().split("T")[0],
     description: `${originalEntry.description} copy`,
-    amount: originalEntry.amount,
+    amount: 0, // Set the initial amount to zero
     type: originalEntry.type
   };
   profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
-  if (type === 'income') {
-    profile.incomeStatement.months[monthIndex].categories[catIndex].totalIncome += newEntry.amount;
-    profile.incomeStatement.months[monthIndex].totalIncome += newEntry.amount;
-  } else {
-    profile.incomeStatement.months[monthIndex].categories[catIndex].totalExpenses += newEntry.amount;
-    profile.incomeStatement.months[monthIndex].totalExpenses += newEntry.amount;
-  }
   updateMonthlyTable();
   saveDataToLocalStorage();
 }
@@ -817,4 +810,4 @@ function deleteEntry(type, monthIndex, catIndex, entryIndex) {
     updateMonthlyTable();
     saveDataToLocalStorage();
   }
-}
+  }
