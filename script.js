@@ -979,4 +979,4 @@ function removeGeneralExpenseTransactions(amount, desc, date) {
     tx.amount === -amount && tx.description === desc && tx.date === date
   );
   if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-                                            }
+  }
