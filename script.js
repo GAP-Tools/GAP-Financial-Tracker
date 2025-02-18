@@ -139,10 +139,6 @@ function showEntryModal(type) {
     document.getElementById('entryDescription').value = '';
 }
 
-function closeModal() {
-    document.getElementById('entryModal').style.display = 'none';
-}
-
 function populateCategories() {
     const categorySelect = document.getElementById('entryCategory');
     categorySelect.innerHTML = '<option value="">Select Category</option>';
@@ -780,9 +776,11 @@ function editEntry(type, monthIndex, catIndex, entryIndex) {
         if (type === 'income') {
             profile.generalIncome.balance += diff;
             profile.fundAllocations.categories.forEach(cat => {
-                const allocatedDiff = diff * (cat.percentage / 100);
-                cat.balance += allocatedDiff;
-                updateFundTransactions(cat.transactions, oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
+                const oldAllocated = oldAmount * (cat.percentage / 100);
+                const newAllocated = newAmount * (cat.percentage / 100);
+                const diffAllocated = newAllocated - oldAllocated;
+                cat.balance += diffAllocated;
+                updateFundTransactions(cat.transactions, oldAllocated, newAllocated, oldDescription, newDescription, oldDate, newDate);
             });
             updateGeneralIncomeTransactions(oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
         } else {
@@ -852,20 +850,20 @@ function deleteEntry(type, monthIndex, catIndex, entryIndex) {
     }
 }
 
-function updateFundTransactions(transactions, oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
+function updateFundTransactions(transactions, oldAllocated, newAllocated, oldDesc, newDesc, oldDate, newDate) {
     let transactionExist = false;
     transactions.forEach(tx => {
-        if (tx.description === oldDesc && tx.date === oldDate && tx.amount === oldAmount) {
-            tx.amount = newAmount;
+        if (tx.description === oldDesc && tx.date === oldDate && tx.amount === oldAllocated) {
+            tx.amount = newAllocated;
             tx.description = newDesc;
             tx.date = newDate;
             transactionExist = true;
         }
     });
-    if (!transactionExist && oldAmount === 0) {
+    if (!transactionExist) {
         transactions.push({
             date: newDate,
-            amount: newAmount,
+            amount: newAllocated,
             type: 'income',
             description: newDesc,
         });
@@ -882,7 +880,7 @@ function updateGeneralIncomeTransactions(oldAmount, newAmount, oldDesc, newDesc,
             transactionExist = true;
         }
     });
-    if (!transactionExist && oldAmount === 0) {
+    if (!transactionExist) {
         profile.generalIncome.transactions.push({
             date: newDate,
             amount: newAmount,
@@ -902,7 +900,7 @@ function updateFundExpenseTransactions(transactions, oldAmount, newAmount, oldDe
             transactionExist = true;
         }
     });
-    if (!transactionExist && oldAmount === 0) {
+    if (!transactionExist) {
         transactions.push({
             date: newDate,
             amount: -newAmount,
@@ -922,7 +920,7 @@ function updateGeneralExpenseTransactions(oldAmount, newAmount, oldDesc, newDesc
             transactionExist = true;
         }
     });
-    if (!transactionExist && oldAmount === 0) {
+    if (!transactionExist) {
         profile.generalIncome.transactions.push({
             date: newDate,
             amount: -newAmount,
@@ -950,4 +948,4 @@ function removeFundExpenseTransactions(transactions, amount, desc, date) {
 function removeGeneralExpenseTransactions(amount, desc, date) {
     const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
     if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-        }
+    }
