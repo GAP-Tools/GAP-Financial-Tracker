@@ -27,13 +27,13 @@ input, select, button {
 }
 
 button {
-  background-color: #0056b3;
+  background-color: green;
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: green;
+  background-color: #0056b3;
 }
 
 table {
@@ -80,15 +80,14 @@ th, td {
 }
 
 .actions button {
-  background: #0056b3;
+  background: green;
   border: none;
   cursor: pointer;
   font-size: 16px;
 }
 
 .actions button:hover {
-  background-color: #0056b3;
-  color: white;
+  color: #0056b3;
 }
 
 .target-input {
@@ -108,23 +107,6 @@ th, td {
   font-size: 12px;
   color: #555;
   margin-left: 5px;
-}
-
-#switchLink {
-  display: inline-block;
-  background-color: green;
-  box-shadow: 2px 2px 4px #0056b3;
-  padding: 5px 10px;
-  margin: 0;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
-}
-
-#switchLink:hover {
-  box-shadow: 2px 2px 4px #007bff;
 }
 
 .calculator-icon {
@@ -169,12 +151,64 @@ th, td {
   border-radius: 5px;
   background-color: #f4f4f4;
   cursor: pointer;
-  color: #0056b3;
+  color: green;
 }
 
 .calculator-buttons button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+.business-selector {
+  margin-bottom: 20px;
+}
+
+#switchLink {
+  display: inline-block;
+  background-color: #0056b3;
+  box-shadow: 2px 2px 4px green;
+  padding: 5px 10px;
+  margin: 0;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+#switchLink:hover {
+  box-shadow: 2px 2px 4px #007bff;
+}
+
+.business-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.business-controls button {
   background-color: green;
   color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.business-controls button:hover {
+  background-color: #0056b3;
+}
+
+select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.business-list-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .modal {
