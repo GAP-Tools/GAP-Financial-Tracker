@@ -524,7 +524,7 @@ function saveEntry() {
 function getCurrentMonth() {
     const date = new Date();
     const year = date.getFullYear();
-    let month =date.getMonth() + 1;
+    let month = date.getMonth() + 1;
     month = month < 10 ? `0${month}` : month;
     return `${year}-${month}`;
 }
@@ -938,25 +938,6 @@ function clearData() {
     }
 }
 
-function shareOnWhatsApp() {
-    const url = encodeURIComponent(window.location.href);
-    window.open("https://api.whatsapp.com/send?text=Check out this financial tracker application: " + url);
-}
-
-function shareOnFacebook() {
-    const url = encodeURIComponent(window.location.href);
-    window.open("https://www.facebook.com/sharer/sharer.php?u=" + url);
-}
-
-function shareOnTwitter() {
-    const url = encodeURIComponent(window.location.href);
-    window.open("https://twitter.com/intent/tweet?url=" + url + "&text=Check out this financial tracker application");
-}
-
-function downloadApp() {
-    window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
-}
-
 // Backup and Restore
 function backupData() {
     localStorage.setItem("financialTrackerBackup", JSON.stringify(businesses));
@@ -1005,4 +986,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateMonthlyTable();
         saveDataToLocalStorage();
     }
-  }
+                                                }
