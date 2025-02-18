@@ -141,6 +141,14 @@ function switchBusiness() {
     updateFinancialHealth();
 }
 
+// Switch to personal
+document.addEventListener('DOMContentLoaded', function() {
+  const switchLink = document.getElementById('switchLink');
+  switchLink.addEventListener('click', function() {
+    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker";
+  });
+});
+
 // Save Business Profile
 function saveBusinessProfile() {
     const business = businesses[currentBusinessIndex];
