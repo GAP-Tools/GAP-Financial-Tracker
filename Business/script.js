@@ -328,7 +328,6 @@ function updateMonthlyTable() {
             document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
 
             (category.entries || []).forEach((entry, entryIndex) => {
-                if (entry.amount <= 0) return; // Skip zero or negative entries
                 const entryDate = new Date(entry.date);
                 const formattedDate = entryDate.toLocaleDateString('en-US', {
                     weekday: 'short',
@@ -381,7 +380,7 @@ function saveEntry() {
         category = 'General Income';
     }
 
-    if (isNaN(amount) || amount <= 0 || !description || (type === 'expense' && !category)) {
+    if (isNaN(amount) || amount < 0 || !description || (type === 'expense' && !category)) {
         alert('Invalid input. Please fill all fields correctly.');
         return;
     }
@@ -825,7 +824,6 @@ function syncFundAllocations() {
     (business.incomeStatement.months || []).forEach(month => {
         (month.categories || []).forEach(category => {
             (category.entries || []).forEach(entry => {
-                if (entry.amount <= 0) return;
                 if (entry.type === 'income') {
                     const amount = entry.amount;
                     business.fundAllocations.categories.forEach(fundCat => {
@@ -847,7 +845,6 @@ function syncFundAllocations() {
     (business.incomeStatement.months || []).forEach(month => {
         (month.categories || []).forEach(category => {
             (category.entries || []).forEach(entry => {
-                if (entry.amount <= 0) return;
                 if (entry.type === 'expense') {
                     const expenseCat = category.name;
                     const fundCat = business.fundAllocations.categories.find(fc => fc.name === expenseCat);
@@ -943,7 +940,7 @@ function addBalanceSheetEntry(type) {
     const amount = parseFloat(prompt("Enter Amount:"));
     const date = new Date().toISOString().split("T")[0];
 
-    if (description && !isNaN(amount) && amount > 0) {
+    if (description && !isNaN(amount) && amount >= 0) {
         business.balanceSheet.push({
             date,
             description,
@@ -1001,7 +998,7 @@ function editBalanceSheetEntry(index) {
     const newDescription = prompt("Edit Description:", entry.description);
     const newDate = prompt("Edit Date:", entry.date);
 
-    if (!isNaN(newAmount) && newDescription && newDate && newAmount > 0) {
+    if (!isNaN(newAmount) && newDescription && newDate && newAmount >= 0) {
         entry.amount = newAmount;
         entry.description = newDescription;
         entry.date = newDate;
@@ -1018,7 +1015,7 @@ function duplicateBalanceSheetEntry(index) {
     const newEntry = {
         date: new Date(entry.date).toDateString(),
         description: `${entry.description} (copy)`,
-        amount: 0,
+        amount: entry.amount,
         type: entry.type,
     };
     business.balanceSheet.push(newEntry);
