@@ -888,9 +888,11 @@ function viewCategoryTransactions(categoryIndex) {
     const summaryText = document.getElementById('transactionSummaryText');
     summaryText.innerHTML = '';
     category.transactions.forEach(transaction => {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = `On ${transaction.date}, ${transaction.amount} ${transaction.type} transaction for ${transaction.description}.`;
-        summaryText.appendChild(paragraph);
+        if (transaction.amount !== 0) { // Filter out zero-amount transactions
+            const paragraph = document.createElement('p');
+            paragraph.textContent = `On ${transaction.date}, ${transaction.amount} ${transaction.type} transaction for ${transaction.description}.`;
+            summaryText.appendChild(paragraph);
+        }
     });
     document.getElementById('transactionSummaryModal').style.display = 'block';
 }
@@ -1013,7 +1015,7 @@ function duplicateBalanceSheetEntry(index) {
     const business = businesses[currentBusinessIndex];
     const entry = business.balanceSheet[index];
     const newEntry = {
-        date: new Date(entry.date).toDateString(),
+        date: entry.date, // Same date as original
         description: `${entry.description} (copy)`,
         amount: entry.amount,
         type: entry.type,
@@ -1036,12 +1038,10 @@ function deleteBalanceSheetEntry(index) {
 function duplicateEntry(monthIndex, catIndex, entryIndex) {
     const business = businesses[currentBusinessIndex];
     const entry = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    const newDate = new Date(entry.date);
-    newDate.setDate(newDate.getDate() + 1);
     const newDescription = `${entry.description} (copy)`;
 
     business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
-        date: newDate.toISOString().split("T")[0],
+        date: entry.date, // Same date as original
         description: newDescription,
         amount: 0,
         type: entry.type,
@@ -1063,4 +1063,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-}
+    }
