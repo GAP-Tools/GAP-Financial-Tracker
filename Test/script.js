@@ -61,12 +61,11 @@ fetchCurrencyRates();
 
 // Populate Currency Dropdowns
 function populateCurrencyDropdowns() {
+  currencySelect.innerHTML = ''; // Clear existing options
   for (const currency in currencyRates) {
     const newOption = document.createElement("option");
     newOption.value = currency;
     newOption.text = `${currency} (${getCurrencySymbol(currency)})`;
-    fromCurrency.add(newOption);
-    toCurrency.add(newOption);
     currencySelect.add(newOption);
   }
 }
@@ -129,6 +128,7 @@ function updateBusinessList() {
     option.text = business.name;
     businessList.add(option);
   });
+  if (businesses.length === 0) currentBusinessIndex = -1;
 }
 
 // Switch Business
@@ -158,7 +158,7 @@ function saveBusinessProfile() {
 document.addEventListener('DOMContentLoaded', () => {
   const switchLink = document.getElementById('switchLink');
   switchLink.addEventListener('click', () => {
-    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/";
+    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/Personal";
   });
 });
 
@@ -166,8 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function editRevenueTarget() {
   const business = businesses[currentBusinessIndex];
   const newTarget = prompt("Enter New Revenue/Residual Income Target:", business.revenueTarget);
-  if (newTarget && !isNaN(newTarget)) {
-    business.revenueTarget = parseFloat(newTarget);
+  if (newTarget && !isNaN(+newTarget)) {
+    business.revenueTarget = +newTarget;
     saveBusinessProfile();
     updateFinancialHealth();
   } else {
@@ -191,10 +191,11 @@ function editBusinessName() {
 
 // Delete Business
 function deleteBusiness() {
-  if (confirm("Are you sure you want to delete this business? This action cannot be undone.")) {
+  if (businesses.length === 0) return;
+  if (confirm("Are you sure you want to delete this business?")) {
     businesses.splice(currentBusinessIndex, 1);
     if (businesses.length > 0) {
-      currentBusinessIndex = 0;
+      currentBusinessIndex = Math.min(currentBusinessIndex, businesses.length - 1);
       switchBusiness();
     } else {
       currentBusinessIndex = -1;
@@ -210,7 +211,7 @@ function deleteBusiness() {
 function addBalanceSheetEntry(type) {
   const business = businesses[currentBusinessIndex];
   const description = prompt("Enter Description:");
-  const amount = parseFloat(prompt("Enter Amount:"));
+  const amount = +prompt("Enter Amount:", 0);
   const date = new Date().toISOString().split("T")[0];
 
   if (description && !isNaN(amount)) {
@@ -218,7 +219,7 @@ function addBalanceSheetEntry(type) {
       date,
       description,
       amount,
-      type,
+      type: type.toLowerCase(),
     });
     updateBalanceSheet();
     saveDataToLocalStorage();
@@ -262,7 +263,7 @@ function updateBalanceSheet() {
 function editBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
   const entry = business.balanceSheet[index];
-  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  const newAmount = +prompt("Edit Amount:", entry.amount);
   const newDescription = prompt("Edit Description:", entry.description);
   const newDate = prompt("Edit Date:", entry.date);
 
@@ -282,12 +283,10 @@ function duplicateBalanceSheetEntry(index) {
   const business = businesses[currentBusinessIndex];
   const entry = business.balanceSheet[index];
   const newEntry = {
-    date: entry.date,
-    description: entry.description,
-    amount: entry.amount,
-    type: entry.type,
+    ...entry,
+    amount: 0,
+    date: new Date(entry.date).setDate(new Date(entry.date).getDate() + 1),
   };
-  newEntry.date = new Date(entry.date).setDate(new Date(entry.date).getDate() + 1);
   business.balanceSheet.push(newEntry);
   updateBalanceSheet();
   saveDataToLocalStorage();
@@ -295,8 +294,8 @@ function duplicateBalanceSheetEntry(index) {
 
 // Delete Balance Sheet Entry
 function deleteBalanceSheetEntry(index) {
-  if (confirm("Are you sure you want to delete this entry?")) {
-    const business = businesses[currentBusinessIndex];
+  const business = businesses[currentBusinessIndex];
+  if (confirm("Are you sure?")) {
     business.balanceSheet.splice(index, 1);
     updateBalanceSheet();
     saveDataToLocalStorage();
@@ -308,7 +307,6 @@ function showEntryModal(type) {
   document.getElementById('entryModal').style.display = 'block';
   document.getElementById('entryType').value = type;
   populateCategories();
-  document.getElementById('newCategory').value = '';
   document.getElementById('entryAmount').value = '';
   document.getElementById('entryDescription').value = '';
 }
@@ -343,7 +341,7 @@ function updateMonthlyTable() {
   monthlyBody.innerHTML = '';
 
   (business.incomeStatement.months || []).forEach((monthData, monthIndex) => {
-    // Compute month's totals from entries
+    // Compute totals
     const totalIncome = monthData.categories.reduce((sum, category) => {
       return sum + category.entries.reduce((s, entry) => {
         return (entry.type === 'income') ? s + entry.amount : s;
@@ -392,7 +390,6 @@ function updateMonthlyTable() {
     monthlyBody.appendChild(categoryContainer);
 
     (monthData.categories || []).forEach((category, catIndex) => {
-      // Compute category totals from entries
       const categoryTotalIncome = category.entries.reduce((sum, entry) => {
         return (entry.type === 'income') ? sum + entry.amount : sum;
       }, 0);
@@ -412,9 +409,6 @@ function updateMonthlyTable() {
               <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
             </svg>
           </button>
-          <button onclick="editCategoryName(${monthIndex}, ${catIndex})">✎</button>
-          <button onclick="duplicateCategory(${monthIndex}, ${catIndex})">♻️</button>
-          <button onclick="deleteCategory(${monthIndex}, ${catIndex})">🗑️</button>
         </td>
       `;
       document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
@@ -472,12 +466,12 @@ function expandCollapseRow(rowElement) {
 
 function saveEntry() {
   const type = document.getElementById('entryType').value;
-  const amount = parseFloat(document.getElementById('entryAmount').value);
+  const amount = +document.getElementById('entryAmount').value;
   const description = document.getElementById('entryDescription').value.trim();
-  const category = document.getElementById('entryCategory').value || document.getElementById('newCategory').value.trim();
+  const category = document.getElementById('entryCategory').value;
 
-  if (!category || isNaN(amount) || amount <= 0 || !description) {
-    alert('Please fill all fields correctly');
+  if (isNaN(amount) || amount <= 0 || !description || !category) {
+    alert('Invalid input. Please fill all fields correctly.');
     return;
   }
 
@@ -486,35 +480,34 @@ function saveEntry() {
   let monthObject;
   let categoryObject;
 
-  // Create or Update Month
+  // Update or create month
   if (!business.incomeStatement.months.some(m => m.month === currentMonth)) {
     business.incomeStatement.months.push({
       month: currentMonth,
       categories: [],
     });
   }
-
   monthObject = business.incomeStatement.months.find(m => m.month === currentMonth);
 
-  // Create or Update Category
+  // Update or create category
   if (!monthObject.categories.some(cat => cat.name === category)) {
     monthObject.categories.push({
       name: category,
       entries: [],
     });
   }
-
   categoryObject = monthObject.categories.find(cat => cat.name === category);
 
-  // Create New Entry
+  // Create new entry
   categoryObject.entries.push({
     date: new Date().toISOString().split("T")[0],
     description,
     amount,
-    type: type,
+    type: type === 'income' ? 'income' : 'expense',
   });
 
   updateMonthlyTable();
+  updateFundAllocationTable();
   closeModal();
   saveDataToLocalStorage();
 }
@@ -527,7 +520,7 @@ function getCurrentMonth() {
   return `${year}-${month}`;
 }
 
-// Additional Data Management Functions
+// Data Management
 function exportBusinessData() {
   const business = businesses[currentBusinessIndex];
   const fileName = saveFileNameInput.value.trim() || business.name;
@@ -550,10 +543,11 @@ function importBusinessData() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = JSON.parse(e.target.result);
-      businesses.push(data);
+      businesses = data || [];
       updateBusinessList();
-      switchBusiness(businesses.length - 1);
+      switchBusiness(0);
       saveDataToLocalStorage();
+      alert("Data imported successfully!");
     };
     reader.readAsText(file);
   };
@@ -582,13 +576,24 @@ function clearBusinessData() {
 // Data Storage
 function saveDataToLocalStorage() {
   localStorage.setItem("financialTrackerData", JSON.stringify(businesses));
+  localStorage.setItem("financialTrackerBackup", JSON.stringify(businesses));
 }
 
 function loadSavedData() {
   const savedData = JSON.parse(localStorage.getItem("financialTrackerData"));
   businesses = savedData || [];
   updateBusinessList();
-  if (businesses.length > 0) switchBusiness(0);
+  loadBackup();
+}
+
+function loadBackup() {
+  const backupData = JSON.parse(localStorage.getItem("financialTrackerBackup"));
+  if (backupData) {
+    businesses = backupData;
+    updateBusinessList();
+    switchBusiness(0);
+    alert("Data restored from backup!");
+  }
 }
 
 // UI Event Handlers
@@ -684,11 +689,11 @@ function updateFinancialHealth() {
   const avgCashflow = parseFloat(document.getElementById('average-cashflow').textContent.replace(business.currency, '').trim());
   const healthScore = Math.round((avgCashflow / business.revenueTarget) * 100);
 
-  healthChart.data.datasets[0].data = [healthScore > 100 ? 100 : healthScore];
+  healthChart.data.datasets[0].data = [Math.min(healthScore, 100)];
   healthChart.data.datasets[0].backgroundColor = getHealthColor(healthScore);
   healthChart.update();
 
-  healthPercentage.textContent = `${healthScore > 100 ? 100 : healthScore}%`;
+  healthPercentage.textContent = `${Math.min(healthScore, 100)}%`;
   healthTips.textContent = generateHealthTip(healthScore, avgCashflow, business.revenueTarget);
 }
 
@@ -718,7 +723,7 @@ function generateHealthTip(score, cashflow, target) {
 
   const section = score <= 39 ? 'low' : score <= 59 ? 'moderate' : score <= 79 ? 'good' : 'excellent';
   const extraTips = [];
-  
+
   if (cashflow < target) {
     extraTips.push("Your cashflow is below your revenue target. Focus on increasing income or reducing expenses.");
   } else {
@@ -823,12 +828,10 @@ function duplicateEntry(monthIndex, catIndex, entryIndex) {
   const business = businesses[currentBusinessIndex];
   const entryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
   const newEntry = {
-    date: entryToDuplicate.date,
-    description: entryToDuplicate.description,
+    ...entryToDuplicate,
     amount: 0,
-    type: entryToDuplicate.type
+    date: new Date(entryToDuplicate.date).setDate(new Date(entryToDuplicate.date).getDate() + 1)
   };
-  newEntry.date = new Date(entryToDuplicate.date).setDate(new Date(entryToDuplicate.date).getDate() + 1);
   business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
   updateMonthlyTable();
   saveDataToLocalStorage();
@@ -847,12 +850,8 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
 function addAllocationCategory() {
   const business = businesses[currentBusinessIndex];
   const newCategory = document.getElementById("newAllocationCategory").value;
-  const newPercentage = parseFloat(document.getElementById("newAllocationPercentage").value);
-  if (newCategory && !isNaN(newPercentage)) {
-    if (isNaN(newPercentage) || newPercentage <= 0) {
-      alert("Invalid percentage");
-      return;
-    }
+  const newPercentage = +document.getElementById("newAllocationPercentage").value;
+  if (newCategory && !isNaN(newPercentage) && newPercentage > 0) {
     const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
     if (totalPercentage + newPercentage > 100) {
       alert("Total percentage exceeds 100%");
@@ -865,15 +864,15 @@ function addAllocationCategory() {
       transactions: [],
     });
     populateAllocationCategories();
+    saveDataToLocalStorage();
+  } else {
+    alert("Invalid input. Please enter a valid percentage and category name.");
   }
 }
 
 function saveAllocations() {
-  let totalPercentage = 0;
   const business = businesses[currentBusinessIndex];
-  business.fundAllocations.categories.forEach(cat => {
-    totalPercentage += cat.percentage;
-  });
+  const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
   if (totalPercentage === 100) {
     closeAllocationModal();
     saveDataToLocalStorage();
@@ -906,14 +905,11 @@ function editAllocationCategory(index) {
   const business = businesses[currentBusinessIndex];
   const category = business.fundAllocations.categories[index];
   const newCategoryName = prompt("Edit Category Name:", category.name);
-  const newPercentage = parseFloat(prompt("Edit Percentage:", category.percentage));
-  if (newCategoryName && !isNaN(newPercentage)) {
+  const newPercentage = +prompt("Edit Percentage:", category.percentage);
+  if (newCategoryName && !isNaN(newPercentage) && newPercentage > 0) {
     category.name = newCategoryName;
     category.percentage = newPercentage;
-    let totalPercentage = 0;
-    business.fundAllocations.categories.forEach(cat => {
-      totalPercentage += cat.percentage;
-    });
+    const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
     if (totalPercentage === 100) {
       populateAllocationCategories();
       saveDataToLocalStorage();
@@ -968,40 +964,10 @@ function closeSummaryModal() {
   document.getElementById('transactionSummaryModal').style.display = 'none';
 }
 
-// Export and Import Data
-function exportData() {
-  const fileName = document.getElementById("saveFileName").value || "financial_data.json";
-  const data = JSON.stringify(businesses[currentBusinessIndex]);
-  const blob = new Blob([data], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fileName;
-  a.click();
-}
-
-function importData() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "application/json";
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = JSON.parse(e.target.result);
-      businesses[currentBusinessIndex] = data;
-      loadSavedData();
-      saveDataToLocalStorage();
-      alert("Data imported successfully!");
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
 function clearData() {
   if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
     localStorage.removeItem("financialTrackerData");
+    localStorage.removeItem("financialTrackerBackup");
     location.reload();
   }
 }
@@ -1025,198 +991,28 @@ function downloadApp() {
   window.open("https://www.appcreator24.com/app3480869-q98157", "_blank");
 }
 
-function editEntry(type, monthIndex, catIndex, entryIndex) {
-  const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const oldAmount = entry.amount;
-  const oldDescription = entry.description;
-  const oldDate = entry.date;
-  const newAmount = parseFloat(prompt("Edit Amount:", oldAmount));
-  const newDescription = prompt("Edit Description:", oldDescription);
-  const newDate = prompt("Edit Date (YYYY-MM-DD):", oldDate);
-  if (!isNaN(newAmount) && newDescription && newDate) {
-    const diff = newAmount - oldAmount;
-    const month = profile.incomeStatement.months[monthIndex];
-    const category = month.categories[catIndex];
-    if (type === 'income') {
-      category.totalIncome += diff;
-      month.totalIncome += diff;
-    } else {
-      category.totalExpenses += diff;
-      month.totalExpenses += diff;
+// Backup and Restore
+function backupData() {
+  localStorage.setItem("financialTrackerBackup", JSON.stringify(businesses));
+}
+
+function restoreData() {
+  const backup = localStorage.getItem("financialTrackerBackup");
+  if (backup) {
+    const confirmed = confirm("A backup was found. Do you want to restore it?");
+    if (confirmed) {
+      businesses = JSON.parse(backup);
+      updateBusinessList();
+      switchBusiness(0);
+      alert("Data restored from backup!");
     }
-    if (type === 'income') {
-      profile.generalIncome.balance += diff;
-      profile.fundAllocations.categories.forEach(cat => {
-        const allocatedDiff = diff * (cat.percentage / 100);
-        cat.balance += allocatedDiff;
-        const oldAllocatedAmount = oldAmount * (cat.percentage / 100);
-        const newAllocatedAmount = newAmount * (cat.percentage / 100);
-        updateFundTransactions(cat.transactions, oldAllocatedAmount, newAllocatedAmount, oldDescription, newDescription, oldDate, newDate);
-      });
-      updateGeneralIncomeTransactions(oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
-    } else {
-      const fundCategory = profile.fundAllocations.categories.find(c => c.name === category.name);
-      if (fundCategory) {
-        fundCategory.balance -= diff;
-        updateFundExpenseTransactions(fundCategory.transactions, oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
-      }
-      profile.generalIncome.balance -= diff;
-      updateGeneralExpenseTransactions(oldAmount, newAmount, oldDescription, newDescription, oldDate, newDate);
-    }
-    entry.amount = newAmount;
-    entry.description = newDescription;
-    entry.date = newDate;
-    updateMonthlyTable();
-    updateFundAllocationTable();
-    saveDataToLocalStorage();
   }
 }
 
-function duplicateEntry(type, monthIndex, catIndex, entryIndex) {
-  const originalEntry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const newEntry = {
-    date: new Date().toISOString().split("T")[0],
-    description: `${originalEntry.description} (copy)`,
-    amount: 0,
-    type: originalEntry.type
-  };
-  profile.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
-  updateMonthlyTable();
-  saveDataToLocalStorage();
-}
+window.addEventListener("beforeunload", () => {
+  backupData();
+});
 
-function deleteEntry(type, monthIndex, catIndex, entryIndex) {
-  if (confirm("Are you sure you want to delete this entry?")) {
-    const entry = profile.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    const month = profile.incomeStatement.months[monthIndex];
-    const category = month.categories[catIndex];
-    if (type === 'income') {
-      category.totalIncome -= entry.amount;
-      month.totalIncome -= entry.amount;
-    } else {
-      category.totalExpenses -= entry.amount;
-      month.totalExpenses -= entry.amount;
-    }
-    if (type === 'income') {
-      profile.generalIncome.balance -= entry.amount;
-      profile.fundAllocations.categories.forEach(cat => {
-        const allocatedAmount = entry.amount * (cat.percentage / 100);
-        cat.balance -= allocatedAmount;
-        removeFundTransactions(cat.transactions, allocatedAmount, entry.description, entry.date);
-      });
-      removeGeneralIncomeTransactions(entry.amount, entry.description, entry.date);
-    } else {
-      const fundCategory = profile.fundAllocations.categories.find(c => c.name === category.name);
-      if (fundCategory) {
-        fundCategory.balance += entry.amount;
-        removeFundExpenseTransactions(fundCategory.transactions, entry.amount, entry.description, entry.date);
-      }
-      profile.generalIncome.balance += entry.amount;
-      removeGeneralExpenseTransactions(entry.amount, entry.description, entry.date);
-    }
-    category.entries.splice(entryIndex, 1);
-    updateMonthlyTable();
-    updateFundAllocationTable();
-    saveDataToLocalStorage();
-  }
-}
-
-function updateFundTransactions(transactions, oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
-  let transactionExist = false;
-  transactions.forEach(tx => {
-    if (tx.description === oldDesc && tx.date === oldDate && parseFloat(tx.amount) === oldAmount) {
-      tx.amount = newAmount;
-      tx.description = newDesc;
-      tx.date = newDate;
-      transactionExist = true;
-    }
-  });
-  if (!transactionExist && oldAmount === 0) {
-    transactions.push({
-      date: newDate,
-      amount: newAmount,
-      type: 'income',
-      description: newDesc,
-    });
-  }
-}
-
-function updateGeneralIncomeTransactions(oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
-  let transactionExist = false;
-  profile.generalIncome.transactions.forEach(tx => {
-    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === oldAmount) {
-      tx.amount = newAmount;
-      tx.description = newDesc;
-      tx.date = newDate;
-      transactionExist = true;
-    }
-  });
-  if (!transactionExist && oldAmount === 0) {
-    profile.generalIncome.transactions.push({
-      date: newDate,
-      amount: newAmount,
-      type: 'income',
-      description: newDesc,
-    });
-  }
-}
-
-function updateFundExpenseTransactions(transactions, oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
-  let transactionExist = false;
-  transactions.forEach(tx => {
-    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === -oldAmount) {
-      tx.amount = -newAmount;
-      tx.description = newDesc;
-      tx.date = newDate;
-      transactionExist = true;
-    }
-  });
-  if (!transactionExist && oldAmount === 0) {
-    transactions.push({
-      date: newDate,
-      amount: -newAmount,
-      type: 'expense',
-      description: newDesc,
-    });
-  }
-}
-
-function updateGeneralExpenseTransactions(oldAmount, newAmount, oldDesc, newDesc, oldDate, newDate) {
-  let transactionExist = false;
-  profile.generalIncome.transactions.forEach(tx => {
-    if (tx.description === oldDesc && tx.date === oldDate && tx.amount === -oldAmount) {
-      tx.amount = -newAmount;
-      tx.description = newDesc;
-      tx.date = newDate;
-      transactionExist = true;
-    }
-  });
-  if (!transactionExist && oldAmount === 0) {
-    profile.generalIncome.transactions.push({
-      date: newDate,
-      amount: -newAmount,
-      type: 'expense',
-      description: newDesc,
-    });
-  }
-}
-
-function removeFundTransactions(transactions, amount, desc, date) {
-  const index = transactions.findIndex(tx => tx.amount === amount && tx.description === desc && tx.date === date);
-  if (index > -1) transactions.splice(index, 1);
-}
-
-function removeGeneralIncomeTransactions(amount, desc, date) {
-  const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === amount && tx.description === desc && tx.date === date);
-  if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-}
-
-function removeFundExpenseTransactions(transactions, amount, desc, date) {
-  const index = transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
-  if (index > -1) transactions.splice(index, 1);
-}
-
-function removeGeneralExpenseTransactions(amount, desc, date) {
-  const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
-  if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-    }
+window.addEventListener("load", () => {
+  restoreData();
+});
