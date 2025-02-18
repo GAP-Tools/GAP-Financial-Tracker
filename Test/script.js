@@ -3,7 +3,6 @@ let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
 let currencyRates = {}; // Currency exchange rate data
 let localStorageBackup;
-
 const monthsData = {};
 
 // DOM Elements
@@ -507,7 +506,7 @@ function saveEntry() {
   categoryObject.entries.push({
     date: new Date().toISOString().split("T")[0],
     description,
-    amount,
+    amount: parseFloat(amount),
     type: type === 'income' ? 'income' : 'expense',
   });
 
@@ -970,3 +969,27 @@ window.addEventListener("beforeunload", () => {
 window.addEventListener("load", () => {
   restoreData();
 });
+
+// Duplicate and Delete Entries
+function duplicateEntry(monthIndex, catIndex, entryIndex) {
+  const business = businesses[currentBusinessIndex];
+  const entry = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+  const newDate = new Date(entry.date);
+  newDate.setDate(newDate.getDate() + 1);
+  business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
+    ...entry,
+    date: newDate.toISOString().split("T")[0],
+    amount: 0,
+  });
+  updateMonthlyTable();
+  saveDataToLocalStorage();
+}
+
+function deleteEntry(monthIndex, catIndex, entryIndex) {
+  const business = businesses[currentBusinessIndex];
+  if (confirm("Are you sure you want to delete this entry?")) {
+    business.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+    updateMonthlyTable();
+    saveDataToLocalStorage();
+  }
+  }
