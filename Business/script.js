@@ -38,6 +38,12 @@ let healthChart = new Chart(healthChartCtx, {
     },
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const switchLink = document.getElementById('switchLink');
+    switchLink.addEventListener('click', function() {
+        window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker/";
+    });
+
 // Fetch Currency Rates
 async function fetchCurrencyRates() {
     const apiUrl = "https://v6.exchangerate-api.com/v6/eb5cfc3ff6c3b48bb6f60c83/latest/USD";
