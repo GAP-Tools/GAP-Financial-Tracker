@@ -342,7 +342,6 @@ function updateMonthlyTable() {
     monthlyBody.innerHTML = '';
 
     (business.incomeStatement.months || []).forEach((monthData, monthIndex) => {
-        // Compute totals
         const totalIncome = monthData.categories.reduce((sum, category) => {
             return sum + category.entries.reduce((s, entry) => {
                 return (entry.type === 'income') ? s + entry.amount : s;
@@ -391,20 +390,16 @@ function updateMonthlyTable() {
         monthlyBody.appendChild(categoryContainer);
 
         (monthData.categories || []).forEach((category, catIndex) => {
-            // Compute category totals
-            const categoryTotalIncome = category.entries.reduce((sum, entry) => {
-                return (entry.type === 'income') ? sum + entry.amount : sum;
-            }, 0);
-            const categoryTotalExpenses = category.entries.reduce((sum, entry) => {
-                return (entry.type === 'expense') ? sum + entry.amount : sum;
-            }, 0);
-
             const categoryRow = document.createElement('tr');
             categoryRow.classList.add('expandable');
             categoryRow.innerHTML = `
         <td class="editable-date" onclick="editCategory(${monthIndex}, ${catIndex})">${category.name}</td>
-        <td>${business.currency} ${categoryTotalIncome}</td>
-        <td>${business.currency} ${categoryTotalExpenses}</td>
+        <td>${business.currency} ${category.entries.reduce((sum, entry) => 
+            entry.type === 'income' ? sum + entry.amount : sum, 0
+        )}</td>
+        <td>${business.currency} ${category.entries.reduce((sum, entry) => 
+            entry.type === 'expense' ? sum + entry.amount : sum, 0
+        )}</td>
         <td>
           <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
             <svg class="expand-icon" viewBox="0 0 24 24">
@@ -514,6 +509,17 @@ function saveEntry() {
 
     if (type === 'income') {
         allocateIncome(amount);
+    } else {
+        // Deduct from fund allocation category's balance
+        const fundCategory = business.fundAllocations.categories.find(fc => fc.name === category);
+        if (fundCategory) {
+            fundCategory.transactions.push({
+                date: new Date().toISOString().split("T")[0],
+                amount: amount,
+                type: 'expense',
+                description: 'Expense Charge',
+            });
+        }
     }
 
     updateMonthlyTable();
@@ -541,7 +547,6 @@ function allocateIncome(amount) {
 
     business.fundAllocations.categories.forEach(cat => {
         const allocationAmount = (amount * cat.percentage) / 100;
-        cat.balance += allocationAmount;
         cat.transactions.push({
             date: new Date().toISOString().split("T")[0],
             amount: allocationAmount,
@@ -847,7 +852,6 @@ function addAllocationCategory() {
         business.fundAllocations.categories.push({
             name: newCategory,
             percentage: newPercentage,
-            balance: 0,
             transactions: [],
         });
         populateAllocationCategories();
@@ -921,11 +925,12 @@ function updateFundAllocationTable() {
     const body = document.getElementById('fund-allocation-body');
     body.innerHTML = '';
     business.fundAllocations.categories.forEach(cat => {
+        const balance = cat.transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
         const row = document.createElement('tr');
         row.innerHTML = `
         <td>${cat.name}</td>
         <td>${cat.percentage}%</td>
-        <td>${business.currency} ${parseFloat(cat.balance).toFixed(2)}</td>
+        <td>${business.currency} ${balance.toFixed(2)}</td>
         <td>
             <button onclick="viewCategoryTransactions(${business.fundAllocations.categories.indexOf(cat)})">View</button>
         </td>
@@ -942,7 +947,7 @@ function viewCategoryTransactions(categoryIndex) {
     summaryText.innerHTML = '';
     category.transactions.forEach(transaction => {
         const paragraph = document.createElement('p');
-        paragraph.textContent = `On ${transaction.date}, an amount of ${business.currency} ${transaction.amount} was recorded as ${transaction.type}: ${transaction.description}.`;
+        paragraph.textContent = `On ${transaction.date}, ${transaction.amount} ${transaction.type === 'income' ? 'allocated' : 'spent'}: ${transaction.description}.`;
         summaryText.appendChild(paragraph);
     });
     document.getElementById('transactionSummaryModal').style.display = 'block';
@@ -995,17 +1000,46 @@ function duplicateEntry(monthIndex, catIndex, entryIndex) {
     business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
         ...entry,
         date: new Date(newDate).toISOString().split("T")[0],
-        amount: 0,
+        description: `Duplicate of ${entry.description}`,
     });
+    if (entry.type === 'expense') {
+        const category = entry.category;
+        const fundCategory = business.fundAllocations.categories.find(fc => fc.name === category);
+        if (fundCategory) {
+            fundCategory.transactions.push({
+                date: new Date(newDate).toISOString().split("T")[0],
+                amount: entry.amount,
+                type: 'expense',
+                description: 'Expense duplication',
+            });
+        }
+    }
     updateMonthlyTable();
+    updateFundAllocationTable();
     saveDataToLocalStorage();
 }
 
 function deleteEntry(monthIndex, catIndex, entryIndex) {
     const business = businesses[currentBusinessIndex];
     if (confirm("Are you sure you want to delete this entry?")) {
+        const entry = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
         business.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
+        if (entry.type === 'expense') {
+            const category = entry.category;
+            const fundCategory = business.fundAllocations.categories.find(fc => fc.name === category);
+            if (fundCategory) {
+                const transactionIndex = fundCategory.transactions.findIndex(t => 
+                    t.date === entry.date &&
+                    t.amount === entry.amount &&
+                    t.type === 'expense' &&
+                    t.description === entry.description
+                );
+                if (transactionIndex !== -1) {
+                    fundCategory.transactions.splice(transactionIndex, 1);
+                }
+            }
+        }
         updateMonthlyTable();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
-    }
     }
