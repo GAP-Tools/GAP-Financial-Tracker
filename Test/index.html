@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GAP Multi-Business Financial Tracker</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Multi-Business Financial Tracker</title>
+  <link rel="stylesheet" href="business-styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -31,9 +31,8 @@
       <br>
       <label for="currency">Preferred Currency:</label>
       <select id="currency"></select>
-      <br>
-      <br>
-      <label for="revenue-target">Revenue/Residual Income Target:</label>
+      <br><br>
+      <label for="revenue-target">Revenue Target:</label>
       <div class="target-input">
         <input type="number" id="revenue-target" placeholder="Target">
         <button onclick="editRevenueTarget()">✎</button>
@@ -43,7 +42,7 @@
 
     <!-- Fund Allocation Section -->
     <section class="fund-allocation">
-      <h2>Business Fund Allocation</h2>
+      <h2>Fund Allocation</h2>
       <button onclick="showAllocationModal()">Manage Categories</button>
       <div class="table-container">
         <table id="fund-allocation-table">
@@ -77,8 +76,8 @@
           <tbody id="monthly-body"></tbody>
         </table>
         <div class="averages">
-          <p>Average Total Income: <span id="average-income">0</span></p>
-          <p>Average Total Expenses: <span id="average-expenses">0</span></p>
+          <p>Average Income: <span id="average-income">0</span></p>
+          <p>Average Expenses: <span id="average-expenses">0</span></p>
           <p>Average Cashflow: <span id="average-cashflow">0</span></p>
         </div>
       </div>
@@ -142,19 +141,19 @@
 
     <!-- Story Generation -->
     <section class="story-generation">
-      <h2>Business Financial Report</h2>
+      <h2>Business Financial Story</h2>
       <button onclick="generateBusinessStory()">Generate Story</button>
       <p id="businessFinancialStory"></p>
     </section>
   </div>
 
   <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">Calculator</div>
+  <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
 
   <!-- Calculator Popup -->
   <div id="calculatorPopup" class="calculator-popup">
     <div class="calculator-content">
-      <h3>Basic Calculator</h3>
+      <h3>Business Calculator</h3>
       <input type="text" id="calculatorInput" readonly>
       <div class="calculator-buttons">
         <button onclick="appendToCalculator('7')">7</button>
@@ -190,8 +189,9 @@
       </select>
       <input type="number" id="entryAmount" placeholder="Amount">
       <input type="text" id="entryDescription" placeholder="Description">
-      <div class="category-select" id="categorySelectDiv">
+      <div class="category-select">
         <select id="entryCategory"></select>
+        <input type="text" id="newCategory" placeholder="New Category">
       </div>
       <button onclick="saveEntry()">Save Entry</button>
     </div>
@@ -223,6 +223,6 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="business-script.js"></script>
 </body>
-    </html>
+        </html>
