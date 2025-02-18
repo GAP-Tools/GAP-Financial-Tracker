@@ -965,8 +965,15 @@ function updateBalanceSheet() {
 
     business.balanceSheet.forEach((entry, index) => {
         const row = document.createElement("tr");
+        const entryDate = new Date(entry.date);
+        const formattedDate = entryDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
         row.innerHTML = `
-      <td>${entry.date}</td>
+      <td>${formattedDate}</td>
       <td>${entry.description}</td>
       <td>${entry.type === "asset" ? `${business.currency} ${entry.amount}` : ""}</td>
       <td>${entry.type === "liability" ? `${business.currency} ${entry.amount}` : ""}</td>
@@ -1059,4 +1066,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-}
+                                                 }
