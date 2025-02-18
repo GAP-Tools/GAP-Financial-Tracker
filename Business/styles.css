@@ -11,32 +11,8 @@ body {
   padding: 20px;
 }
 
-.profile-section, .income-statement, .balance-sheet, .health-score, .currency-converter, .data-management, .share-app, .story-generation {
+.profile-section, .income-statement, .balance-sheet, .health-score, .data-management, .share-app, .story-generation, .fund-allocation {
   margin-bottom: 40px;
-}
-
-.business-controls button {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: green;
-  color: white;
-  cursor: pointer;
-}
-
-.business-controls button:hover {
-  background-color: #0056b3;
-}
-
-.business-controls {
-  margin-bottom: 10px;
-}
-
-.business-list-controls {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  margin-top: 10px;
 }
 
 h1, h2 {
@@ -139,7 +115,7 @@ th, td {
   right: 20px;
   font-size: 24px;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: green;
   color: white;
   padding: 10px;
   border-radius: 50%;
@@ -210,14 +186,31 @@ th, td {
   align-items: center;
 }
 
-#businessList {
-  padding: 10px;
+.business-controls button {
+  background-color: green;
+  color: white;
   border: 1px solid #ccc;
   border-radius: 5px;
-  flex-grow: 1;
+  padding: 10px;
 }
 
-/* New CSS */
+.business-controls button:hover {
+  background-color: #0056b3;
+}
+
+select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.business-list-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 10px;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -277,60 +270,45 @@ tbody tr:hover {
   gap: 5px;
 }
 
-ómo {
-  color: green;
+#fund-allocation-table, #fund-allocation-table th, #fund-allocation-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
 }
 
-.nested {
-  display: none;
-}
-
-.expandable.expanded + .nested {
-  display: table-row;
-}
-
-.collapsible {
-  cursor: pointer;
-}
-
-.collapsible:hover {
-  background-color: #ddd;
-}
-
-.abs-pack-right {
-  position: sticky;
-  right: 0;
-  background-color: white;
-  padding: 5px;
-}
-
-.abs-pack-right a {
-  color: blue;
-  text-decoration: none;
-}
-
-.abs-pack-right a:hover {
-  text-decoration: underline;
-}
-
-.date-picker {
-  cursor: pointer;
-}
-
-.date-picker svg {
-  margin-right: 5px;
-}
-
-.numeric-keypad {
+#fund-allocation-table {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  margin-top: 20px;
 }
 
-.numeric-keypad button {
-  padding: 15px;
-  font-size: 20px;
+.allocation-modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.allocation-modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.category-list {
+  margin-bottom: 20px;
+}
+
+.category-form input {
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .draft-indicator {
