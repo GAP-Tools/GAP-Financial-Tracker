@@ -313,6 +313,7 @@ function showEntryModal(type) {
     }
     document.getElementById('entryAmount').value = '';
     document.getElementById('entryDescription').value = '';
+    populateCategories();
 }
 
 // Close Modal
@@ -326,11 +327,7 @@ function populateCategories() {
     const categorySelect = document.getElementById('entryCategory');
     categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-    const allCategories = business.incomeStatement.months.reduce((acc, month) => {
-        return acc.concat(month.categories);
-    }, []);
-
-    allCategories.forEach(category => {
+    business.fundAllocations.categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category.name;
         option.textContent = category.name;
@@ -515,6 +512,10 @@ function saveEntry() {
         type: type === 'income' ? 'income' : 'expense',
     });
 
+    if (type === 'income') {
+        allocateIncome(amount);
+    }
+
     updateMonthlyTable();
     updateFundAllocationTable();
     closeModal();
@@ -527,6 +528,27 @@ function getCurrentMonth() {
     let month = date.getMonth() + 1;
     month = month < 10 ? `0${month}` : month;
     return `${year}-${month}`;
+}
+
+function allocateIncome(amount) {
+    const business = businesses[currentBusinessIndex];
+    const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
+
+    if (totalPercentage !== 100) {
+        alert("Fund allocation percentages do not add up to 100%");
+        return;
+    }
+
+    business.fundAllocations.categories.forEach(cat => {
+        const allocationAmount = (amount * cat.percentage) / 100;
+        cat.balance += allocationAmount;
+        cat.transactions.push({
+            date: new Date().toISOString().split("T")[0],
+            amount: allocationAmount,
+            type: 'income',
+            description: 'Income Allocation',
+        });
+    });
 }
 
 // Data Management
@@ -986,4 +1008,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateMonthlyTable();
         saveDataToLocalStorage();
     }
-                                                }
+    }
