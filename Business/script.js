@@ -253,7 +253,7 @@ function updateMonthlyTable() {
         const row = document.createElement('tr');
         row.classList.add('expandable');
         row.innerHTML = `
-      <td class="editable-date" onclick="editDate('month', ${monthIndex})">${monthData.month}</td>
+      <td class="editable-date" onclick="editDate('month', ${monthIndex})">${getFormattedMonth(monthData.month)}</td>
       <td>${business.currency} ${totalIncome}</td>
       <td>${business.currency} ${totalExpenses}</td>
       <td>${business.currency} ${totalIncome - totalExpenses}</td>
@@ -329,10 +329,17 @@ function updateMonthlyTable() {
 
             (category.entries || []).forEach((entry, entryIndex) => {
                 if (entry.amount <= 0) return; // Skip zero or negative entries
+                const entryDate = new Date(entry.date);
+                const formattedDate = entryDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
                 const dailyRow = document.createElement('tr');
                 dailyRow.innerHTML = `
           <td class="editable-date" onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">
-            ${entry.date}
+            ${formattedDate}
           </td>
           <td>${entry.description}</td>
           <td>${business.currency} ${entry.amount}</td>
@@ -349,6 +356,11 @@ function updateMonthlyTable() {
     });
 
     updateAverages();
+}
+
+function getFormattedMonth(monthString) {
+    const dateObj = new Date(`${monthString}-01`);
+    return dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
 function expandCollapseRow(rowElement) {
@@ -997,7 +1009,7 @@ function duplicateBalanceSheetEntry(index) {
     const business = businesses[currentBusinessIndex];
     const entry = business.balanceSheet[index];
     const newEntry = {
-        date: new Date(entry.date).toDateString(), // Same date or next day?
+        date: new Date(entry.date).toDateString(),
         description: `${entry.description} (copy)`,
         amount: 0,
         type: entry.type,
@@ -1047,4 +1059,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-                                                }
+}
