@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Business Financial Tracker</title>
+  <title>GAP Multi-Business Financial Tracker</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -41,14 +41,23 @@
       <button onclick="saveBusinessProfile()">Save Business Profile</button>
     </section>
 
-    <!-- Currency Converter -->
-    <section class="currency-converter">
-      <h2>Currency Converter</h2>
-      <input type="number" id="amount" placeholder="Amount">
-      <select id="fromCurrency"></select>
-      <select id="toCurrency"></select>
-      <button onclick="convertCurrency()">Convert</button>
-      <p id="conversionResult"></p>
+    <!-- Fund Allocation Section -->
+    <section class="fund-allocation">
+      <h2>Business Fund Allocation</h2>
+      <button onclick="showAllocationModal()">Manage Categories</button>
+      <div class="table-container">
+        <table id="fund-allocation-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Allocation[%]</th>
+              <th>Balance</th>
+              <th>Summary</th>
+            </tr>
+          </thead>
+          <tbody id="fund-allocation-body"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Income Statement Section -->
@@ -68,8 +77,8 @@
           <tbody id="monthly-body"></tbody>
         </table>
         <div class="averages">
-          <p>Average Income: <span id="average-income">0</span></p>
-          <p>Average Expenses: <span id="average-expenses">0</span></p>
+          <p>Average Total Income: <span id="average-income">0</span></p>
+          <p>Average Total Expenses: <span id="average-expenses">0</span></p>
           <p>Average Cashflow: <span id="average-cashflow">0</span></p>
         </div>
       </div>
@@ -133,14 +142,14 @@
 
     <!-- Story Generation -->
     <section class="story-generation">
-      <h2>Business Financial Story</h2>
+      <h2>Business Financial Report</h2>
       <button onclick="generateBusinessStory()">Generate Story</button>
       <p id="businessFinancialStory"></p>
     </section>
   </div>
 
   <!-- Floating Calculator Icon -->
-  <div class="calculator-icon" onclick="toggleCalculator()">🧮</div>
+  <div class="calculator-icon" onclick="toggleCalculator()">Calculator</div>
 
   <!-- Calculator Popup -->
   <div id="calculatorPopup" class="calculator-popup">
@@ -162,6 +171,7 @@
         <button onclick="appendToCalculator('*')">*</button>
         <button onclick="appendToCalculator('0')">0</button>
         <button onclick="appendToCalculator('.')">.</button>
+        <button onclick="deleteLastCharacter()">⌫</button>
         <button onclick="calculateResult()">=</button>
         <button onclick="appendToCalculator('/')">/</button>
         <button onclick="clearCalculator()">C</button>
@@ -180,14 +190,39 @@
       </select>
       <input type="number" id="entryAmount" placeholder="Amount">
       <input type="text" id="entryDescription" placeholder="Description">
-      <div class="category-select">
+      <div class="category-select" id="categorySelectDiv">
         <select id="entryCategory"></select>
-        <input type="text" id="newCategory" placeholder="New Category">
       </div>
       <button onclick="saveEntry()">Save Entry</button>
     </div>
   </div>
 
+  <!-- Allocation Modal -->
+  <div id="allocationModal" class="allocation-modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAllocationModal()">&times;</span>
+      <h3>Manage Fund Allocation Categories</h3>
+      <div class="category-list">
+        <ul id="allocationCategories"></ul>
+      </div>
+      <div class="category-form">
+        <input type="text" id="newAllocationCategory" placeholder="New Category">
+        <input type="number" id="newAllocationPercentage" placeholder="Percentage">
+        <button onclick="addAllocationCategory()">Add Category</button>
+      </div>
+      <button onclick="saveAllocations()">Save Allocations</button>
+    </div>
+  </div>
+
+  <!-- Transaction Summary Modal -->
+  <div id="transactionSummaryModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeSummaryModal()">&times;</span>
+      <h3>Transaction Summary</h3>
+      <div id="transactionSummaryText"></div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
-      </html>
+        </html>
