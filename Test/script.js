@@ -241,12 +241,12 @@ function updateMonthlyTable() {
     (business.incomeStatement.months || []).forEach((monthData, monthIndex) => {
         const totalIncome = monthData.categories.reduce((sum, category) => {
             return sum + category.entries.reduce((s, entry) => {
-                return (entry.type === 'income') ? s + entry.amount : s;
+                return (entry.type === 'income' && entry.amount > 0) ? s + entry.amount : s;
             }, 0);
         }, 0);
         const totalExpenses = monthData.categories.reduce((sum, category) => {
             return sum + category.entries.reduce((s, entry) => {
-                return (entry.type === 'expense') ? s + entry.amount : s;
+                return (entry.type === 'expense' && entry.amount > 0) ? s + entry.amount : s;
             }, 0);
         }, 0);
 
@@ -292,10 +292,10 @@ function updateMonthlyTable() {
             categoryRow.innerHTML = `
         <td class="editable-date" onclick="editCategory(${monthIndex}, ${catIndex})">${category.name}</td>
         <td>${business.currency} ${category.entries.reduce((sum, entry) => 
-            entry.type === 'income' ? sum + entry.amount : sum, 0
+            entry.type === 'income' && entry.amount > 0 ? sum + entry.amount : sum, 0
         )}</td>
         <td>${business.currency} ${category.entries.reduce((sum, entry) => 
-            entry.type === 'expense' ? sum + entry.amount : sum, 0
+            entry.type === 'expense' && entry.amount > 0 ? sum + entry.amount : sum, 0
         )}</td>
         <td>
           <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
@@ -328,6 +328,7 @@ function updateMonthlyTable() {
             document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
 
             (category.entries || []).forEach((entry, entryIndex) => {
+                if (entry.amount <= 0) return; // Skip zero or negative entries
                 const dailyRow = document.createElement('tr');
                 dailyRow.innerHTML = `
           <td class="editable-date" onclick="editEntry(${monthIndex}, ${catIndex}, ${entryIndex})">
@@ -419,27 +420,6 @@ function getCurrentMonth() {
     let month = date.getMonth() + 1;
     month = month < 10 ? `0${month}` : month;
     return `${year}-${month}`;
-}
-
-function allocateIncome(amount) {
-    const business = businesses[currentBusinessIndex];
-    const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
-
-    if (totalPercentage !== 100) {
-        alert("Fund allocation percentages do not add up to 100%");
-        return;
-    }
-
-    business.fundAllocations.categories.forEach(cat => {
-        const allocationAmount = (amount * cat.percentage) / 100;
-        cat.balance += allocationAmount;
-        cat.transactions.push({
-            date: new Date().toISOString().split("T")[0],
-            amount: allocationAmount,
-            type: 'income',
-            description: 'Income Allocation',
-        });
-    });
 }
 
 // Data Management
@@ -589,7 +569,7 @@ function updateAverages() {
         return sum + months.reduce((s, month) => {
             return s + month.categories.reduce((ss, category) => {
                 return ss + category.entries.reduce((sss, entry) => {
-                    return (entry.type === 'income') ? sss + entry.amount : sss;
+                    return (entry.type === 'income' && entry.amount > 0) ? sss + entry.amount : sss;
                 }, 0);
             }, 0);
         }, 0);
@@ -599,7 +579,7 @@ function updateAverages() {
         return sum + months.reduce((s, month) => {
             return s + month.categories.reduce((ss, category) => {
                 return ss + category.entries.reduce((sss, entry) => {
-                    return (entry.type === 'expense') ? sss + entry.amount : sss;
+                    return (entry.type === 'expense' && entry.amount > 0) ? sss + entry.amount : sss;
                 }, 0);
             }, 0);
         }, 0);
@@ -706,6 +686,8 @@ function editCategory(monthIndex, catIndex) {
         businesses[currentBusinessIndex].incomeStatement.months[monthIndex].categories[catIndex].name = newName;
         populateCategories();
         updateMonthlyTable();
+        syncFundAllocations();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
     }
 }
@@ -719,10 +701,9 @@ function editEntry(monthIndex, catIndex, entryIndex) {
         entry.amount = newAmount;
         entry.description = newDescription;
 
-        // Sync fund allocations
         syncFundAllocations();
-
         updateMonthlyTable();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
     }
 }
@@ -746,6 +727,8 @@ function addAllocationCategory() {
             transactions: [],
         });
         populateAllocationCategories();
+        syncFundAllocations();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
     } else {
         alert("Invalid input. Please enter a valid percentage and category name.");
@@ -757,8 +740,9 @@ function saveAllocations() {
     const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
     if (totalPercentage === 100) {
         closeAllocationModal();
-        saveDataToLocalStorage();
+        syncFundAllocations();
         updateFundAllocationTable();
+        saveDataToLocalStorage();
     } else {
         alert("Total percentage must be exactly 100%");
     }
@@ -795,6 +779,8 @@ function editAllocationCategory(index) {
         const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
         if (totalPercentage === 100) {
             populateAllocationCategories();
+            syncFundAllocations();
+            updateFundAllocationTable();
             saveDataToLocalStorage();
         } else {
             alert("Total percentage must be exactly 100%");
@@ -807,6 +793,8 @@ function deleteAllocationCategory(index) {
     if (confirm("Are you sure you want to delete this category?")) {
         business.fundAllocations.categories.splice(index, 1);
         populateAllocationCategories();
+        syncFundAllocations();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
     }
 }
@@ -825,6 +813,7 @@ function syncFundAllocations() {
     (business.incomeStatement.months || []).forEach(month => {
         (month.categories || []).forEach(category => {
             (category.entries || []).forEach(entry => {
+                if (entry.amount <= 0) return;
                 if (entry.type === 'income') {
                     const amount = entry.amount;
                     business.fundAllocations.categories.forEach(fundCat => {
@@ -846,6 +835,7 @@ function syncFundAllocations() {
     (business.incomeStatement.months || []).forEach(month => {
         (month.categories || []).forEach(category => {
             (category.entries || []).forEach(entry => {
+                if (entry.amount <= 0) return;
                 if (entry.type === 'expense') {
                     const expenseCat = category.name;
                     const fundCat = business.fundAllocations.categories.find(fc => fc.name === expenseCat);
@@ -934,22 +924,111 @@ window.addEventListener("load", () => {
     restoreData();
 });
 
+// Add Balance Sheet Entries
+function addBalanceSheetEntry(type) {
+    const business = businesses[currentBusinessIndex];
+    const description = prompt("Enter Description:");
+    const amount = parseFloat(prompt("Enter Amount:"));
+    const date = new Date().toISOString().split("T")[0];
+
+    if (description && !isNaN(amount) && amount > 0) {
+        business.balanceSheet.push({
+            date,
+            description,
+            amount,
+            type: type.toLowerCase(),
+        });
+        updateBalanceSheet();
+        saveDataToLocalStorage();
+    } else {
+        alert("Invalid Input!");
+    }
+}
+
+function updateBalanceSheet() {
+    const business = businesses[currentBusinessIndex];
+    balanceSheetBody.innerHTML = "";
+    let totalAssetsAmount = 0;
+    let totalLiabilitiesAmount = 0;
+
+    business.balanceSheet.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.description}</td>
+      <td>${entry.type === "asset" ? `${business.currency} ${entry.amount}` : ""}</td>
+      <td>${entry.type === "liability" ? `${business.currency} ${entry.amount}` : ""}</td>
+      <td class="actions">
+        <button onclick="editBalanceSheetEntry(${index})">✎</button>
+        <button onclick="duplicateBalanceSheetEntry(${index})">♻️</button>
+        <button onclick="deleteBalanceSheetEntry(${index})">🗑️</button>
+      </td>
+    `;
+        balanceSheetBody.appendChild(row);
+
+        if (entry.type === "asset") totalAssetsAmount += entry.amount;
+        if (entry.type === "liability") totalLiabilitiesAmount += entry.amount;
+    });
+
+    totalAssets.textContent = `${business.currency} ${totalAssetsAmount}`;
+    totalLiabilities.textContent = `${business.currency} ${totalLiabilitiesAmount}`;
+    netWorthDisplay.textContent = `${business.currency} ${totalAssetsAmount - totalLiabilitiesAmount}`;
+}
+
+function editBalanceSheetEntry(index) {
+    const business = businesses[currentBusinessIndex];
+    const entry = business.balanceSheet[index];
+    const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+    const newDescription = prompt("Edit Description:", entry.description);
+    const newDate = prompt("Edit Date:", entry.date);
+
+    if (!isNaN(newAmount) && newDescription && newDate && newAmount > 0) {
+        entry.amount = newAmount;
+        entry.description = newDescription;
+        entry.date = newDate;
+        updateBalanceSheet();
+        saveDataToLocalStorage();
+    } else {
+        alert("Invalid Input!");
+    }
+}
+
+function duplicateBalanceSheetEntry(index) {
+    const business = businesses[currentBusinessIndex];
+    const entry = business.balanceSheet[index];
+    const newEntry = {
+        ...entry,
+        date: new Date(entry.date).toDateString(), // Adjust date logic as needed
+        amount: entry.amount,
+    };
+    business.balanceSheet.push(newEntry);
+    updateBalanceSheet();
+    saveDataToLocalStorage();
+}
+
+function deleteBalanceSheetEntry(index) {
+    const business = businesses[currentBusinessIndex];
+    if (confirm("Are you sure you want to delete this entry?")) {
+        business.balanceSheet.splice(index, 1);
+        updateBalanceSheet();
+        saveDataToLocalStorage();
+    }
+}
+
 // Duplicate and Delete Entries
 function duplicateEntry(monthIndex, catIndex, entryIndex) {
     const business = businesses[currentBusinessIndex];
     const entry = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-    const newDate = new Date(entry.date);
-    newDate.setDate(newDate.getDate() + 1);
-    business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
+    const newEntry = {
         ...entry,
-        date: new Date(newDate).toISOString().split("T")[0],
-        amount: 0,
-    });
+        date: new Date(entry.date).toDateString(), // Adjust date logic as needed
+        amount: entry.amount,
+    };
+    business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
 
-    // Sync fund allocations
     syncFundAllocations();
-
     updateMonthlyTable();
+    updateFundAllocationTable();
     saveDataToLocalStorage();
 }
 
@@ -958,10 +1037,9 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
     if (confirm("Are you sure you want to delete this entry?")) {
         business.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
 
-        // Sync fund allocations
         syncFundAllocations();
-
         updateMonthlyTable();
+        updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-                                                  }
+                                           }
