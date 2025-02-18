@@ -2,7 +2,7 @@
 let businesses = []; // Array to store multiple businesses
 let currentBusinessIndex = 0; // Index of the currently selected business
 let currencyRates = {}; // Currency exchange rate data
-let localStorageBackup = 0;
+let localStorageBackup;
 
 const monthsData = {};
 
@@ -390,6 +390,7 @@ function updateMonthlyTable() {
     monthlyBody.appendChild(categoryContainer);
 
     (monthData.categories || []).forEach((category, catIndex) => {
+      // Compute category totals
       const categoryTotalIncome = category.entries.reduce((sum, entry) => {
         return (entry.type === 'income') ? sum + entry.amount : sum;
       }, 0);
@@ -468,9 +469,13 @@ function saveEntry() {
   const type = document.getElementById('entryType').value;
   const amount = +document.getElementById('entryAmount').value;
   const description = document.getElementById('entryDescription').value.trim();
-  const category = document.getElementById('entryCategory').value;
+  let category = document.getElementById('entryCategory').value;
 
-  if (isNaN(amount) || amount <= 0 || !description || !category) {
+  if (type === 'income') {
+    category = 'General Income';
+  }
+
+  if (isNaN(amount) || amount <= 0 || !description || (type === 'expense' && !category)) {
     alert('Invalid input. Please fill all fields correctly.');
     return;
   }
@@ -767,16 +772,13 @@ function editDate(tableType, index) {
       updateMonthlyTable();
       saveDataToLocalStorage();
     }
-  } else if (tableType === 'entry') {
-    // Handle entry date edit
   }
 }
 
-function editCategoryName(monthIndex, catIndex) {
-  const business = businesses[currentBusinessIndex];
-  const newName = prompt("Edit Category Name:", business.incomeStatement.months[monthIndex].categories[catIndex].name);
-  if (newName && newName.trim()) {
-    business.incomeStatement.months[monthIndex].categories[catIndex].name = newName.trim();
+function editCategory(monthIndex, catIndex) {
+  const newName = prompt("Edit Category Name:", businesses[currentBusinessIndex].incomeStatement.months[monthIndex].categories[catIndex].name);
+  if (newName) {
+    businesses[currentBusinessIndex].incomeStatement.months[monthIndex].categories[catIndex].name = newName;
     populateCategories();
     updateMonthlyTable();
     saveDataToLocalStorage();
@@ -784,9 +786,8 @@ function editCategoryName(monthIndex, catIndex) {
 }
 
 function editEntry(monthIndex, catIndex, entryIndex) {
-  const business = businesses[currentBusinessIndex];
-  const entry = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const newAmount = parseFloat(prompt("Edit Amount:", entry.amount));
+  const entry = businesses[currentBusinessIndex].incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
+  const newAmount = +prompt("Edit Amount:", entry.amount);
   const newDescription = prompt("Edit Description:", entry.description);
 
   if (!isNaN(newAmount) && newDescription) {
@@ -797,60 +798,12 @@ function editEntry(monthIndex, catIndex, entryIndex) {
   }
 }
 
-function duplicateCategory(monthIndex, catIndex) {
-  const business = businesses[currentBusinessIndex];
-  const categoryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex];
-  const newCategory = { 
-    name: `${categoryToDuplicate.name} - Copy`,
-    entries: categoryToDuplicate.entries.map(entry => ({
-      ...entry,
-      amount: 0,
-      date: new Date(entry.date).setDate(new Date(entry.date).getDate() + 1)
-    }))
-  };
-  business.incomeStatement.months[monthIndex].categories.push(newCategory);
-  populateCategories();
-  updateMonthlyTable();
-  saveDataToLocalStorage();
-}
-
-function deleteCategory(monthIndex, catIndex) {
-  if (confirm("Are you sure you want to delete this category?")) {
-    const business = businesses[currentBusinessIndex];
-    business.incomeStatement.months[monthIndex].categories.splice(catIndex, 1);
-    populateCategories();
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-}
-
-function duplicateEntry(monthIndex, catIndex, entryIndex) {
-  const business = businesses[currentBusinessIndex];
-  const entryToDuplicate = business.incomeStatement.months[monthIndex].categories[catIndex].entries[entryIndex];
-  const newEntry = {
-    ...entryToDuplicate,
-    amount: 0,
-    date: new Date(entryToDuplicate.date).setDate(new Date(entryToDuplicate.date).getDate() + 1)
-  };
-  business.incomeStatement.months[monthIndex].categories[catIndex].entries.push(newEntry);
-  updateMonthlyTable();
-  saveDataToLocalStorage();
-}
-
-function deleteEntry(monthIndex, catIndex, entryIndex) {
-  if (confirm("Are you sure you want to delete this entry?")) {
-    const business = businesses[currentBusinessIndex];
-    business.incomeStatement.months[monthIndex].categories[catIndex].entries.splice(entryIndex, 1);
-    updateMonthlyTable();
-    saveDataToLocalStorage();
-  }
-}
-
 // Fund Allocation Functions
 function addAllocationCategory() {
   const business = businesses[currentBusinessIndex];
   const newCategory = document.getElementById("newAllocationCategory").value;
   const newPercentage = +document.getElementById("newAllocationPercentage").value;
+
   if (newCategory && !isNaN(newPercentage) && newPercentage > 0) {
     const totalPercentage = business.fundAllocations.categories.reduce((sum, cat) => sum + cat.percentage, 0);
     if (totalPercentage + newPercentage > 100) {
@@ -906,6 +859,7 @@ function editAllocationCategory(index) {
   const category = business.fundAllocations.categories[index];
   const newCategoryName = prompt("Edit Category Name:", category.name);
   const newPercentage = +prompt("Edit Percentage:", category.percentage);
+
   if (newCategoryName && !isNaN(newPercentage) && newPercentage > 0) {
     category.name = newCategoryName;
     category.percentage = newPercentage;
