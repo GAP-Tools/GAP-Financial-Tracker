@@ -1043,3 +1043,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
+                                                 }
