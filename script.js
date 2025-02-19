@@ -315,20 +315,36 @@ function saveEntry() {
     }
     monthObject = profile.incomeStatement.months.find(m => m.month === currentMonth);
     if (type === 'income') {
-        if (!monthObject.categories.some(cat => cat.name === 'General Income')) {
-            monthObject.categories.push({
-                name: 'General Income',
-                entries: [],
+        if (category === 'General Income') {
+            if (!monthObject.categories.some(cat => cat.name === 'General Income')) {
+                monthObject.categories.push({
+                    name: 'General Income',
+                    entries: [],
+                });
+            }
+            categoryObject = monthObject.categories.find(cat => cat.name === 'General Income');
+            categoryObject.entries.push({
+                date: new Date().toISOString().split("T")[0],
+                description: description,
+                amount: amount,
+                type: 'income',
+            });
+            allocateIncome(amount, description);
+        } else {
+            if (!monthObject.categories.some(cat => cat.name === category)) {
+                monthObject.categories.push({
+                    name: category,
+                    entries: [],
+                });
+            }
+            categoryObject = monthObject.categories.find(cat => cat.name === category);
+            categoryObject.entries.push({
+                date: new Date().toISOString().split("T")[0],
+                description: description,
+                amount: amount,
+                type: 'income',
             });
         }
-        categoryObject = monthObject.categories.find(cat => cat.name === 'General Income');
-        categoryObject.entries.push({
-            date: new Date().toISOString().split("T")[0],
-            description: description,
-            amount: amount,
-            type: 'income',
-        });
-        allocateIncome(amount, description);
     } else if (type === 'expense') {
         if (!monthObject.categories.some(cat => cat.name === category)) {
             monthObject.categories.push({
@@ -974,4 +990,4 @@ function removeFundExpenseTransactions(transactions, amount, desc, date) {
 function removeGeneralExpenseTransactions(amount, desc, date) {
     const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
     if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-        }
+    }
