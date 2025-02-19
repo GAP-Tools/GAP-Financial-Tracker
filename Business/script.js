@@ -200,16 +200,9 @@ function deleteBusiness() {
 function showEntryModal(type) {
     document.getElementById('entryModal').style.display = 'block';
     document.getElementById('entryType').value = type;
-    if (type === 'income') {
-        document.getElementById('entryCategory').disabled = false;
-        document.getElementById('entryCategory').value = '';
-        document.getElementById('categorySelectDiv').style.display = 'block';
-    } else {
-        document.getElementById('entryCategory').disabled = false;
-        document.getElementById('categorySelectDiv').style.display = 'block';
-    }
-    document.getElementById('entryAmount').value = '';
-    document.getElementById('entryDescription').value = '';
+    document.getElementById('entryCategory').disabled = false;
+    document.getElementById('entryCategory').value = '';
+    document.getElementById('categorySelectDiv').style.display = 'block';
     populateCategories();
 }
 
@@ -820,7 +813,7 @@ function syncFundAllocations() {
     (business.incomeStatement.months || []).forEach(month => {
         (month.categories || []).forEach(category => {
             (category.entries || []).forEach(entry => {
-                if (entry.type === 'income') {
+                if (entry.type === 'income' && category.name === 'General Income') {
                     const amount = entry.amount;
                     business.fundAllocations.categories.forEach(fundCat => {
                         const allocatedAmount = amount * (fundCat.percentage / 100);
@@ -832,6 +825,17 @@ function syncFundAllocations() {
                             description: entry.description,
                         });
                     });
+                } else if (entry.type === 'income') {
+                    const fundCat = business.fundAllocations.categories.find(fc => fc.name === category.name);
+                    if (fundCat) {
+                        fundCat.balance += entry.amount;
+                        fundCat.transactions.push({
+                            date: entry.date,
+                            amount: entry.amount,
+                            type: 'income',
+                            description: entry.description,
+                        });
+                    }
                 }
             });
         });
@@ -1059,4 +1063,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-}
+    }
