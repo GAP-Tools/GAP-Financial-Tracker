@@ -141,14 +141,6 @@ function switchBusiness() {
     updateFinancialHealth();
 }
 
-// Switch to personal
-document.addEventListener('DOMContentLoaded', function() {
-  const switchLink = document.getElementById('switchLink');
-  switchLink.addEventListener('click', function() {
-    window.location.href = "https://gap-tools.github.io/GAP-Financial-Tracker";
-  });
-});
-
 // Save Business Profile
 function saveBusinessProfile() {
     const business = businesses[currentBusinessIndex];
@@ -209,9 +201,9 @@ function showEntryModal(type) {
     document.getElementById('entryModal').style.display = 'block';
     document.getElementById('entryType').value = type;
     if (type === 'income') {
-        document.getElementById('entryCategory').disabled = true;
-        document.getElementById('entryCategory').value = 'General Income';
-        document.getElementById('categorySelectDiv').style.display = 'none';
+        document.getElementById('entryCategory').disabled = false;
+        document.getElementById('entryCategory').value = '';
+        document.getElementById('categorySelectDiv').style.display = 'block';
     } else {
         document.getElementById('entryCategory').disabled = false;
         document.getElementById('categorySelectDiv').style.display = 'block';
@@ -382,13 +374,9 @@ function saveEntry() {
     const type = document.getElementById('entryType').value;
     const amount = parseFloat(document.getElementById('entryAmount').value);
     const description = document.getElementById('entryDescription').value.trim();
-    let category = document.getElementById('entryCategory').value;
+    const category = document.getElementById('entryCategory').value;
 
-    if (type === 'income') {
-        category = 'General Income';
-    }
-
-    if (isNaN(amount) || amount < 0 || !description || (type === 'expense' && !category)) {
+    if (isNaN(amount) || amount < 0 || !description || !category) {
         alert('Invalid input. Please fill all fields correctly.');
         return;
     }
@@ -1025,7 +1013,7 @@ function duplicateBalanceSheetEntry(index) {
     const newEntry = {
         date: entry.date, // Same date as original
         description: `${entry.description} (copy)`,
-        amount: entry.amount,
+        amount: 0, // Set amount to zero
         type: entry.type,
     };
     business.balanceSheet.push(newEntry);
@@ -1051,7 +1039,7 @@ function duplicateEntry(monthIndex, catIndex, entryIndex) {
     business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
         date: entry.date, // Same date as original
         description: newDescription,
-        amount: 0,
+        amount: 0, // Set amount to zero
         type: entry.type,
     });
 
@@ -1071,4 +1059,4 @@ function deleteEntry(monthIndex, catIndex, entryIndex) {
         updateFundAllocationTable();
         saveDataToLocalStorage();
     }
-    }
+}
