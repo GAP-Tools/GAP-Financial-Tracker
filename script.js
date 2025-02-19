@@ -128,9 +128,9 @@ function showEntryModal(type) {
     document.getElementById('entryType').value = type;
     populateCategories();
     if (type === 'income') {
-        document.getElementById('entryCategory').disabled = true;
-        document.getElementById('entryCategory').value = 'General Income';
-        document.getElementById('categorySelectDiv').style.display = 'none';
+        document.getElementById('entryCategory').disabled = false;
+        document.getElementById('entryCategory').value = '';
+        document.getElementById('categorySelectDiv').style.display = 'block';
     } else {
         document.getElementById('entryCategory').disabled = false;
         document.getElementById('categorySelectDiv').style.display = 'block';
@@ -152,19 +152,34 @@ function populateCategories() {
         option.textContent = cat.name;
         categorySelect.appendChild(option);
     });
+    const generalIncomeOption = document.createElement('option');
+    generalIncomeOption.value = 'General Income';
+    generalIncomeOption.textContent = 'General Income';
+    categorySelect.appendChild(generalIncomeOption);
 }
 
 function updateMonthlyTable() {
     const monthlyBody = document.getElementById('monthly-body');
     monthlyBody.innerHTML = '';
     (profile.incomeStatement.months || []).forEach((monthData, monthIndex) => {
+        const totalIncome = monthData.categories.reduce((sum, category) => {
+            return sum + category.entries.reduce((s, entry) => {
+                return (entry.type === 'income' && entry.amount > 0) ? s + entry.amount : s;
+            }, 0);
+        }, 0);
+        const totalExpenses = monthData.categories.reduce((sum, category) => {
+            return sum + category.entries.reduce((s, entry) => {
+                return (entry.type === 'expense' && entry.amount > 0) ? s + entry.amount : s;
+            }, 0);
+        }, 0);
+
         const row = document.createElement('tr');
         row.classList.add('expandable');
         row.innerHTML = `
-            <td class="editable-date" onclick="editDate('month', ${monthIndex})">${monthData.month}</td>
-            <td>${profile.currency} ${monthData.totalIncome}</td>
-            <td>${profile.currency} ${monthData.totalExpenses}</td>
-            <td>${profile.currency} ${monthData.totalIncome - monthData.totalExpenses}</td>
+            <td class="editable-date" onclick="editDate('month', ${monthIndex})">${getFormattedMonth(monthData.month)}</td>
+            <td>${profile.currency} ${totalIncome}</td>
+            <td>${profile.currency} ${totalExpenses}</td>
+            <td>${profile.currency} ${totalIncome - totalExpenses}</td>
             <td>
                 <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
                     <svg class="expand-icon" viewBox="0 0 24 24">
@@ -174,6 +189,7 @@ function updateMonthlyTable() {
             </td>
         `;
         monthlyBody.appendChild(row);
+
         const categoryContainer = document.createElement('tr');
         categoryContainer.classList.add('nested');
         categoryContainer.innerHTML = `
@@ -193,13 +209,18 @@ function updateMonthlyTable() {
             </td>
         `;
         monthlyBody.appendChild(categoryContainer);
-        (monthData.categories || []).forEach((cat, catIndex) => {
+
+        (monthData.categories || []).forEach((category, catIndex) => {
             const categoryRow = document.createElement('tr');
             categoryRow.classList.add('expandable');
             categoryRow.innerHTML = `
-                <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${cat.name}</td>
-                <td>${profile.currency} ${cat.totalIncome}</td>
-                <td>${profile.currency} ${cat.totalExpenses}</td>
+                <td class="editable-date" onclick="editCategoryName(${monthIndex}, ${catIndex})">${category.name}</td>
+                <td>${profile.currency} ${category.entries.reduce((sum, entry) => 
+                    entry.type === 'income' && entry.amount > 0 ? sum + entry.amount : sum, 0
+                )}</td>
+                <td>${profile.currency} ${category.entries.reduce((sum, entry) => 
+                    entry.type === 'expense' && entry.amount > 0 ? sum + entry.amount : sum, 0
+                )}</td>
                 <td>
                     <button class="expand-button" onclick="expandCollapseRow(this.parentElement.parentElement)">
                         <svg class="expand-icon" viewBox="0 0 24 24">
@@ -209,6 +230,7 @@ function updateMonthlyTable() {
                 </td>
             `;
             document.getElementById(`category-body-${monthIndex}`).appendChild(categoryRow);
+
             const dailyContainer = document.createElement('tr');
             dailyContainer.classList.add('nested');
             dailyContainer.innerHTML = `
@@ -229,11 +251,19 @@ function updateMonthlyTable() {
                 </td>
             `;
             document.getElementById(`category-body-${monthIndex}`).appendChild(dailyContainer);
-            (cat.entries || []).forEach((entry, entryIndex) => {
+
+            (category.entries || []).forEach((entry, entryIndex) => {
+                const entryDate = new Date(entry.date);
+                const formattedDate = entryDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
                 const dailyRow = document.createElement('tr');
                 dailyRow.innerHTML = `
                     <td class="editable-date" onclick="editEntry('${entry.type}', ${monthIndex}, ${catIndex}, ${entryIndex})">
-                        ${entry.date}
+                        ${formattedDate}
                     </td>
                     <td>${entry.description}</td>
                     <td>${profile.currency} ${entry.amount}</td>
@@ -248,7 +278,13 @@ function updateMonthlyTable() {
             });
         });
     });
+
     updateAverages();
+}
+
+function getFormattedMonth(monthString) {
+    const dateObj = new Date(`${monthString}-01`);
+    return dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
 function expandCollapseRow(rowElement) {
@@ -275,8 +311,6 @@ function saveEntry() {
         profile.incomeStatement.months.push({
             month: currentMonth,
             categories: [],
-            totalIncome: 0,
-            totalExpenses: 0,
         });
     }
     monthObject = profile.incomeStatement.months.find(m => m.month === currentMonth);
@@ -284,14 +318,10 @@ function saveEntry() {
         if (!monthObject.categories.some(cat => cat.name === 'General Income')) {
             monthObject.categories.push({
                 name: 'General Income',
-                totalIncome: 0,
-                totalExpenses: 0,
                 entries: [],
             });
         }
         categoryObject = monthObject.categories.find(cat => cat.name === 'General Income');
-        categoryObject.totalIncome += amount;
-        monthObject.totalIncome += amount;
         categoryObject.entries.push({
             date: new Date().toISOString().split("T")[0],
             description: description,
@@ -300,21 +330,13 @@ function saveEntry() {
         });
         allocateIncome(amount, description);
     } else if (type === 'expense') {
-        if (!category) {
-            alert('Please select a category for expenses');
-            return;
-        }
         if (!monthObject.categories.some(cat => cat.name === category)) {
             monthObject.categories.push({
                 name: category,
-                totalIncome: 0,
-                totalExpenses: 0,
                 entries: [],
             });
         }
         categoryObject = monthObject.categories.find(cat => cat.name === category);
-        categoryObject.totalExpenses += amount;
-        monthObject.totalExpenses += amount;
         categoryObject.entries.push({
             date: new Date().toISOString().split("T")[0],
             description: description,
@@ -379,8 +401,8 @@ function getCurrentMonth() {
 function updateAverages() {
     const profileMonths = profile.incomeStatement.months || [];
     const totalMonths = profileMonths.length || 1;
-    const avgIncome = profileMonths.reduce((sum, m) => sum + m.totalIncome, 0) / totalMonths;
-    const avgExpenses = profileMonths.reduce((sum, m) => sum + m.totalExpenses, 0) / totalMonths;
+    const avgIncome = profileMonths.reduce((sum, m) => sum + m.categories.reduce((s, c) => s + c.entries.reduce((ss, e) => ss + (e.type === 'income' ? e.amount : 0), 0), 0), 0) / totalMonths;
+    const avgExpenses = profileMonths.reduce((sum, m) => sum + m.categories.reduce((s, c) => s + c.entries.reduce((ss, e) => ss + (e.type === 'expense' ? e.amount : 0), 0), 0), 0) / totalMonths;
     const avgCashflow = avgIncome - avgExpenses;
     document.getElementById('average-income').textContent = `${profile.currency} ${avgIncome.toFixed(2)}`;
     document.getElementById('average-expenses').textContent = `${profile.currency} ${avgExpenses.toFixed(2)}`;
@@ -952,4 +974,4 @@ function removeFundExpenseTransactions(transactions, amount, desc, date) {
 function removeGeneralExpenseTransactions(amount, desc, date) {
     const index = profile.generalIncome.transactions.findIndex(tx => tx.amount === -amount && tx.description === desc && tx.date === date);
     if (index > -1) profile.generalIncome.transactions.splice(index, 1);
-}
+        }
