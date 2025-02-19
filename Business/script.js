@@ -203,6 +203,8 @@ function showEntryModal(type) {
     document.getElementById('entryCategory').disabled = false;
     document.getElementById('entryCategory').value = '';
     document.getElementById('categorySelectDiv').style.display = 'block';
+    document.getElementById('entryAmount').value = '';
+    document.getElementById('entryDescription').value = '';
     populateCategories();
 }
 
@@ -217,10 +219,12 @@ function populateCategories() {
     const categorySelect = document.getElementById('entryCategory');
     categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-    business.fundAllocations.categories.forEach(category => {
+    const categories = business.fundAllocations.categories.map(cat => cat.name);
+    categories.push('General Income');
+    categories.forEach(category => {
         const option = document.createElement('option');
-        option.value = category.name;
-        option.textContent = category.name;
+        option.value = category;
+        option.textContent = category;
         categorySelect.appendChild(option);
     });
 }
@@ -1015,7 +1019,7 @@ function duplicateBalanceSheetEntry(index) {
     const business = businesses[currentBusinessIndex];
     const entry = business.balanceSheet[index];
     const newEntry = {
-        date: entry.date, // Same date as original
+        date: new Date().toISOString().split("T")[0], // Current date
         description: `${entry.description} (copy)`,
         amount: 0, // Set amount to zero
         type: entry.type,
@@ -1041,7 +1045,7 @@ function duplicateEntry(monthIndex, catIndex, entryIndex) {
     const newDescription = `${entry.description} (copy)`;
 
     business.incomeStatement.months[monthIndex].categories[catIndex].entries.push({
-        date: entry.date, // Same date as original
+        date: new Date().toISOString().split("T")[0], // Current date
         description: newDescription,
         amount: 0, // Set amount to zero
         type: entry.type,
